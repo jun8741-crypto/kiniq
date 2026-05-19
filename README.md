@@ -1,177 +1,155 @@
-# AI Healthcare Project Template
+# CKD 조기 발굴 및 생활습관 중재 서비스
 
-이 프로젝트는 AI 모델 추론(Inference) 워커와 FastAPI API 서버를 통합한 서비스 템플릿입니다. 
-현대적인 Python 패키지 관리 도구인 `uv`와 컨테이너화 도구인 `Docker`를 활용하여 일관된 개발 및 배포 환경을 제공합니다.
-
----
-
-## 🚀 주요 특징
-
-- **FastAPI Framework**: 고성능 비동기 API 서버 구현.
-- **AI Worker**: 모델 추론 및 학습 작업을 API 서버와 분리하여 처리.
-- **UV Package Manager**: 매우 빠른 의존성 설치 및 가상환경 관리.
-- **Tortoise ORM**: 비동기 방식의 데이터베이스 모델링 및 쿼리 관리.
-- **Docker-Compose**: MySQL, Redis, Nginx를 포함한 전체 서비스 스택을 한 번에 실행.
-- **CI/CD Scripts**: 코드 포맷팅(Ruff), 타입 체크(Mypy), 테스트(Pytest)를 위한 자동화 스크립트 제공.
+> 만성 신장질환(CKD) 위험군을 조기에 발굴하고, 맞춤형 생활습관 챌린지로 건강 행동 변화를 유도하는 웹 서비스.
+> 넥스트러너스 AI 헬스케어 3기 — Talos 참여기업 프로젝트
 
 ---
 
-## 📂 프로젝트 구조
+## 🎯 서비스 개요
 
-```text
-.
-├── ai_worker/          # AI 모델 추론 및 학습 관련 코드 (Worker)
-│   ├── core/           # 워커 설정 및 로거
-│   ├── models/         # AI 모델 파일 보관 (PyTorch 등)
-│   ├── tasks/          # 실제 처리할 작업 정의
-│   └── main.py         # 워커 진입점
-├── app/                # FastAPI 서버 코드
-│   ├── apis/           # API 라우터 (v1 버전 관리)
-│   ├── core/           # 서버 설정 (pydantic-settings), DB 설정, JWT, Validator 등 핵심 기능
-│   ├── dtos/           # 데이터 전송 객체 (Pydantic models)
-│   ├── models/         # DB 테이블 정의
-│   ├── services/       # 비즈니스 로직
-│   └── main.py         # FastAPI 애플리케이션 진입점
-├── envs/               # 환경 변수 설정 파일 (.env)
-├── infra/              # 인프라 설정 관련 디렉터리
-│   ├── docker/         # Docker Compose 설정 (운영용)
-│   └── nginx/          # Nginx 설정 파일 (리버스 프록시)
-├── scripts/            # 배포 및 CI용 쉘 스크립트
-├── docker-compose.yml  # 로컬 개발용 서비스 실행 설정
-└── pyproject.toml      # uv 기반 의존성 관리 설정
+- **타겟**: 40세 이상 성인, CKD(만성 신장질환) 위험군
+- **핵심 흐름**: 건강검진 결과 입력 → ML 예측 → 그룹 배정(G1~G4) → 맞춤 챌린지 → 대시보드
+- **배포 마감**: 2026-06-12 / PPT 제출: 2026-06-19
+
+---
+
+## 🏗️ 아키텍처 — 7컨테이너
+
+```
+사용자 ──► nginx ──► fastapi (app/)
+                         │ Redis Stream
+                         ▼
+                    ai-worker (ai_worker/)
+                         ├── PostgreSQL
+                         ├── Redis
+                         ├── Qdrant (벡터 DB)
+                         └── Langfuse (LLM 트레이싱)
 ```
 
+| 컨테이너 | 역할 | 코드 위치 |
+|---|---|---|
+| `nginx` | 리버스 프록시 | `infra/nginx/` |
+| `postgres` | DB | 이미지만 |
+| `redis` | 메시지 브로커·캐시 | 이미지만 |
+| `fastapi` ⭐ | API 서버 | **`app/`** |
+| `ai-worker` ⭐ | ML 추론 + LLM + RAG | **`ai_worker/`** |
+| `qdrant` | 벡터 DB (RAG) | 이미지만 |
+| `langfuse` | LLM 관찰성 | 이미지만 |
+
 ---
 
-## ⚙️ 사전 준비 사항
+## 📂 폴더 구조
 
-- **Python**: 3.13 이상 (로컬 개발 환경용)
-- **UV**: Python 패키지 매니저 ([설치 가이드](https://github.com/astral-sh/uv))
-- **Docker & Docker-Compose**: 전체 서비스 실행용
+> 상세 가이드 → **[docs/folder-structure-guide.md](docs/folder-structure-guide.md)**
+
+```
+.
+├─ app/              ← FastAPI 백엔드 (apis·services·repositories·models·dtos·tests)
+├─ ai_worker/        ← AI Worker (ML 추론·LLM·RAG)
+├─ src/
+│  ├─ ckd/           ← ML 모델 학습 라이브러리
+│  └─ rag_indexing/  ← RAG 지식 베이스 인덱싱
+├─ frontend/         ← Vite + React (예정)
+├─ infra/            ← Nginx 설정·운영 Docker Compose
+├─ scripts/          ← CI 스크립트 (lint·mypy·test·deploy)
+├─ envs/             ← 환경변수 (.env, Git 제외)
+├─ docs/             ← 프로젝트 문서
+└─ docker-compose.yml
+```
+
+새 기능 = `app/` 안의 **6파일 세트**: `dtos → models → repositories → services → apis/v1 → tests`
 
 ---
 
-## 🛠️ 설치 및 설정
+## ⚙️ 로컬 실행
 
-### 1. 가상환경 구축 및 의존성 설치
+### 사전 준비
 
-`uv`를 사용하여 프로젝트에 필요한 패키지를 설치합니다.
+- Python 3.13+
+- [uv](https://github.com/astral-sh/uv) (패키지 매니저)
+- Docker & Docker Compose
+
+### 1. 환경변수 설정
 
 ```bash
-# 의존성 설치 (가상환경 자동 생성)
-uv sync
-
-# 특정 그룹의 의존성만 설치하려는 경우
-uv sync --group app  # API 서버용
-uv sync --group ai   # AI 워커용
+cp envs/example.local.env envs/.local.env
+# envs/.local.env 열어서 DB 비밀번호·SECRET_KEY 등 수정
 ```
 
-### 2. 환경 변수 설정
+### 2. 의존성 설치
 
-`envs/` 디렉토리에 있는 예시 파일을 복사하여 `.env` 파일을 생성합니다.
-- 로컬용 
-    ```bash
-    cp envs/example.local.env envs/.local.env
-    ```
-- 배포용 
-    ```bash
-    cp envs/example.prod.env envs/.prod.env
-    ```
+```bash
+uv sync          # 전체
+uv sync --group app   # FastAPI 서버만
+uv sync --group ai    # AI Worker만
+```
 
-생성된 `env` 파일 내의 환경변수들은 프로젝트 상황에 맞게 수정하세요.
-
----
-
-## 🏃 실행 방법
-
-### 1. 로컬 및 개발 환경
-
-#### Docker Compose로 전체 스택 실행
-
-모든 서비스(API, Worker, DB, Redis, Nginx)를 한 번에 실행합니다.
+### 3. 전체 스택 실행 (Docker)
 
 ```bash
 docker-compose up -d --build
 ```
 
-실행 후 다음 주소로 접속 가능합니다:
-- **API 서버**: [http://localhost/api/docs](http://localhost/api/docs) (Swagger UI)
-- **Nginx**: 80 포트를 통해 API 서버로 요청을 전달합니다.
+실행 후 접속:
+- **API Swagger**: http://localhost/api/docs
+- **Langfuse UI**: http://localhost:3000
 
-#### 로컬에서 개별 실행 (개발용)
+### 4. 개별 실행 (개발용)
 
-**FastAPI 서버 실행:**
 ```bash
-uv run uvicorn app.main:app --reload
-# or
-docker compose up -d --build app
-```
+# FastAPI 서버 (포트 8001 — 부트캠프 환경 충돌 방지)
+uv run uvicorn app.main:app --reload --port 8001
 
-**AI Worker 실행:**
-```bash
+# AI Worker
 uv run python -m ai_worker.main
-# or
-docker compose up -d --build ai_worker
 ```
-
-### 2. EC2 배포 환경 (Production)
-
-제공된 쉘 스크립트를 사용하여 AWS EC2 환경에 이미지를 빌드, 푸시 및 배포할 수 있습니다.
-
-#### 사전 준비
-- EC2 인스턴스 (Ubuntu 권장)
-- SSH 키 페어 (`~/.ssh/` 경로에 위치)
-- 도커 허브(Docker Hub) 계정 및 Personal Access Token
-- 배포용 환경 변수 설정 (`envs/.prod.env`)
-- 도메인 구매 (Gabia, GoDaddy, AWS Route53 등)
-
-#### 자동 배포 스크립트 실행
-`scripts/deployment.sh`는 도커 이미지 빌드, 레포지토리 푸시, EC2 접속 및 컨테이너 실행 과정을 자동화합니다.
-
-```bash
-chmod +x scripts/deployment.sh
-./scripts/deployment.sh
-```
-스크립트 실행 시 다음 정보를 입력해야 합니다:
-1. 도커 허브 계정 정보 (Username, PAT)
-2. 이미지를 업로드할 레포지토리 이름
-3. 배포할 서비스 선택 (FastAPI, AI-Worker) 및 버전(Tag)
-4. SSH 키 파일명 및 EC2 IP 주소
-5. https 사용여부
-   - 5-1. https인 경우 도메인 추가 입력  
-
-#### SSL(HTTPS) 설정 (Certbot)
-도메인을 연결하고 HTTPS를 적용하려면 `scripts/certbot.sh`를 사용합니다.
-
-```bash
-chmod +x scripts/certbot.sh
-./scripts/certbot.sh
-```
-1. 도메인 주소 및 이메일 입력
-2. SSH 키 파일명 및 EC2 IP 주소 입력
-3. Let's Encrypt를 통한 인증서 발급 및 Nginx 설정 자동 갱신 적용
 
 ---
 
-## 🧪 테스트 및 품질 관리
-
-제공된 스크립트를 사용하여 코드의 품질을 검증할 수 있습니다.
+## 🧪 품질 관리
 
 ```bash
-# 테스트 실행
+pytest                          # 테스트
+ruff check . && ruff format .   # 린트·포맷
+mypy app/                       # 타입 체크
+```
+
+또는 스크립트:
+
+```bash
 ./scripts/ci/run_test.sh
-
-# 코드 포맷팅 확인 (Ruff)
 ./scripts/ci/code_fommatting.sh
-
-# 정적 타입 검사 (Mypy)
 ./scripts/ci/check_mypy.sh
 ```
 
 ---
 
-## 📝 개발 가이드
+## 🌿 브랜치 전략 (Git Flow)
 
-- **API 추가**: `app/apis/v1/` 아래에 새로운 라우터 파일을 생성하고 `app/apis/v1/__init__.py`에 등록하세요.
-- **DB 모델 추가**: `app/models/`에 Tortoise 모델을 정의하고 `app/db/databases.py`의 `MODELS` 리스트에 추가하세요.
-- **AI 로직 추가**: `ai_worker/tasks/`에 새로운 처리 로직을 작성하고 `ai_worker/main.py`에서 호출하도록 구성하세요.
+| 브랜치 | 용도 |
+|---|---|
+| `main` | 배포용 (보호) |
+| `develop` | 통합 브랜치 |
+| `feature/...` | 기능 개발 |
+| `hotfix/...` | 긴급 수정 |
+
+PR: 최소 1인 리뷰 + CI 통과 + Squash merge. 의료 콘텐츠 변경 시 `medical-review` 라벨 필수.
+
+---
+
+## 🔒 보안·의료 주의사항
+
+- 혈압·혈당 수치는 **민감 건강정보** — 로그·평문 저장·외부 전송 금지
+- LLM 프롬프트에 PHI(개인 건강정보) 평문 전달 금지 — 요약·범주화 후 전달
+- "확진"·"치료"·"예방됩니다" 표현 금지 — "위험을 낮출 수 있다"·"관리"로만
+- 이 서비스는 **임상적 의사결정 도구가 아닙니다**
+
+---
+
+## 📚 문서
+
+| 문서 | 내용 |
+|---|---|
+| [docs/folder-structure-guide.md](docs/folder-structure-guide.md) | 폴더 구조 상세 가이드 (v1.27) |
+| `.claude/CLAUDE.md` | AI 에이전트 헌장·팀 컨벤션 |
+| `.claude/memory.md` | 세션 인계 문서 (결정사항·다음 할 일) |
