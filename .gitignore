@@ -12,4 +12,10 @@ wheels/
 .coverage
 *.coverage
 .coverage.*
-\n# Mac 시스템 파일\n.DS_Store\n**/.DS_Store
+
+# Mac 시스템 파일
+.DS_Store
+**/.DS_Store
+
+# Claude Code
+.claude
