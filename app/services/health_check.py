@@ -8,10 +8,10 @@ from app.models.users import Gender
 from app.repositories.health_check_repository import HealthCheckRepository
 
 # 세이프티 가드 임계값
-_BP_CRISIS_SYSTOLIC = 180   # mmHg — 고혈압 위기 기준
+_BP_CRISIS_SYSTOLIC = 180  # mmHg — 고혈압 위기 기준
 _BP_CRISIS_DIASTOLIC = 120  # mmHg
-_GLUCOSE_CRISIS = 400       # mg/dL — 즉각 처치 필요 수준
-_EGFR_G5_THRESHOLD = 15     # mL/min/1.73m² — 신부전 단계
+_GLUCOSE_CRISIS = 400  # mg/dL — 즉각 처치 필요 수준
+_EGFR_G5_THRESHOLD = 15  # mL/min/1.73m² — 신부전 단계
 
 
 class HealthCheckService:
@@ -89,8 +89,7 @@ class HealthCheckService:
 
         if egfr is not None and egfr < _EGFR_G5_THRESHOLD:
             warnings.append(
-                f"신장 기능이 매우 저하되어 있습니다 (eGFR {egfr} mL/min/1.73m²). "
-                "즉시 신장내과 전문의 진료를 받으세요."
+                f"신장 기능이 매우 저하되어 있습니다 (eGFR {egfr} mL/min/1.73m²). 즉시 신장내과 전문의 진료를 받으세요."
             )
 
         return " | ".join(warnings) if warnings else None
@@ -134,9 +133,7 @@ class HealthCheckService:
             ckd_stage=ckd_stage,
         )
 
-        safety_warning = self._check_safety_warning(
-            dto.systolic_bp, dto.diastolic_bp, dto.fasting_glucose, egfr
-        )
+        safety_warning = self._check_safety_warning(dto.systolic_bp, dto.diastolic_bp, dto.fasting_glucose, egfr)
 
         response = HealthCheckResponse.model_validate(hc)
         response.safety_warning = safety_warning

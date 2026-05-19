@@ -4,25 +4,25 @@ from tortoise import fields, models
 
 
 class SmokingStatus(StrEnum):
-    NEVER = "NEVER"        # 비흡연
-    PAST = "PAST"          # 과거 흡연 (현재 금연 중)
-    CURRENT = "CURRENT"    # 현재 흡연
+    NEVER = "NEVER"  # 비흡연
+    PAST = "PAST"  # 과거 흡연 (현재 금연 중)
+    CURRENT = "CURRENT"  # 현재 흡연
 
 
 class DrinkingFrequency(StrEnum):
-    NEVER = "NEVER"                # 음주 안 함
+    NEVER = "NEVER"  # 음주 안 함
     OCCASIONALLY = "OCCASIONALLY"  # 월 1~3회
-    WEEKLY = "WEEKLY"              # 주 1~4회
-    DAILY = "DAILY"                # 거의 매일
+    WEEKLY = "WEEKLY"  # 주 1~4회
+    DAILY = "DAILY"  # 거의 매일
 
 
 class CkdStage(StrEnum):
-    G1 = "G1"    # eGFR >= 90  (정상 or 고위험 경계)
-    G2 = "G2"    # eGFR 60~89  (경증 감소)
+    G1 = "G1"  # eGFR >= 90  (정상 or 고위험 경계)
+    G2 = "G2"  # eGFR 60~89  (경증 감소)
     G3A = "G3A"  # eGFR 45~59  (경~중등도)
     G3B = "G3B"  # eGFR 30~44  (중~중증도)
-    G4 = "G4"    # eGFR 15~29  (중증)
-    G5 = "G5"    # eGFR < 15   (신부전)
+    G4 = "G4"  # eGFR 15~29  (중증)
+    G5 = "G5"  # eGFR < 15   (신부전)
 
 
 class HealthCheck(models.Model):

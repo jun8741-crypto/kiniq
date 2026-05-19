@@ -30,6 +30,7 @@ services:
       - ws
     volumes:
       - postgres_data:/var/lib/postgresql/data  # 컨테이너가 삭제돼도 데이터는 호스트 파일시스템에 남음
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql  # 컨테이너 최초 생성 시 ckduser DB 자동 생성
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s

@@ -99,7 +99,7 @@ class TestHealthCheckCreateAPI(TestCase):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/api/v1/health-checks", json=_HEALTH_CHECK_PAYLOAD)
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestHealthCheckListAPI(TestCase):

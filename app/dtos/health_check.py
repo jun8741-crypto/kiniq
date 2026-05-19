@@ -20,22 +20,14 @@ class HealthCheckCreateRequest(BaseModel):
         float | None,
         Field(None, ge=0.1, le=30.0, description="혈청 크레아티닌 (mg/dL) — eGFR 계산에 사용"),
     ]
-    total_cholesterol: Annotated[
-        float | None, Field(None, ge=50.0, le=700.0, description="총 콜레스테롤 (mg/dL)")
-    ]
-    hdl_cholesterol: Annotated[
-        float | None, Field(None, ge=10.0, le=200.0, description="HDL 콜레스테롤 (mg/dL)")
-    ]
-    triglycerides: Annotated[
-        float | None, Field(None, ge=20.0, le=2000.0, description="중성지방 (mg/dL)")
-    ]
+    total_cholesterol: Annotated[float | None, Field(None, ge=50.0, le=700.0, description="총 콜레스테롤 (mg/dL)")]
+    hdl_cholesterol: Annotated[float | None, Field(None, ge=10.0, le=200.0, description="HDL 콜레스테롤 (mg/dL)")]
+    triglycerides: Annotated[float | None, Field(None, ge=20.0, le=2000.0, description="중성지방 (mg/dL)")]
 
     # 신체 측정
     weight: Annotated[float, Field(ge=20.0, le=300.0, description="체중 (kg)")]
     height: Annotated[float, Field(ge=100.0, le=250.0, description="신장 (cm)")]
-    waist_circumference: Annotated[
-        float | None, Field(None, ge=40.0, le=200.0, description="허리둘레 (cm)")
-    ]
+    waist_circumference: Annotated[float | None, Field(None, ge=40.0, le=200.0, description="허리둘레 (cm)")]
 
     # 생활습관 설문
     smoking_status: Annotated[SmokingStatus, Field(description="흡연 상태")]
