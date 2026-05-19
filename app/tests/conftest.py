@@ -1,4 +1,5 @@
 import asyncio
+import socket
 from collections.abc import Generator
 
 import pytest
@@ -11,10 +12,22 @@ from app.core.db.databases import TORTOISE_APP_MODELS
 
 TEST_BASE_URL = "http://test"
 
+
+def _resolve_db_host(host: str) -> str:
+    """Docker 외부(로컬 머신)에서 실행 시 호스트명이 미해결되면 localhost로 자동 대체.
+    CI(GitHub Actions)와 Docker 컨테이너 내부에서는 'postgres' 그대로 사용."""
+    try:
+        socket.getaddrinfo(host, None)
+        return host
+    except socket.gaierror:
+        return "localhost"
+
+
 # PostgreSQL에서 DB를 생성/삭제하려면 다른 DB(maintenance DB)에 먼저 접속해야 한다.
 # asyncpg는 DB 미지정 시 username(ckduser)을 DB명으로 사용하므로,
 # CI의 postgres 서비스에 ckduser DB가 존재해야 한다. (checks.yml 참고)
-TEST_DB_URL = f"postgres://{config.DB_USER}:{config.DB_PASSWORD}@{config.DB_HOST}:{config.DB_PORT}/{config.DB_NAME}"
+_db_host = _resolve_db_host(config.DB_HOST)
+TEST_DB_URL = f"postgres://{config.DB_USER}:{config.DB_PASSWORD}@{_db_host}:{config.DB_PORT}/{config.DB_NAME}"
 
 
 @pytest.fixture(scope="session", autouse=True)
