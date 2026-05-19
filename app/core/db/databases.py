@@ -1,6 +1,5 @@
-from fastapi import FastAPI
+from aerich import Command
 from tortoise import Tortoise
-from tortoise.contrib.fastapi import register_tortoise
 
 from app.core import config
 
@@ -34,7 +33,16 @@ TORTOISE_ORM = {
     "timezone": "Asia/Seoul",
 }
 
+AERICH_MIGRATION_LOCATION = "./app/core/db/migrations"
 
-def initialize_tortoise(app: FastAPI) -> None:
-    Tortoise.init_models(TORTOISE_APP_MODELS, "models")
-    register_tortoise(app, config=TORTOISE_ORM)
+
+async def run_migrations() -> None:
+    """앱 시작 시 미적용 마이그레이션을 자동으로 적용한다."""
+    command = Command(
+        tortoise_config=TORTOISE_ORM,
+        app="models",
+        location=AERICH_MIGRATION_LOCATION,
+    )
+    await command.init()
+    await command.upgrade(run_in_transaction=True)
+    await Tortoise.close_connections()
