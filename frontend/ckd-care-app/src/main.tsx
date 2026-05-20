@@ -30,6 +30,7 @@ import { RAGChatbotPage } from "./pages/RAGChatbotPage";
 import { SimulationPage } from "./pages/SimulationPage";
 import { CheckupHistoryPage } from "./pages/CheckupHistoryPage";
 import { EmergencyGuardPage } from "./pages/EmergencyGuardPage";
+import { OAuthCallbackPage } from "./pages/OAuthCallbackPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isLoading } = useAuth();
@@ -44,6 +45,7 @@ function AppRoutes() {
       <Route path="/" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/email-verify" element={<EmailVerifyPage />} />
+      <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
 
       {/* 인증 필요 라우트 */}
       <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
@@ -67,6 +69,7 @@ function AppRoutes() {
       <Route path="/rag-chatbot" element={<PrivateRoute><RAGChatbotPage /></PrivateRoute>} />
       <Route path="/simulation" element={<PrivateRoute><SimulationPage /></PrivateRoute>} />
       <Route path="/checkup-history" element={<PrivateRoute><CheckupHistoryPage /></PrivateRoute>} />
+      <Route path="/health-check-history" element={<PrivateRoute><CheckupHistoryPage /></PrivateRoute>} />
       <Route path="/emergency" element={<PrivateRoute><EmergencyGuardPage /></PrivateRoute>} />
     </Routes>
   );

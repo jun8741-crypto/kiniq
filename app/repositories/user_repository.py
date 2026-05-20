@@ -52,6 +52,30 @@ class UserRepository:
     async def exists_by_phone_number(self, phone_number: str) -> bool:
         return await self._model.filter(phone_number=phone_number).exists()
 
+    async def get_or_create_social_user(
+        self,
+        *,
+        email: str,
+        name: str,
+        provider: str,
+        provider_id: str,
+    ) -> tuple[User, bool]:
+        """소셜 로그인 유저를 이메일로 조회하거나 신규 생성. (created: bool) 반환."""
+        user = await self._model.get_or_none(email=email)
+        if user:
+            return user, False
+        user = await self._model.create(
+            email=email,
+            # 소셜 전용 계정은 비밀번호 로그인 불가 — bcrypt로 해석 불가능한 sentinel
+            hashed_password=f"SOCIAL:{provider}:{provider_id}",
+            name=name[:20],
+            phone_number="00000000000",
+            gender=Gender.MALE,
+            birthday=date(2000, 1, 1),
+            is_active=True,
+        )
+        return user, True
+
     async def update_last_login(self, user_id: int) -> None:
         await self._model.filter(id=user_id).update(last_login=datetime.now(config.TIMEZONE))
 

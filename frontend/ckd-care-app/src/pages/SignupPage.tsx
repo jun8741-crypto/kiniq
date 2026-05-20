@@ -17,7 +17,7 @@ export function SignupPage() {
     phone_number: "",
     gender: "" as "MALE" | "FEMALE" | "",
   });
-  const [agreed, setAgreed] = useState({ sensitive: false, privacy: false, terms: false });
+  const [agreed, setAgreed] = useState({ sensitive: false, privacy: false, terms: false, marketing: false });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +29,18 @@ export function SignupPage() {
   async function handleSignup() {
     if (!form.name || !form.email || !form.password || !form.birth_date || !form.phone_number || !form.gender) {
       setError("모든 항목을 입력해주세요."); return;
+    }
+    if (form.password.length < 8) {
+      setError("비밀번호는 8자 이상이어야 합니다."); return;
+    }
+    if (!/[a-zA-Z]/.test(form.password) || !/[0-9]/.test(form.password) || !/[^a-zA-Z0-9]/.test(form.password)) {
+      setError("비밀번호는 영문, 숫자, 특수문자를 각 1개 이상 포함해야 합니다."); return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(form.birth_date)) {
+      setError("생년월일은 YYYY-MM-DD 형식으로 입력해주세요."); return;
+    }
+    if (!/^\d{10,11}$/.test(form.phone_number.replace(/-/g, ""))) {
+      setError("전화번호는 숫자 10~11자리로 입력해주세요 (예: 01012345678)."); return;
     }
     if (!agreed.sensitive || !agreed.privacy || !agreed.terms) {
       setError("필수 동의 항목을 모두 체크해주세요."); return;
@@ -107,7 +119,11 @@ export function SignupPage() {
                 checked={agreed.terms}
                 onChange={(v) => setAgreed((p) => ({ ...p, terms: v }))}
               />
-              <Checkbox label="[선택] 마케팅 수신 동의" />
+              <Checkbox
+                label="[선택] 마케팅 수신 동의"
+                checked={agreed.marketing}
+                onChange={(v) => setAgreed((p) => ({ ...p, marketing: v }))}
+              />
             </div>
           </div>
 

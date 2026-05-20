@@ -1,5 +1,5 @@
-import { User, Bell, LogOut, LayoutDashboard, Trophy } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { User, Bell, LayoutDashboard, Trophy } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { notificationApi } from "../api/notification";
@@ -9,8 +9,7 @@ interface TopNavProps {
 }
 
 export function TopNav({ brand = "CKD CARE" }: TopNavProps) {
-  const { logout, token } = useAuth();
-  const navigate = useNavigate();
+  const { token } = useAuth();
   const location = useLocation();
   const [unread, setUnread] = useState(0);
 
@@ -18,11 +17,6 @@ export function TopNav({ brand = "CKD CARE" }: TopNavProps) {
     if (!token) return;
     notificationApi.list(true, 1).then((r) => setUnread(r.unread_count)).catch(() => {});
   }, [token, location.pathname]);
-
-  function handleLogout() {
-    logout();
-    navigate("/");
-  }
 
   const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "대시보드" },
@@ -71,13 +65,6 @@ export function TopNav({ brand = "CKD CARE" }: TopNavProps) {
         >
           <User size={20} />
         </Link>
-        <button
-          onClick={handleLogout}
-          className="flex h-[36px] w-[36px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-alt"
-          title="로그아웃"
-        >
-          <LogOut size={20} />
-        </button>
       </div>
     </nav>
   );

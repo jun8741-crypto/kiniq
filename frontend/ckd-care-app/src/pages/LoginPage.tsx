@@ -14,8 +14,15 @@ export function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 비밀번호 찾기 상태
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   async function handleLogin() {
     if (!email || !password) { setError("이메일과 비밀번호를 입력하세요."); return; }
@@ -23,13 +30,26 @@ export function LoginPage() {
     setLoading(true);
     try {
       const res = await authApi.login({ email, password });
-      await login(res.access_token);
+      await login(res.access_token, rememberMe);
       navigate("/dashboard");
     } catch (e) {
       setError(e instanceof Error ? e.message : "로그인에 실패했습니다.");
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleForgotSubmit() {
+    if (!forgotEmail) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
+      return;
+    }
+    setForgotLoading(true);
+    // TODO: POST /auth/forgot-password API 연동
+    setTimeout(() => {
+      setForgotLoading(false);
+      setForgotSent(true);
+    }, 800);
   }
 
   return (
@@ -44,41 +64,89 @@ export function LoginPage() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-[16px]">
-            <TextInput
-              label="이메일"
-              placeholder="email@example.com"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextInput
-              label="비밀번호"
-              placeholder="비밀번호를 입력하세요"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          {/* 비밀번호 찾기 패널 */}
+          {showForgot ? (
+            <div className="flex flex-col gap-[16px] rounded-md border border-border bg-bg-alt p-[16px]">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-text-primary">비밀번호 찾기</p>
+                <button
+                  className="text-xs text-text-muted hover:text-text-secondary"
+                  onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(""); }}
+                >
+                  닫기
+                </button>
+              </div>
 
-          {error && (
-            <p className="rounded-sm bg-danger/10 px-[12px] py-[8px] text-sm text-danger">
-              {error}
-            </p>
+              {forgotSent ? (
+                <div className="rounded-sm bg-success/10 px-[12px] py-[10px] text-sm text-success">
+                  임시 비밀번호 발송 기능은 현재 준비 중입니다.<br />
+                  불편하신 경우 고객센터(support@ckdcare.example)로 문의해 주세요.
+                </div>
+              ) : (
+                <>
+                  <TextInput
+                    label="가입 시 등록한 이메일"
+                    placeholder="email@example.com"
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                  />
+                  <BtnPrimary
+                    label="임시 비밀번호 받기"
+                    loading={forgotLoading}
+                    onClick={handleForgotSubmit}
+                  />
+                </>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-[16px]">
+                <TextInput
+                  label="이메일"
+                  placeholder="email@example.com"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <TextInput
+                  label="비밀번호"
+                  placeholder="비밀번호를 입력하세요"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              {error && (
+                <p className="rounded-sm bg-danger/10 px-[12px] py-[8px] text-sm text-danger">
+                  {error}
+                </p>
+              )}
+
+              <div className="flex items-center justify-between">
+                <Checkbox
+                  label="로그인 유지"
+                  checked={rememberMe}
+                  onChange={setRememberMe}
+                />
+                <button
+                  className="text-sm text-info hover:underline"
+                  onClick={() => setShowForgot(true)}
+                >
+                  비밀번호 찾기
+                </button>
+              </div>
+
+              <BtnPrimary
+                label="로그인"
+                height={48}
+                className="w-full"
+                onClick={handleLogin}
+                loading={loading}
+              />
+            </>
           )}
-
-          <div className="flex items-center justify-between">
-            <Checkbox label="로그인 유지" />
-            <button className="text-sm text-info">비밀번호 찾기</button>
-          </div>
-
-          <BtnPrimary
-            label="로그인"
-            height={48}
-            className="w-full"
-            onClick={handleLogin}
-            loading={loading}
-          />
 
           <div className="flex items-center gap-[12px]">
             <div className="h-px flex-1 bg-border" />
@@ -86,11 +154,20 @@ export function LoginPage() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <BtnSecondary
-            label="카카오로 시작하기 (P1)"
-            height={48}
-            className="w-full"
-          />
+          <div className="flex flex-col gap-[8px]">
+            <BtnSecondary
+              label="카카오로 시작하기"
+              height={48}
+              className="w-full opacity-50"
+              onClick={() => alert("카카오 로그인은 서비스 오픈 후 이용 가능합니다.")}
+            />
+            <BtnSecondary
+              label="Google로 시작하기"
+              height={48}
+              className="w-full opacity-50"
+              onClick={() => alert("Google 로그인은 서비스 오픈 후 이용 가능합니다.")}
+            />
+          </div>
 
           <p className="text-center text-sm text-text-secondary">
             계정이 없으신가요?{" "}

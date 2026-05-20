@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import type { HealthCheckResponse } from "../api/healthCheck";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import { TextInput } from "../components/TextInput";
@@ -21,16 +22,25 @@ function calcBmi(height: string, weight: string): string {
 
 export function ManualInputPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefill = (location.state as { prefill?: HealthCheckResponse } | null)?.prefill;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [warning, setWarning] = useState("");
 
   const [form, setForm] = useState({
-    checked_date: new Date().toISOString().slice(0, 10),
-    height: "", weight: "", waist: "",
-    systolic_bp: "", diastolic_bp: "",
-    creatinine: "",
-    fasting_glucose: "", triglycerides: "", hdl: "", total_cholesterol: "",
+    checked_date: prefill?.checked_date ?? new Date().toISOString().slice(0, 10),
+    height: prefill?.height != null ? String(prefill.height) : "",
+    weight: prefill?.weight != null ? String(prefill.weight) : "",
+    waist: prefill?.waist_circumference != null ? String(prefill.waist_circumference) : "",
+    systolic_bp: prefill?.systolic_bp != null ? String(prefill.systolic_bp) : "",
+    diastolic_bp: prefill?.diastolic_bp != null ? String(prefill.diastolic_bp) : "",
+    creatinine: prefill?.creatinine != null ? String(prefill.creatinine) : "",
+    fasting_glucose: prefill?.fasting_glucose != null ? String(prefill.fasting_glucose) : "",
+    triglycerides: prefill?.triglycerides != null ? String(prefill.triglycerides) : "",
+    hdl: prefill?.hdl_cholesterol != null ? String(prefill.hdl_cholesterol) : "",
+    total_cholesterol: prefill?.total_cholesterol != null ? String(prefill.total_cholesterol) : "",
   });
 
   function set(field: string) {
@@ -46,6 +56,22 @@ export function ManualInputPage() {
       if (!form[f as keyof typeof form]) {
         setError("필수 항목(검진일·신장·체중·혈압·공복혈당)을 입력해주세요."); return;
       }
+    }
+    const h = parseFloat(form.height), w = parseFloat(form.weight);
+    if (isNaN(h) || h < 100 || h > 250) { setError("신장은 100~250 cm 범위로 입력해주세요."); return; }
+    if (isNaN(w) || w < 20 || w > 300) { setError("체중은 20~300 kg 범위로 입력해주세요."); return; }
+    if (form.waist) {
+      const wc = parseFloat(form.waist);
+      if (isNaN(wc) || wc < 40 || wc > 200) { setError("허리둘레는 40~200 cm 범위로 입력해주세요."); return; }
+    }
+    const sbp = parseInt(form.systolic_bp), dbp = parseInt(form.diastolic_bp);
+    if (isNaN(sbp) || sbp < 60 || sbp > 250) { setError("수축기 혈압은 60~250 mmHg 범위로 입력해주세요."); return; }
+    if (isNaN(dbp) || dbp < 40 || dbp > 150) { setError("이완기 혈압은 40~150 mmHg 범위로 입력해주세요."); return; }
+    const fg = parseFloat(form.fasting_glucose);
+    if (isNaN(fg) || fg < 50 || fg > 700) { setError("공복혈당은 50~700 mg/dL 범위로 입력해주세요."); return; }
+    if (form.creatinine) {
+      const cr = parseFloat(form.creatinine);
+      if (isNaN(cr) || cr < 0.1 || cr > 30) { setError("크레아티닌은 0.1~30 mg/dL 범위로 입력해주세요."); return; }
     }
     setError(""); setWarning("");
     setLoading(true);
@@ -100,7 +126,9 @@ export function ManualInputPage() {
         )}
 
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-text-primary">건강검진 수치 입력</h1>
+          <h1 className="text-2xl font-bold text-text-primary">
+            {prefill ? "건강검진 수치 재입력" : "건강검진 수치 입력"}
+          </h1>
           <TextInput
             label="검진일"
             placeholder="YYYY-MM-DD"
