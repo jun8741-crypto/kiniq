@@ -202,6 +202,34 @@
 
 ---
 
+### 🔲 PATCH `/users/me/password` — 비밀번호 변경 (P0)
+> REQ-AUTH-002 — 마이페이지 계정관리 UI 구현 완료, 백엔드 미구현
+
+인증 필요
+
+**요청**
+```json
+{
+  "current_password": "OldP@ss1!",
+  "new_password": "NewP@ss2@"
+}
+```
+
+| 필드 | 타입 | 제약 |
+|------|------|------|
+| current_password | string | 현재 비밀번호 |
+| new_password | string | 8자 이상, 영문+숫자+특수문자 포함 |
+
+**응답 `200`**
+```json
+{ "message": "비밀번호가 변경되었습니다." }
+```
+
+**에러** `400` — 현재 비밀번호 불일치  
+**에러** `401` — 인증 필요
+
+---
+
 ## 3. 건강검진 (`/health-checks`)
 > 명세 원안: `/checkups` → 현재 구현 경로로 확정
 
@@ -863,6 +891,7 @@
 | DELETE | `/auth/account` | ✅ | P0 | 🔲 |
 | GET | `/users/me` | ✅ | P0 | ✅ |
 | PATCH | `/users/me` | ✅ | P0 | ✅ |
+| PATCH | `/users/me/password` | ✅ | P0 | 🔲 |
 | POST | `/health-checks` | ✅ | P0 | ✅ |
 | GET | `/health-checks` | ✅ | P0 | ✅ |
 | GET | `/health-checks/{id}` | ✅ | P0 | ✅ |
