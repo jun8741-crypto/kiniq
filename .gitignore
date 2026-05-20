@@ -19,3 +19,7 @@ wheels/
 
 # Claude Code
 .claude
+
+# Frontend
+frontend/ckd-care-app/node_modules/
+frontend/ckd-care-app/dist/
