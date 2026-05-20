@@ -1,103 +1,173 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import { TextInput } from "../components/TextInput";
 import { BtnPrimary } from "../components/BtnPrimary";
 import { BtnSecondary } from "../components/BtnSecondary";
+import { healthCheckApi } from "../api/healthCheck";
+
+function toNum(v: string): number | null {
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function calcBmi(height: string, weight: string): string {
+  const h = parseFloat(height);
+  const w = parseFloat(weight);
+  if (!h || !w) return "";
+  return (w / Math.pow(h / 100, 2)).toFixed(1);
+}
 
 export function ManualInputPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
+
+  const [form, setForm] = useState({
+    checked_date: new Date().toISOString().slice(0, 10),
+    height: "", weight: "", waist: "",
+    systolic_bp: "", diastolic_bp: "",
+    creatinine: "",
+    fasting_glucose: "", triglycerides: "", hdl: "", total_cholesterol: "",
+  });
+
+  function set(field: string) {
+    return (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  }
+
+  const bmi = calcBmi(form.height, form.weight);
+
+  async function handleSave() {
+    const required = ["checked_date", "height", "weight", "systolic_bp", "diastolic_bp", "fasting_glucose"];
+    for (const f of required) {
+      if (!form[f as keyof typeof form]) {
+        setError("필수 항목(검진일·신장·체중·혈압·공복혈당)을 입력해주세요."); return;
+      }
+    }
+    setError(""); setWarning("");
+    setLoading(true);
+    try {
+      const res = await healthCheckApi.create({
+        checked_date: form.checked_date,
+        height: parseFloat(form.height),
+        weight: parseFloat(form.weight),
+        waist_circumference: toNum(form.waist),
+        systolic_bp: parseInt(form.systolic_bp),
+        diastolic_bp: parseInt(form.diastolic_bp),
+        creatinine: toNum(form.creatinine),
+        fasting_glucose: parseFloat(form.fasting_glucose),
+        triglycerides: toNum(form.triglycerides),
+        hdl_cholesterol: toNum(form.hdl),
+        total_cholesterol: toNum(form.total_cholesterol),
+      });
+      if (res.safety_warning) {
+        setWarning(res.safety_warning);
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "저장에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-bg-alt">
       <ScreenLabel label="07 · 수동 입력 (REQ-DATA-03)" />
       <TopNav />
       <main className="flex flex-1 flex-col p-[32px]">
-        {/* 헤더 */}
+
+        {/* 안전 경고 (Safety Guard) */}
+        {warning && (
+          <div className="mb-4 rounded-md border-2 border-danger bg-danger/10 p-[16px]">
+            <p className="text-sm font-bold text-danger">⚠ 주의</p>
+            <p className="mt-1 text-sm text-danger">{warning}</p>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="mt-3 text-sm font-bold text-info underline"
+            >
+              대시보드로 이동
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-4 rounded-sm bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>
+        )}
+
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-text-primary">
-            건강검진 수치 입력
-          </h1>
+          <h1 className="text-2xl font-bold text-text-primary">건강검진 수치 입력</h1>
           <TextInput
             label="검진일"
             placeholder="YYYY-MM-DD"
             className="w-[200px]"
+            value={form.checked_date}
+            onChange={set("checked_date")}
           />
         </div>
 
-        {/* 2칼럼 그리드 */}
         <div className="mt-[24px] grid grid-cols-2 gap-[32px]">
-          {/* 좌측 칼럼 */}
+          {/* 좌측 */}
           <div className="flex flex-col gap-[24px]">
-            {/* 신체계측 */}
             <div className="rounded-md border border-border bg-bg p-[16px]">
-              <p className="mb-[12px] text-md font-bold text-text-primary">
-                신체계측
-              </p>
+              <p className="mb-[12px] text-md font-bold text-text-primary">신체계측 <span className="text-danger text-xs">* 필수</span></p>
               <div className="flex flex-col gap-[12px]">
-                <TextInput label="신장 (cm)" placeholder="170.0" />
-                <TextInput label="체중 (kg)" placeholder="72.5" />
-                <TextInput label="BMI (kg/m2)" placeholder="자동 계산" />
-                <TextInput label="허리둘레 (cm)" placeholder="85.0" />
+                <TextInput label="신장 (cm)" placeholder="170.0" value={form.height} onChange={set("height")} />
+                <TextInput label="체중 (kg)" placeholder="72.5" value={form.weight} onChange={set("weight")} />
+                <div className="flex flex-col gap-[4px]">
+                  <label className="text-sm font-normal text-text-secondary">BMI (kg/m²)</label>
+                  <div className="flex h-[40px] items-center rounded-sm border border-border bg-bg-alt px-[12px]">
+                    <span className="text-sm text-text-muted">{bmi || "신장·체중 입력 시 자동 계산"}</span>
+                  </div>
+                </div>
+                <TextInput label="허리둘레 (cm)" placeholder="85.0" value={form.waist} onChange={set("waist")} />
               </div>
             </div>
 
-            {/* 혈압 */}
             <div className="rounded-md border border-border bg-bg p-[16px]">
-              <p className="mb-[12px] text-md font-bold text-text-primary">
-                혈압
-              </p>
+              <p className="mb-[12px] text-md font-bold text-text-primary">혈압 <span className="text-danger text-xs">* 필수</span></p>
               <div className="flex flex-col gap-[12px]">
-                <TextInput
-                  label="수축기 혈압 SBP (mmHg)"
-                  placeholder="120"
-                />
-                <TextInput
-                  label="이완기 혈압 DBP (mmHg)"
-                  placeholder="80"
-                />
+                <TextInput label="수축기 혈압 SBP (mmHg)" placeholder="120" value={form.systolic_bp} onChange={set("systolic_bp")} />
+                <TextInput label="이완기 혈압 DBP (mmHg)" placeholder="80" value={form.diastolic_bp} onChange={set("diastolic_bp")} />
               </div>
             </div>
 
-            {/* CKD 마커 */}
             <div className="rounded-md border border-danger bg-bg p-[16px]">
-              <p className="mb-[12px] text-md font-bold text-danger">
-                CKD 마커
-              </p>
+              <p className="mb-[12px] text-md font-bold text-danger">CKD 마커</p>
               <div className="flex flex-col gap-[12px]">
-                <TextInput label="크레아티닌 (mg/dL)" placeholder="1.0" />
+                <TextInput label="크레아티닌 (mg/dL)" placeholder="1.0" value={form.creatinine} onChange={set("creatinine")} />
+                <p className="text-xs text-text-muted">입력 시 CKD-EPI 공식으로 eGFR 자동 계산</p>
               </div>
             </div>
           </div>
 
-          {/* 우측 칼럼 */}
+          {/* 우측 */}
           <div className="flex flex-col gap-[24px]">
-            {/* 혈액검사 */}
             <div className="rounded-md border border-border bg-bg p-[16px]">
-              <p className="mb-[12px] text-md font-bold text-text-primary">
-                혈액검사
-              </p>
+              <p className="mb-[12px] text-md font-bold text-text-primary">혈액검사 <span className="text-danger text-xs">* 공복혈당 필수</span></p>
               <div className="flex flex-col gap-[12px]">
-                <TextInput label="공복혈당 (mg/dL)" placeholder="100" />
-                <TextInput label="중성지방 (mg/dL)" placeholder="150" />
-                <TextInput label="HDL (mg/dL)" placeholder="60" />
-                <TextInput label="LDL (mg/dL)" placeholder="100" />
-                <TextInput label="AST (U/L)" placeholder="25" />
-                <TextInput label="GOT (U/L)" placeholder="25" />
+                <TextInput label="공복혈당 (mg/dL)" placeholder="100" value={form.fasting_glucose} onChange={set("fasting_glucose")} />
+                <TextInput label="중성지방 (mg/dL)" placeholder="150" value={form.triglycerides} onChange={set("triglycerides")} />
+                <TextInput label="HDL 콜레스테롤 (mg/dL)" placeholder="60" value={form.hdl} onChange={set("hdl")} />
+                <TextInput label="총 콜레스테롤 (mg/dL)" placeholder="180" value={form.total_cholesterol} onChange={set("total_cholesterol")} />
               </div>
             </div>
 
-            {/* 정보 박스 */}
             <div className="rounded-sm bg-bg-alt p-[12px]">
               <p className="text-xs text-text-secondary">
-                입력하신 수치는 CKD 위험도 예측 모델에 활용됩니다. 가능한 한
-                최근 건강검진 결과를 정확히 입력해주세요.
+                입력하신 수치는 CKD 위험도 예측 모델에 활용됩니다. 가능한 최근 건강검진 결과를 정확히 입력해주세요.
               </p>
             </div>
           </div>
         </div>
 
-        {/* 하단 버튼 */}
         <div className="mt-[32px] flex justify-end gap-[12px]">
-          <BtnSecondary label="취소" />
-          <BtnPrimary label="저장" />
+          <BtnSecondary label="취소" onClick={() => navigate(-1)} />
+          <BtnPrimary label="저장" loading={loading} onClick={handleSave} />
         </div>
       </main>
     </div>

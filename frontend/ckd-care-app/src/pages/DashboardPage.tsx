@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import { Tag } from "../components/Tag";
@@ -229,7 +230,15 @@ export function DashboardPage() {
 
         {!h && !loading && (
           <div className="mt-[24px] rounded-md border border-dashed border-border bg-bg p-[32px] text-center">
-            <p className="text-text-muted">검진 데이터가 없습니다. 건강검진 결과를 입력해보세요.</p>
+            <p className="text-text-muted">검진 데이터가 없습니다.</p>
+            <div className="mt-[12px] flex justify-center gap-[12px]">
+              <Link to="/manual-input" className="rounded-md bg-accent px-[16px] py-[8px] text-sm font-bold text-bg">
+                검진 수치 입력
+              </Link>
+              <Link to="/lifestyle-survey" className="rounded-md border border-accent px-[16px] py-[8px] text-sm font-bold text-accent">
+                생활습관 설문
+              </Link>
+            </div>
           </div>
         )}
 
