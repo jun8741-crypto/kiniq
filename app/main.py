@@ -6,12 +6,14 @@ from tortoise import Tortoise
 
 from app.apis.v1 import v1_routers
 from app.core.db.databases import TORTOISE_APP_MODELS, TORTOISE_ORM, run_migrations
+from app.core.seed import seed_challenges
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await run_migrations()
     await Tortoise.init(config=TORTOISE_ORM)
+    await seed_challenges()
     yield
     await Tortoise.close_connections()
 

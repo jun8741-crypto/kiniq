@@ -17,11 +17,9 @@ from tortoise import Tortoise
 _DATA_FILE = Path(__file__).parent / "data" / "challenges_v04.json"
 
 
-async def seed(truncate: bool = False) -> None:
-    from app.core.db.databases import TORTOISE_ORM
+async def _insert_challenges(truncate: bool = False) -> None:
+    """Tortoise 연결이 이미 된 상태에서 호출하는 내부 함수."""
     from app.models.challenge import Challenge, ChallengeCategory, ChallengeTrack
-
-    await Tortoise.init(config=TORTOISE_ORM)
 
     challenges = json.loads(_DATA_FILE.read_text(encoding="utf-8"))
 
@@ -50,8 +48,20 @@ async def seed(truncate: bool = False) -> None:
         )
         inserted += 1
 
+    print(f"[seed] 챌린지 — 삽입: {inserted}건, 건너뜀: {skipped}건 (총 {len(challenges)}건)")
+
+
+async def seed_on_startup() -> None:
+    """FastAPI lifespan에서 호출 — Tortoise 이미 초기화된 상태 전제."""
+    await _insert_challenges()
+
+
+async def seed(truncate: bool = False) -> None:
+    from app.core.db.databases import TORTOISE_ORM
+
+    await Tortoise.init(config=TORTOISE_ORM)
+    await _insert_challenges(truncate=truncate)
     await Tortoise.close_connections()
-    print(f"완료 — 삽입: {inserted}건, 건너뜀: {skipped}건 (총 {len(challenges)}건)")
 
 
 def main() -> None:

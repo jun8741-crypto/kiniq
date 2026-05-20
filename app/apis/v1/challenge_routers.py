@@ -27,7 +27,8 @@ user_challenge_router = APIRouter(prefix="/user-challenges", tags=["user-challen
     summary="챌린지 목록 조회",
     description=(
         "사용자의 App 그룹(app_group)에 맞는 챌린지 목록을 반환합니다. "
-        "G1·G2는 Track A(케어), G3·G4는 Track B(일반). 미입력 시 빈 목록."
+        "G1·G2는 Track A(케어), G3·G4는 Track B(일반). "
+        "미입력 시 최신 검진의 CKD 단계로 자동 배정 (ML 모델 미실행 fallback)."
     ),
 )
 async def list_challenges(
@@ -35,6 +36,16 @@ async def list_challenges(
     service: Annotated[ChallengeService, Depends(ChallengeService)],
     app_group: Annotated[AppGroup | None, Query(description="ML 모델 배정 그룹 (G1~G4)")] = None,
 ) -> Response:
+    # ML 모델 미실행 시: 최신 검진 CKD 단계로 fallback
+    if app_group is None:
+        from app.models.health_check import CkdStage, HealthCheck
+        latest = await HealthCheck.filter(user_id=user.id).order_by("-checked_date").first()
+        if latest and latest.ckd_stage in (CkdStage.G1, CkdStage.G2):
+            app_group = AppGroup.G2
+        elif latest and latest.ckd_stage in (CkdStage.G3A, CkdStage.G3B, CkdStage.G4, CkdStage.G5):
+            app_group = AppGroup.G3
+        else:
+            app_group = AppGroup.G2  # 검진 없으면 Track A 기본
     result = await service.list_challenges(app_group)
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
 
