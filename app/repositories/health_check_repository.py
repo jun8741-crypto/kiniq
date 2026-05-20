@@ -1,6 +1,6 @@
 from datetime import date
 
-from app.models.health_check import CkdStage, DrinkingFrequency, HealthCheck, SmokingStatus
+from app.models.health_check import CkdStage, HealthCheck
 
 
 class HealthCheckRepository:
@@ -14,9 +14,6 @@ class HealthCheckRepository:
         weight: float,
         height: float,
         bmi: float,
-        smoking_status: SmokingStatus,
-        drinking_frequency: DrinkingFrequency,
-        exercise_days_per_week: int,
         creatinine: float | None = None,
         total_cholesterol: float | None = None,
         hdl_cholesterol: float | None = None,
@@ -39,9 +36,6 @@ class HealthCheckRepository:
             height=height,
             bmi=bmi,
             waist_circumference=waist_circumference,
-            smoking_status=smoking_status,
-            drinking_frequency=drinking_frequency,
-            exercise_days_per_week=exercise_days_per_week,
             egfr_estimated=egfr_estimated,
             ckd_stage=ckd_stage,
         )

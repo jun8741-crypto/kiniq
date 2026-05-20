@@ -3,19 +3,6 @@ from enum import StrEnum
 from tortoise import fields, models
 
 
-class SmokingStatus(StrEnum):
-    NEVER = "NEVER"  # 비흡연
-    PAST = "PAST"  # 과거 흡연 (현재 금연 중)
-    CURRENT = "CURRENT"  # 현재 흡연
-
-
-class DrinkingFrequency(StrEnum):
-    NEVER = "NEVER"  # 음주 안 함
-    OCCASIONALLY = "OCCASIONALLY"  # 월 1~3회
-    WEEKLY = "WEEKLY"  # 주 1~4회
-    DAILY = "DAILY"  # 거의 매일
-
-
 class CkdStage(StrEnum):
     G1 = "G1"  # eGFR >= 90  (정상 or 고위험 경계)
     G2 = "G2"  # eGFR 60~89  (경증 감소)
@@ -23,6 +10,15 @@ class CkdStage(StrEnum):
     G3B = "G3B"  # eGFR 30~44  (중~중증도)
     G4 = "G4"  # eGFR 15~29  (중증)
     G5 = "G5"  # eGFR < 15   (신부전)
+
+
+class AppGroup(StrEnum):
+    """ML 모델(Model 1) 출력 그룹 — KDIGO 단계와 별개 (REQ-ML-003)."""
+
+    G1 = "G1"  # eGFR < 60 → Track A (케어)
+    G2 = "G2"  # eGFR >= 60 + 임상 마커 → Track A (케어)
+    G3 = "G3"  # 위험점수 >= 임계값 → Track B (일반)
+    G4 = "G4"  # 정상 → Track B (일반)
 
 
 class HealthCheck(models.Model):
@@ -47,15 +43,11 @@ class HealthCheck(models.Model):
     bmi = fields.FloatField(description="체질량지수 (서비스에서 자동 계산)")
     waist_circumference = fields.FloatField(null=True, description="허리둘레 cm")
 
-    # 생활습관 설문
-    smoking_status = fields.CharEnumField(enum_type=SmokingStatus)
-    drinking_frequency = fields.CharEnumField(enum_type=DrinkingFrequency)
-    exercise_days_per_week = fields.IntField(description="주당 운동 일수")
-
     # AI / CKD-EPI 예측 결과 — ai_worker 또는 서비스가 비동기로 채움
     egfr_estimated = fields.FloatField(null=True, description="추정 eGFR mL/min/1.73m²")
     ckd_risk_score = fields.FloatField(null=True, description="ML 모델 CKD 위험도 0.0~1.0")
     ckd_stage = fields.CharEnumField(enum_type=CkdStage, null=True)
+    app_group = fields.CharEnumField(enum_type=AppGroup, null=True, description="ML 모델 배정 그룹 (REQ-ML-003)")
 
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)

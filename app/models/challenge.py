@@ -8,12 +8,12 @@ class ChallengeCategory(StrEnum):
     EXERCISE = "EXERCISE"
     DIET = "DIET"
     SLEEP = "SLEEP"
-    SMOKING = "SMOKING"
+    STRESS = "STRESS"
 
 
 class ChallengeTrack(StrEnum):
-    A = "A"  # G1~G2 대상
-    B = "B"  # G3A~G3B 대상
+    A = "A"  # App G1·G2 대상 (케어)
+    B = "B"  # App G3·G4 대상 (일반)
 
 
 class UserChallengeStatus(StrEnum):
@@ -29,12 +29,13 @@ class Challenge(models.Model):
     description = fields.TextField()
     duration_days = fields.IntField(description="챌린지 총 기간 (일)")
     track = fields.CharEnumField(enum_type=ChallengeTrack)
+    stage = fields.IntField(default=1, description="난이도 단계 1=입문 2=초보 3=중급 4=숙련")
     is_active = fields.BooleanField(default=True)
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
         table = "challenges"
-        ordering = ["track", "category"]
+        ordering = ["track", "stage", "category"]
 
 
 class UserChallenge(models.Model):

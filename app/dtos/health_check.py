@@ -4,7 +4,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 
 from app.dtos.base import BaseSerializerModel
-from app.models.health_check import CkdStage, DrinkingFrequency, SmokingStatus
+from app.models.health_check import CkdStage
 
 
 class HealthCheckCreateRequest(BaseModel):
@@ -29,11 +29,6 @@ class HealthCheckCreateRequest(BaseModel):
     height: Annotated[float, Field(ge=100.0, le=250.0, description="신장 (cm)")]
     waist_circumference: Annotated[float | None, Field(None, ge=40.0, le=200.0, description="허리둘레 (cm)")]
 
-    # 생활습관 설문
-    smoking_status: Annotated[SmokingStatus, Field(description="흡연 상태")]
-    drinking_frequency: Annotated[DrinkingFrequency, Field(description="음주 빈도")]
-    exercise_days_per_week: Annotated[int, Field(ge=0, le=7, description="주당 운동 일수")]
-
 
 class HealthCheckResponse(BaseSerializerModel):
     id: int
@@ -56,11 +51,6 @@ class HealthCheckResponse(BaseSerializerModel):
     height: float
     bmi: float
     waist_circumference: float | None
-
-    # 생활습관
-    smoking_status: SmokingStatus
-    drinking_frequency: DrinkingFrequency
-    exercise_days_per_week: int
 
     # AI / CKD-EPI 예측 결과 (비동기 처리, 처음엔 null)
     egfr_estimated: float | None

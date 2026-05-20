@@ -12,17 +12,14 @@ from app.dtos.challenge import (
     UserChallengeResponse,
 )
 from app.models.challenge import ChallengeTrack, UserChallengeStatus
-from app.models.health_check import CkdStage
+from app.models.health_check import AppGroup
 from app.repositories.challenge_repository import ChallengeRepository, UserChallengeRepository
 
-# G4/G5는 안전 분기 미구현 — 챌린지 노출 금지 (memory.md § 알려진 함정)
-_BLOCKED_STAGES = {CkdStage.G4, CkdStage.G5}
-
-_STAGE_TO_TRACK: dict[CkdStage, ChallengeTrack] = {
-    CkdStage.G1: ChallengeTrack.A,
-    CkdStage.G2: ChallengeTrack.A,
-    CkdStage.G3A: ChallengeTrack.B,
-    CkdStage.G3B: ChallengeTrack.B,
+_GROUP_TO_TRACK: dict[AppGroup, ChallengeTrack] = {
+    AppGroup.G1: ChallengeTrack.A,
+    AppGroup.G2: ChallengeTrack.A,
+    AppGroup.G3: ChallengeTrack.B,
+    AppGroup.G4: ChallengeTrack.B,
 }
 
 
@@ -31,12 +28,12 @@ class ChallengeService:
         self._repo = ChallengeRepository()
         self._user_repo = UserChallengeRepository()
 
-    async def list_challenges(self, ckd_stage: CkdStage | None) -> ChallengeListResponse:
-        """사용자 CKD 단계에 맞는 챌린지 목록 반환. G4/G5 또는 단계 미입력 시 빈 목록."""
-        if ckd_stage is None or ckd_stage in _BLOCKED_STAGES:
+    async def list_challenges(self, app_group: AppGroup | None) -> ChallengeListResponse:
+        """사용자 App 그룹에 맞는 챌린지 목록 반환. 그룹 미입력 시 빈 목록."""
+        if app_group is None:
             return ChallengeListResponse(total=0, items=[])
 
-        track = _STAGE_TO_TRACK[ckd_stage]
+        track = _GROUP_TO_TRACK[app_group]
         items = await self._repo.list_by_track(track)
         return ChallengeListResponse(
             total=len(items),

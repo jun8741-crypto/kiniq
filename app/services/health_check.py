@@ -126,9 +126,6 @@ class HealthCheckService:
             height=dto.height,
             bmi=bmi,
             waist_circumference=dto.waist_circumference,
-            smoking_status=dto.smoking_status,
-            drinking_frequency=dto.drinking_frequency,
-            exercise_days_per_week=dto.exercise_days_per_week,
             egfr_estimated=egfr,
             ckd_stage=ckd_stage,
         )

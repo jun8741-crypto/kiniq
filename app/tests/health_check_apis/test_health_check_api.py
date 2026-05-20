@@ -28,9 +28,6 @@ _HEALTH_CHECK_PAYLOAD = {
     "weight": 72.0,
     "height": 175.0,
     "waist_circumference": 85.0,
-    "smoking_status": "NEVER",
-    "drinking_frequency": "OCCASIONALLY",
-    "exercise_days_per_week": 3,
 }
 
 
