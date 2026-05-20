@@ -1,126 +1,219 @@
-import { Droplets, UtensilsCrossed, Footprints, Moon, Brain } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Droplets, UtensilsCrossed, Footprints, Moon, Brain, Plus } from "lucide-react";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
-import { BtnSecondary } from "../components/BtnSecondary";
+import { BtnPrimary } from "../components/BtnPrimary";
 import { Card } from "../components/Card";
+import { challengeApi, type Challenge, type UserChallenge, type ChallengeCategory } from "../api/challenge";
 import type { LucideIcon } from "lucide-react";
 
-/* 챌린지 데이터 */
-interface Challenge {
-  icon: LucideIcon;
-  title: string;
-  weight: string;
-  done: boolean;
-  hp: number;
-  borderColor: string;
+const CATEGORY_ICON: Record<ChallengeCategory, LucideIcon> = {
+  HYDRATION: Droplets,
+  EXERCISE: Footprints,
+  DIET: UtensilsCrossed,
+  SLEEP: Moon,
+  STRESS: Brain,
+};
+
+const CATEGORY_LABEL: Record<ChallengeCategory, string> = {
+  HYDRATION: "수분",
+  EXERCISE: "운동",
+  DIET: "식단",
+  SLEEP: "수면",
+  STRESS: "스트레스",
+};
+
+const BORDER_COLOR: Record<ChallengeCategory, string> = {
+  HYDRATION: "border-info",
+  EXERCISE: "border-warning",
+  DIET: "border-success",
+  SLEEP: "border-accent",
+  STRESS: "border-border-strong",
+};
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
 }
 
-const challenges: Challenge[] = [
-  { icon: Droplets, title: "수분 섭취 1.5L", weight: "x1.2", done: true, hp: 90, borderColor: "border-info" },
-  { icon: UtensilsCrossed, title: "저염식 한 끼", weight: "x1.5", done: true, hp: 85, borderColor: "border-success" },
-  { icon: Footprints, title: "30분 걷기", weight: "x1.0", done: true, hp: 78, borderColor: "border-warning" },
-  { icon: Moon, title: "11시 이전 취침", weight: "x1.0", done: false, hp: 70, borderColor: "border-accent" },
-  { icon: Brain, title: "스트레스 관리 5분", weight: "x0.8", done: false, hp: 65, borderColor: "border-border-strong" },
-];
+function checkedToday(uc: UserChallenge) {
+  return uc.last_checkin_date === todayStr();
+}
 
 export function ChallengeMainPage() {
+  const [available, setAvailable] = useState<Challenge[]>([]);
+  const [myList, setMyList] = useState<UserChallenge[]>([]);
+  const [challengeMap, setChallengeMap] = useState<Record<number, Challenge>>({});
+  const [loading, setLoading] = useState(true);
+  const [checkingIn, setCheckingIn] = useState<number | null>(null);
+  const [joining, setJoining] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  async function load() {
+    try {
+      const [listRes, myRes] = await Promise.all([challengeApi.list(), challengeApi.myList()]);
+      setAvailable(listRes.items);
+      setMyList(myRes.items);
+      const map: Record<number, Challenge> = {};
+      listRes.items.forEach((c) => (map[c.id] = c));
+      setChallengeMap(map);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "데이터를 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function handleCheckin(ucId: number) {
+    setCheckingIn(ucId);
+    setError(""); setSuccessMsg("");
+    try {
+      const res = await challengeApi.checkin(ucId);
+      setSuccessMsg(res.message);
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "체크인 실패");
+    } finally {
+      setCheckingIn(null);
+    }
+  }
+
+  async function handleJoin(challengeId: number) {
+    setJoining(challengeId);
+    setError(""); setSuccessMsg("");
+    try {
+      await challengeApi.join(challengeId, todayStr());
+      setSuccessMsg("챌린지에 참여했습니다!");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "참여 실패");
+    } finally {
+      setJoining(null);
+    }
+  }
+
+  const activeList = myList.filter((uc) => uc.status === "ACTIVE");
+  const doneToday = activeList.filter(checkedToday).length;
+  const pct = activeList.length > 0 ? Math.round((doneToday / activeList.length) * 100) : 0;
+  const joinedIds = new Set(myList.map((uc) => uc.challenge_id));
+
+  if (loading) return (
+    <div className="flex min-h-screen flex-col bg-bg-alt">
+      <ScreenLabel label="11 · 챌린지 메인 (REQ-CHG-01)" />
+      <TopNav />
+      <main className="flex flex-1 items-center justify-center text-text-secondary">로딩 중...</main>
+    </div>
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-bg-alt">
       <ScreenLabel label="11 · 챌린지 메인 (REQ-CHG-01)" />
       <TopNav />
       <main className="flex flex-1 flex-col p-[32px]">
+
+        {error && <div className="mb-3 rounded-sm bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>}
+        {successMsg && <div className="mb-3 rounded-sm bg-success/10 px-3 py-2 text-sm text-success">{successMsg}</div>}
+
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-text-primary">
-              오늘의 챌린지
-            </h1>
-            <p className="mt-[4px] text-sm text-text-secondary">
-              A 트랙 — 생활습관 개선을 통한 CKD 진행 억제
-            </p>
+            <h1 className="text-2xl font-bold text-text-primary">오늘의 챌린지</h1>
+            <p className="mt-[4px] text-sm text-text-secondary">진행 중 {activeList.length}개</p>
           </div>
-          <BtnSecondary label="🍺 회식 모드" />
         </div>
 
         {/* 달성률 바 */}
-        <div className="mt-[24px] rounded-md border border-border bg-bg p-[16px]">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-text-primary">3 / 5 항목</p>
-            <p className="text-sm font-bold text-accent">60%</p>
+        {activeList.length > 0 && (
+          <div className="mt-[24px] rounded-md border border-border bg-bg p-[16px]">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-bold text-text-primary">{doneToday} / {activeList.length} 완료</p>
+              <p className="text-sm font-bold text-accent">{pct}%</p>
+            </div>
+            <div className="mt-[8px] h-[10px] w-full rounded-full bg-placeholder">
+              <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${pct}%` }} />
+            </div>
           </div>
-          <div className="mt-[8px] h-[10px] w-full rounded-full bg-placeholder">
-            <div className="h-full w-[60%] rounded-full bg-accent" />
-          </div>
-        </div>
+        )}
 
-        {/* 챌린지 카드들 */}
-        <div className="mt-[24px] flex flex-col gap-[12px]">
-          {challenges.map((c) => (
-            <div
-              key={c.title}
-              className={`flex items-center gap-[16px] rounded-md border-l-4 ${c.borderColor} border border-border bg-bg p-[16px]`}
-            >
-              {/* 체크 */}
-              <div
-                className={`flex h-[24px] w-[24px] items-center justify-center rounded-full ${
-                  c.done ? "bg-success" : "border-2 border-border-strong"
-                }`}
-              >
-                {c.done && (
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" />
-                  </svg>
-                )}
-              </div>
-
-              {/* 아이콘 + 제목 */}
-              <c.icon size={20} className="shrink-0 text-text-secondary" />
-              <div className="flex-1">
-                <p className="text-sm font-bold text-text-primary">{c.title}</p>
-              </div>
-
-              {/* 가중치 */}
-              <span className="text-xs text-text-muted">{c.weight}</span>
-
-              {/* 알 체력 바 */}
-              <div className="flex w-[100px] items-center gap-[4px]">
-                <div className="h-[6px] flex-1 rounded-full bg-placeholder">
-                  <div
-                    className="h-full rounded-full bg-success"
-                    style={{ width: `${c.hp}%` }}
+        {/* 내 진행 중 챌린지 */}
+        {activeList.length > 0 ? (
+          <div className="mt-[24px] flex flex-col gap-[12px]">
+            {activeList.map((uc) => {
+              const c = challengeMap[uc.challenge_id];
+              if (!c) return null;
+              const Icon = CATEGORY_ICON[c.category];
+              const done = checkedToday(uc);
+              return (
+                <div
+                  key={uc.id}
+                  className={`flex items-center gap-[16px] rounded-md border-l-4 ${BORDER_COLOR[c.category]} border border-border bg-bg p-[16px]`}
+                >
+                  <div className={`flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full ${done ? "bg-success" : "border-2 border-border-strong"}`}>
+                    {done && <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" /></svg>}
+                  </div>
+                  <Icon size={20} className="shrink-0 text-text-secondary" />
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-text-primary">{c.name}</p>
+                    <p className="text-xs text-text-muted">{CATEGORY_LABEL[c.category]} · {uc.total_checkins}/{c.duration_days}일 · 연속 {uc.streak_count}일</p>
+                  </div>
+                  <BtnPrimary
+                    label={done ? "완료" : "체크인"}
+                    disabled={done}
+                    loading={checkingIn === uc.id}
+                    onClick={() => !done && handleCheckin(uc.id)}
+                    className="min-w-[72px]"
                   />
                 </div>
-                <span className="text-xs text-text-muted">{c.hp}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* 빈 슬롯 */}
-        <div className="mt-[12px] rounded-md border border-dashed border-border bg-bg p-[16px] text-center">
-          <p className="text-sm text-text-muted">
-            스테이지 1 완료 시 새 챌린지 5개 자동 배정
-          </p>
-        </div>
-
-        {/* 예상 Risk Score 개선 */}
-        <Card title="예상 Risk Score 개선" className="mt-[24px]">
-          <div className="flex items-center gap-[16px]">
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted">현재</span>
-              <span className="text-lg font-bold text-warning">32%</span>
-            </div>
-            <span className="text-text-muted">&rarr;</span>
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-text-muted">예상</span>
-              <span className="text-lg font-bold text-success">28%</span>
-            </div>
-            <p className="flex-1 text-xs text-text-secondary">
-              오늘의 챌린지를 모두 달성하면 위험도가 약 4%p 감소할 것으로
-              예상됩니다.
-            </p>
+              );
+            })}
           </div>
-        </Card>
+        ) : (
+          <div className="mt-[24px] rounded-md border border-dashed border-border bg-bg p-[32px] text-center">
+            <p className="text-text-muted">참여 중인 챌린지가 없습니다. 아래에서 챌린지를 골라보세요!</p>
+          </div>
+        )}
+
+        {/* 참여 가능한 챌린지 */}
+        {available.filter((c) => !joinedIds.has(c.id)).length > 0 && (
+          <div className="mt-[32px]">
+            <h2 className="mb-[12px] text-lg font-bold text-text-primary">참여 가능한 챌린지</h2>
+            <div className="flex flex-col gap-[8px]">
+              {available.filter((c) => !joinedIds.has(c.id)).map((c) => {
+                const Icon = CATEGORY_ICON[c.category];
+                return (
+                  <div key={c.id} className="flex items-center gap-[16px] rounded-md border border-border bg-bg p-[16px]">
+                    <Icon size={20} className="shrink-0 text-text-secondary" />
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-text-primary">{c.name}</p>
+                      <p className="text-xs text-text-muted">{CATEGORY_LABEL[c.category]} · {c.duration_days}일</p>
+                    </div>
+                    <button
+                      onClick={() => handleJoin(c.id)}
+                      disabled={joining === c.id}
+                      className="flex items-center gap-1 rounded-md border border-accent px-[12px] py-[6px] text-sm text-accent disabled:opacity-50"
+                    >
+                      <Plus size={14} />
+                      {joining === c.id ? "참여 중..." : "참여"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 완료한 챌린지 요약 */}
+        {myList.filter((uc) => uc.status === "COMPLETED").length > 0 && (
+          <Card title="완료한 챌린지" className="mt-[24px]">
+            <p className="text-2xl font-bold text-success">
+              {myList.filter((uc) => uc.status === "COMPLETED").length}개
+            </p>
+            <p className="text-xs text-text-muted">지금까지 완료한 챌린지</p>
+          </Card>
+        )}
+
       </main>
     </div>
   );
