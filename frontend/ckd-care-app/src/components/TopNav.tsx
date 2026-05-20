@@ -1,15 +1,23 @@
 import { User, Bell, LogOut, LayoutDashboard, Trophy } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { notificationApi } from "../api/notification";
 
 interface TopNavProps {
   brand?: string;
 }
 
 export function TopNav({ brand = "CKD CARE" }: TopNavProps) {
-  const { logout } = useAuth();
+  const { logout, token } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    if (!token) return;
+    notificationApi.list(true, 1).then((r) => setUnread(r.unread_count)).catch(() => {});
+  }, [token, location.pathname]);
 
   function handleLogout() {
     logout();
@@ -48,9 +56,14 @@ export function TopNav({ brand = "CKD CARE" }: TopNavProps) {
       <div className="flex items-center gap-[4px]">
         <Link
           to="/notifications"
-          className="flex h-[36px] w-[36px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-alt"
+          className="relative flex h-[36px] w-[36px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-alt"
         >
           <Bell size={20} />
+          {unread > 0 && (
+            <span className="absolute right-[4px] top-[4px] flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-danger px-[3px] text-[10px] font-bold text-bg">
+              {unread > 99 ? "99+" : unread}
+            </span>
+          )}
         </Link>
         <Link
           to="/mypage"
