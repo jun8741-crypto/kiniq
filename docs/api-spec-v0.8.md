@@ -1,4 +1,4 @@
-# API 명세서 v0.7
+# API 명세서 v0.8
 
 > 최종 갱신: 2026-05-20  
 > Base URL: `https://{host}/api/v1`  
