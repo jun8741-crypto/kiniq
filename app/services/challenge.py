@@ -14,6 +14,7 @@ from app.dtos.challenge import (
 from app.models.challenge import ChallengeTrack, UserChallengeStatus
 from app.models.health_check import AppGroup
 from app.repositories.challenge_repository import ChallengeRepository, UserChallengeRepository
+from app.services.notification import NotificationService
 
 _GROUP_TO_TRACK: dict[AppGroup, ChallengeTrack] = {
     AppGroup.G1: ChallengeTrack.A,
@@ -27,6 +28,7 @@ class ChallengeService:
     def __init__(self) -> None:
         self._repo = ChallengeRepository()
         self._user_repo = UserChallengeRepository()
+        self._notif = NotificationService()
 
     async def list_challenges(self, app_group: AppGroup | None) -> ChallengeListResponse:
         """사용자 App 그룹에 맞는 챌린지 목록 반환. 그룹 미입력 시 빈 목록."""
@@ -54,6 +56,7 @@ class ChallengeService:
             challenge_id=dto.challenge_id,
             started_at=dto.started_at,
         )
+        await self._notif.notify_challenge_joined(user_id, challenge.name, uc.id)
         return UserChallengeResponse.model_validate(uc)
 
     async def list_my_challenges(
@@ -104,6 +107,12 @@ class ChallengeService:
             message = f"체크인 완료! 연속 {uc.streak_count}일째입니다. 목표까지 {remaining}일 남았습니다."
 
         await self._user_repo.save(uc)
+
+        if uc.status == UserChallengeStatus.COMPLETED:
+            await self._notif.notify_challenge_completed(user_id, challenge.name, uc.total_checkins, uc.id)
+        else:
+            await self._notif.notify_checkin_done(user_id, challenge.name, uc.streak_count, uc.id)
+
         return CheckInResponse(
             id=uc.id,
             streak_count=uc.streak_count,
