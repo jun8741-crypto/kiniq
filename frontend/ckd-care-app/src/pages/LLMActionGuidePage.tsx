@@ -6,7 +6,7 @@ function ShapBar({
   rank,
   label,
   value,
-  shap,
+  shap: _shap,
   note,
   barWidth,
   color,

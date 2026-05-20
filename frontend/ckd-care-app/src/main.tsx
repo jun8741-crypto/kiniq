@@ -1,7 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
+
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
@@ -29,36 +31,53 @@ import { SimulationPage } from "./pages/SimulationPage";
 import { CheckupHistoryPage } from "./pages/CheckupHistoryPage";
 import { EmergencyGuardPage } from "./pages/EmergencyGuardPage";
 
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { token, isLoading } = useAuth();
+  if (isLoading) return <div className="flex min-h-screen items-center justify-center text-text-secondary">로딩 중...</div>;
+  return token ? <>{children}</> : <Navigate to="/" replace />;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* 공개 라우트 */}
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/email-verify" element={<EmailVerifyPage />} />
+
+      {/* 인증 필요 라우트 */}
+      <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+      <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+      <Route path="/ocr-upload" element={<PrivateRoute><OCRUploadPage /></PrivateRoute>} />
+      <Route path="/ocr-result" element={<PrivateRoute><OCRResultPage /></PrivateRoute>} />
+      <Route path="/manual-input" element={<PrivateRoute><ManualInputPage /></PrivateRoute>} />
+      <Route path="/lifestyle-survey" element={<PrivateRoute><LifestyleSurveyPage /></PrivateRoute>} />
+      <Route path="/diet-survey" element={<PrivateRoute><DietSurveyPage /></PrivateRoute>} />
+      <Route path="/challenge" element={<PrivateRoute><ChallengeMainPage /></PrivateRoute>} />
+      <Route path="/daily-checkin" element={<PrivateRoute><DailyCheckinPage /></PrivateRoute>} />
+      <Route path="/egg-hatching" element={<PrivateRoute><EggHatchingPage /></PrivateRoute>} />
+      <Route path="/slump" element={<PrivateRoute><SlumpPage /></PrivateRoute>} />
+      <Route path="/llm-guide" element={<PrivateRoute><LLMActionGuidePage /></PrivateRoute>} />
+      <Route path="/notification-settings" element={<PrivateRoute><NotificationSettingsPage /></PrivateRoute>} />
+      <Route path="/notifications" element={<PrivateRoute><NotificationListPage /></PrivateRoute>} />
+      <Route path="/daily-quiz" element={<PrivateRoute><DailyQuizPage /></PrivateRoute>} />
+      <Route path="/social-group" element={<PrivateRoute><SocialGroupPage /></PrivateRoute>} />
+      <Route path="/family-cheer" element={<PrivateRoute><FamilyCheerPage /></PrivateRoute>} />
+      <Route path="/dining-mode" element={<PrivateRoute><DiningModePage /></PrivateRoute>} />
+      <Route path="/rag-chatbot" element={<PrivateRoute><RAGChatbotPage /></PrivateRoute>} />
+      <Route path="/simulation" element={<PrivateRoute><SimulationPage /></PrivateRoute>} />
+      <Route path="/checkup-history" element={<PrivateRoute><CheckupHistoryPage /></PrivateRoute>} />
+      <Route path="/emergency" element={<PrivateRoute><EmergencyGuardPage /></PrivateRoute>} />
+    </Routes>
+  );
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/email-verify" element={<EmailVerifyPage />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/ocr-upload" element={<OCRUploadPage />} />
-        <Route path="/ocr-result" element={<OCRResultPage />} />
-        <Route path="/manual-input" element={<ManualInputPage />} />
-        <Route path="/lifestyle-survey" element={<LifestyleSurveyPage />} />
-        <Route path="/diet-survey" element={<DietSurveyPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/challenge" element={<ChallengeMainPage />} />
-        <Route path="/daily-checkin" element={<DailyCheckinPage />} />
-        <Route path="/egg-hatching" element={<EggHatchingPage />} />
-        <Route path="/slump" element={<SlumpPage />} />
-        <Route path="/llm-guide" element={<LLMActionGuidePage />} />
-        <Route path="/notification-settings" element={<NotificationSettingsPage />} />
-        <Route path="/notifications" element={<NotificationListPage />} />
-        <Route path="/daily-quiz" element={<DailyQuizPage />} />
-        <Route path="/social-group" element={<SocialGroupPage />} />
-        <Route path="/family-cheer" element={<FamilyCheerPage />} />
-        <Route path="/dining-mode" element={<DiningModePage />} />
-        <Route path="/rag-chatbot" element={<RAGChatbotPage />} />
-        <Route path="/simulation" element={<SimulationPage />} />
-        <Route path="/checkup-history" element={<CheckupHistoryPage />} />
-        <Route path="/emergency" element={<EmergencyGuardPage />} />
-      </Routes>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>
 );
