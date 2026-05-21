@@ -40,12 +40,13 @@ async def list_challenges(
     if app_group is None:
         from app.models.health_check import CkdStage, HealthCheck
         latest = await HealthCheck.filter(user_id=user.id).order_by("-checked_date").first()
-        if latest and latest.ckd_stage in (CkdStage.G1, CkdStage.G2):
-            app_group = AppGroup.G2
-        elif latest and latest.ckd_stage in (CkdStage.G3A, CkdStage.G3B, CkdStage.G4, CkdStage.G5):
+        if latest is None:
+            from app.dtos.challenge import ChallengeListResponse
+            return Response(ChallengeListResponse(total=0, items=[]).model_dump(), status_code=status.HTTP_200_OK)
+        if latest.ckd_stage in (CkdStage.G3A, CkdStage.G3B, CkdStage.G4, CkdStage.G5):
             app_group = AppGroup.G3
         else:
-            app_group = AppGroup.G2  # 검진 없으면 Track A 기본
+            app_group = AppGroup.G2
     result = await service.list_challenges(app_group)
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
 
