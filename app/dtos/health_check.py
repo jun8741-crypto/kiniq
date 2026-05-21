@@ -4,7 +4,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 
 from app.dtos.base import BaseSerializerModel
-from app.models.health_check import CkdStage
+from app.models.health_check import AppGroup, CkdStage
 
 
 class HealthCheckCreateRequest(BaseModel):
@@ -56,6 +56,7 @@ class HealthCheckResponse(BaseSerializerModel):
     egfr_estimated: float | None
     ckd_risk_score: float | None
     ckd_stage: CkdStage | None
+    app_group: AppGroup | None
 
     # 세이프티 가드 메시지 (위험 수치 감지 시)
     safety_warning: str | None = None

@@ -1,6 +1,6 @@
 from datetime import date
 
-from app.models.health_check import CkdStage, HealthCheck
+from app.models.health_check import AppGroup, CkdStage, HealthCheck
 
 
 class HealthCheckRepository:
@@ -21,6 +21,7 @@ class HealthCheckRepository:
         waist_circumference: float | None = None,
         egfr_estimated: float | None = None,
         ckd_stage: CkdStage | None = None,
+        app_group: AppGroup | None = None,
     ) -> HealthCheck:
         return await HealthCheck.create(
             user_id=user_id,
@@ -38,6 +39,7 @@ class HealthCheckRepository:
             waist_circumference=waist_circumference,
             egfr_estimated=egfr_estimated,
             ckd_stage=ckd_stage,
+            app_group=app_group,
         )
 
     async def get_by_user(
