@@ -58,3 +58,72 @@ class TestUserMeApis(TestCase):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/api/v1/users/me")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    async def test_change_password_success(self):
+        email = "pw_change@example.com"
+        signup_data = {
+            "email": email,
+            "password": "OldPass123!",
+            "name": "비번변경",
+            "gender": "MALE",
+            "birth_date": "1988-05-05",
+            "phone_number": "01011112222",
+        }
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            await client.post("/api/v1/auth/signup", json=signup_data)
+            login_response = await client.post("/api/v1/auth/login", json={"email": email, "password": "OldPass123!"})
+            access_token = login_response.json()["access_token"]
+            headers = {"Authorization": f"Bearer {access_token}"}
+
+            response = await client.patch(
+                "/api/v1/users/me/password",
+                json={"current_password": "OldPass123!", "new_password": "NewPass456@"},
+                headers=headers,
+            )
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    async def test_change_password_wrong_current(self):
+        email = "pw_wrong@example.com"
+        signup_data = {
+            "email": email,
+            "password": "OldPass123!",
+            "name": "비번틀림",
+            "gender": "FEMALE",
+            "birth_date": "1995-03-15",
+            "phone_number": "01033334444",
+        }
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            await client.post("/api/v1/auth/signup", json=signup_data)
+            login_response = await client.post("/api/v1/auth/login", json={"email": email, "password": "OldPass123!"})
+            access_token = login_response.json()["access_token"]
+            headers = {"Authorization": f"Bearer {access_token}"}
+
+            response = await client.patch(
+                "/api/v1/users/me/password",
+                json={"current_password": "WrongPass999!", "new_password": "NewPass456@"},
+                headers=headers,
+            )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    async def test_delete_account_success(self):
+        email = "delete_me@example.com"
+        signup_data = {
+            "email": email,
+            "password": "Password123!",
+            "name": "탈퇴테스터",
+            "gender": "MALE",
+            "birth_date": "1985-07-20",
+            "phone_number": "01099998888",
+        }
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            await client.post("/api/v1/auth/signup", json=signup_data)
+            login_response = await client.post("/api/v1/auth/login", json={"email": email, "password": "Password123!"})
+            access_token = login_response.json()["access_token"]
+            headers = {"Authorization": f"Bearer {access_token}"}
+
+            response = await client.delete("/api/v1/users/me", headers=headers)
+            assert response.status_code == status.HTTP_204_NO_CONTENT
+
+            # 탈퇴 후 동일 이메일로 재로그인 불가
+            login_again = await client.post("/api/v1/auth/login", json={"email": email, "password": "Password123!"})
+        assert login_again.status_code == status.HTTP_400_BAD_REQUEST

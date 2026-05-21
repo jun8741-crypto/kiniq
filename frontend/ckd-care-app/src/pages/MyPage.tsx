@@ -8,6 +8,7 @@ import { ListItem } from "../components/ListItem";
 import { TextInput } from "../components/TextInput";
 import { BtnPrimary } from "../components/BtnPrimary";
 import { useAuth } from "../contexts/AuthContext";
+import { authApi } from "../api/auth";
 
 type Panel = "logout" | "account";
 
@@ -20,32 +21,50 @@ export function MyPage() {
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [pwError, setPwError] = useState("");
   const [pwSuccess, setPwSuccess] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
 
   // 회원탈퇴 상태
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
-  function handleLogout() {
+  async function handleLogout() {
+    try { await authApi.logout(); } catch { /* 서버 오류여도 클라이언트 로그아웃 진행 */ }
     logout();
     navigate("/");
   }
 
-  function handlePasswordChange() {
+  async function handlePasswordChange() {
     const { current, next, confirm } = pwForm;
     if (!current || !next || !confirm) { setPwError("모든 항목을 입력해주세요."); return; }
     if (next.length < 8) { setPwError("새 비밀번호는 8자 이상이어야 합니다."); return; }
     if (next !== confirm) { setPwError("새 비밀번호가 일치하지 않습니다."); return; }
     setPwError("");
-    // TODO: PATCH /users/me/password API 연동
-    setPwSuccess(true);
-    setPwForm({ current: "", next: "", confirm: "" });
-    setTimeout(() => setPwSuccess(false), 3000);
+    setPwLoading(true);
+    try {
+      await authApi.changePassword({ current_password: current, new_password: next });
+      setPwSuccess(true);
+      setPwForm({ current: "", next: "", confirm: "" });
+      setTimeout(() => setPwSuccess(false), 3000);
+    } catch (e) {
+      setPwError(e instanceof Error ? e.message : "비밀번호 변경에 실패했습니다.");
+    } finally {
+      setPwLoading(false);
+    }
   }
 
-  function handleDeleteAccount() {
+  async function handleDeleteAccount() {
     if (!deletePassword) { setDeleteError("비밀번호를 입력해주세요."); return; }
-    // TODO: DELETE /users/me API 연동
-    setDeleteError("계정 삭제 기능은 준비 중입니다.");
+    setDeleteLoading(true);
+    try {
+      await authApi.deleteAccount();
+      logout();
+      navigate("/");
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : "회원 탈퇴에 실패했습니다.");
+    } finally {
+      setDeleteLoading(false);
+    }
   }
 
   // 아바타 이니셜
@@ -157,7 +176,7 @@ export function MyPage() {
                   {pwSuccess && (
                     <p className="rounded-sm bg-success/10 px-[12px] py-[8px] text-sm text-success">비밀번호가 변경되었습니다.</p>
                   )}
-                  <BtnPrimary label="비밀번호 변경" onClick={handlePasswordChange} />
+                  <BtnPrimary label="비밀번호 변경" loading={pwLoading} onClick={handlePasswordChange} />
                 </div>
               </div>
 
@@ -182,9 +201,10 @@ export function MyPage() {
                 )}
                 <button
                   onClick={handleDeleteAccount}
-                  className="mt-[12px] flex h-[44px] w-full items-center justify-center rounded-md bg-danger px-[16px] py-[12px] text-sm font-bold text-bg"
+                  disabled={deleteLoading}
+                  className="mt-[12px] flex h-[44px] w-full items-center justify-center rounded-md bg-danger px-[16px] py-[12px] text-sm font-bold text-bg disabled:opacity-50"
                 >
-                  회원 탈퇴
+                  {deleteLoading ? "처리 중..." : "회원 탈퇴"}
                 </button>
               </div>
             </div>

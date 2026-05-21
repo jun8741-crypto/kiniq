@@ -46,6 +46,13 @@ async def login(
     return resp
 
 
+@auth_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout() -> Response:
+    resp = Response(content=None, status_code=status.HTTP_204_NO_CONTENT)
+    resp.delete_cookie(key="refresh_token")
+    return resp
+
+
 def _oauth_error_redirect(msg: str) -> RedirectResponse:
     return RedirectResponse(f"{config.FRONTEND_URL}/?error={urllib.parse.quote(msg)}")
 

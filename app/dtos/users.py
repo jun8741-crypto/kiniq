@@ -1,9 +1,9 @@
 from datetime import date, datetime
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import AfterValidator, BaseModel, EmailStr, Field
 
-from app.core.validators import optional_after_validator, validate_birthday, validate_phone_number
+from app.core.validators import optional_after_validator, validate_birthday, validate_password, validate_phone_number
 from app.dtos.base import BaseSerializerModel
 from app.models.users import Gender
 
@@ -28,6 +28,11 @@ class UserUpdateRequest(BaseModel):
         Gender | None,
         Field(None, description="'MALE' or 'FEMALE'"),
     ]
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: Annotated[str, Field(min_length=8)]
+    new_password: Annotated[str, Field(min_length=8), AfterValidator(validate_password)]
 
 
 class UserInfoResponse(BaseSerializerModel):

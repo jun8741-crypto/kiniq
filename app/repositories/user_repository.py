@@ -79,6 +79,15 @@ class UserRepository:
     async def update_last_login(self, user_id: int) -> None:
         await self._model.filter(id=user_id).update(last_login=datetime.now(config.TIMEZONE))
 
+    async def anonymize_and_deactivate(self, user: User) -> None:
+        user.email = f"deleted_{user.id}@deleted.invalid"
+        user.name = "탈퇴한 사용자"
+        user.phone_number = "00000000000"
+        user.hashed_password = "DELETED"
+        user.is_active = False
+        user.updated_at = datetime.now(config.TIMEZONE)
+        await user.save(update_fields=["email", "name", "phone_number", "hashed_password", "is_active", "updated_at"])
+
     async def update_instance(self, user: User, data: dict[str, Any]) -> None:
         update_fields = []
         for key, value in data.items():

@@ -31,5 +31,9 @@ export interface UserInfo {
 export const authApi = {
   login: (body: LoginRequest) => api.post<LoginResponse>("/auth/login", body),
   signup: (body: SignUpRequest) => api.post<{ detail: string }>("/auth/signup", body),
+  logout: () => api.post<void>("/auth/logout", {}),
   me: () => api.get<UserInfo>("/users/me"),
+  changePassword: (body: { current_password: string; new_password: string }) =>
+    api.patch<void>("/users/me/password", body),
+  deleteAccount: () => api.delete<void>("/users/me"),
 };
