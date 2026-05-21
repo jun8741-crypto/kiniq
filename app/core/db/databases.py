@@ -11,6 +11,7 @@ TORTOISE_APP_MODELS = [
     "app.models.challenge",
     "app.models.notification",
     "app.models.diet_survey",
+    "app.models.notification_setting",
 ]
 
 TORTOISE_ORM = {

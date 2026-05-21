@@ -1,14 +1,21 @@
 from fastapi import HTTPException
 from starlette import status
 
-from app.dtos.notification import NotificationListResponse, NotificationResponse
+from app.dtos.notification import (
+    NotificationListResponse,
+    NotificationResponse,
+    NotificationSettingResponse,
+    NotificationSettingUpdateRequest,
+)
 from app.models.notification import NotificationType
 from app.repositories.notification_repository import NotificationRepository
+from app.repositories.notification_setting_repository import NotificationSettingRepository
 
 
 class NotificationService:
     def __init__(self) -> None:
         self._repo = NotificationRepository()
+        self._setting_repo = NotificationSettingRepository()
 
     async def get_notifications(
         self,
@@ -62,3 +69,14 @@ class NotificationService:
             message=f"'{challenge_name}' {total_days}일 챌린지를 완주했습니다. 축하합니다!",
             related_id=uc_id,
         )
+
+    # ── 알림 설정 ────────────────────────────────────────────────────────────
+
+    async def get_settings(self, user_id: int) -> NotificationSettingResponse:
+        setting = await self._setting_repo.get_or_create(user_id)
+        return NotificationSettingResponse.model_validate(setting)
+
+    async def update_settings(self, user_id: int, data: NotificationSettingUpdateRequest) -> NotificationSettingResponse:
+        updates = data.model_dump(exclude_none=True)
+        setting = await self._setting_repo.update(user_id, updates)
+        return NotificationSettingResponse.model_validate(setting)

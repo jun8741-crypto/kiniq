@@ -134,3 +134,58 @@ class TestCheckinNotificationAPI(TestCase):
         body = response.json()
         types = [item["type"] for item in body["items"]]
         assert "CHECKIN_DONE" in types
+
+
+class TestNotificationSettingsAPI(TestCase):
+    async def test_get_settings_defaults(self):
+        """설정 최초 조회 → 모두 true."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            token = await _get_token(client)
+            response = await client.get(
+                "/api/v1/notifications/settings",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        assert response.status_code == status.HTTP_200_OK
+        body = response.json()
+        assert body["challenge_joined_enabled"] is True
+        assert body["checkin_done_enabled"] is True
+        assert body["challenge_completed_enabled"] is True
+        assert body["challenge_reminder_enabled"] is True
+
+    async def test_update_settings(self):
+        """리마인더 off → 변경 반영."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            token = await _get_token(client)
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.patch(
+                "/api/v1/notifications/settings",
+                json={"challenge_reminder_enabled": False},
+                headers=headers,
+            )
+        assert response.status_code == status.HTTP_200_OK
+        body = response.json()
+        assert body["challenge_reminder_enabled"] is False
+        assert body["checkin_done_enabled"] is True
+
+    async def test_update_settings_partial(self):
+        """일부 항목만 변경 → 나머지는 유지."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            token = await _get_token(client)
+            headers = {"Authorization": f"Bearer {token}"}
+            await client.patch(
+                "/api/v1/notifications/settings",
+                json={"checkin_done_enabled": False, "challenge_completed_enabled": False},
+                headers=headers,
+            )
+            response = await client.get("/api/v1/notifications/settings", headers=headers)
+        assert response.status_code == status.HTTP_200_OK
+        body = response.json()
+        assert body["checkin_done_enabled"] is False
+        assert body["challenge_completed_enabled"] is False
+        assert body["challenge_joined_enabled"] is True
+
+    async def test_settings_unauthorized(self):
+        """토큰 없이 요청 → 401."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get("/api/v1/notifications/settings")
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED

@@ -4,7 +4,12 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import ORJSONResponse as Response
 
 from app.dependencies.security import get_request_user
-from app.dtos.notification import NotificationListResponse, NotificationResponse
+from app.dtos.notification import (
+    NotificationListResponse,
+    NotificationResponse,
+    NotificationSettingResponse,
+    NotificationSettingUpdateRequest,
+)
 from app.models.users import User
 from app.services.notification import NotificationService
 
@@ -55,4 +60,33 @@ async def mark_read(
     service: Annotated[NotificationService, Depends(NotificationService)],
 ) -> Response:
     result = await service.mark_read(notification_id=notification_id, user_id=user.id)
+    return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@notification_router.get(
+    "/settings",
+    response_model=NotificationSettingResponse,
+    status_code=status.HTTP_200_OK,
+    summary="알림 설정 조회",
+)
+async def get_notification_settings(
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[NotificationService, Depends(NotificationService)],
+) -> Response:
+    result = await service.get_settings(user_id=user.id)
+    return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@notification_router.patch(
+    "/settings",
+    response_model=NotificationSettingResponse,
+    status_code=status.HTTP_200_OK,
+    summary="알림 설정 변경",
+)
+async def update_notification_settings(
+    request: NotificationSettingUpdateRequest,
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[NotificationService, Depends(NotificationService)],
+) -> Response:
+    result = await service.update_settings(user_id=user.id, data=request)
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
