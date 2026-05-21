@@ -10,6 +10,7 @@ TORTOISE_APP_MODELS = [
     "app.models.lifestyle_survey",
     "app.models.challenge",
     "app.models.notification",
+    "app.models.diet_survey",
 ]
 
 TORTOISE_ORM = {

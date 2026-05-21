@@ -1,22 +1,70 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Soup, Coffee, Pizza, Leaf } from "lucide-react";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import { Tag } from "../components/Tag";
-import { TextInput } from "../components/TextInput";
 import { BtnPrimary } from "../components/BtnPrimary";
+import { dietSurveyApi } from "../api/dietSurvey";
+
+function StepperInput({ label, value, onChange, min = 0, max = 30 }: {
+  label: string; value: number; onChange: (v: number) => void; min?: number; max?: number;
+}) {
+  return (
+    <div className="flex items-center gap-[12px]">
+      <button
+        onClick={() => onChange(Math.max(min, value - 1))}
+        className="flex h-[36px] w-[36px] items-center justify-center rounded-sm border border-border-strong bg-bg text-lg"
+      >−</button>
+      <span className="w-[40px] text-center text-lg font-bold text-text-primary">{value}</span>
+      <button
+        onClick={() => onChange(Math.min(max, value + 1))}
+        className="flex h-[36px] w-[36px] items-center justify-center rounded-sm border border-border-strong bg-bg text-lg"
+      >+</button>
+      <span className="text-sm text-text-secondary">{label}</span>
+    </div>
+  );
+}
 
 export function DietSurveyPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [soupStew, setSoupStew] = useState(2);
+  const [sweetDrink, setSweetDrink] = useState(1);
+  const [friedFood, setFriedFood] = useState(2);
+  const [vegetables, setVegetables] = useState<boolean | null>(null);
+
+  async function handleSubmit() {
+    if (vegetables === null) {
+      setError("채소 섭취 여부를 선택해주세요."); return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      await dietSurveyApi.create({
+        surveyed_date: new Date().toISOString().slice(0, 10),
+        soup_stew_per_day: soupStew,
+        sweet_drink_per_day: sweetDrink,
+        fried_food_per_week: friedFood,
+        vegetables_every_meal: vegetables,
+      });
+      navigate("/dashboard");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "저장에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-bg-alt">
       <ScreenLabel label="09 · 식이 설문 (REQ-DATA-05)" />
       <TopNav />
       <main className="flex flex-1 flex-col items-center p-[32px]">
-        {/* 제목 */}
-        <h1 className="text-2xl font-bold text-text-primary">
-          간단 식이 설문
-        </h1>
+        <h1 className="text-2xl font-bold text-text-primary">간단 식이 설문</h1>
 
-        {/* 정보 박스 */}
         <div className="mt-[16px] w-[640px] rounded-sm bg-bg-alt border border-border p-[12px]">
           <p className="text-xs text-text-secondary">
             이 설문은 LLM 컨텍스트 전용이며 예측 모델에는 직접 사용되지 않습니다.
@@ -24,7 +72,10 @@ export function DietSurveyPage() {
           </p>
         </div>
 
-        {/* 질문 카드들 */}
+        {error && (
+          <div className="mt-4 w-[640px] rounded-sm bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>
+        )}
+
         <div className="mt-[24px] flex w-[640px] flex-col gap-[16px]">
           {/* Q1: 국·찌개 */}
           <div className="flex flex-col gap-[12px] rounded-md border border-border bg-bg p-[16px]">
@@ -35,7 +86,7 @@ export function DietSurveyPage() {
               </p>
               <Tag label="나트륨" />
             </div>
-            <TextInput placeholder="예: 2회" />
+            <StepperInput label="회" value={soupStew} onChange={setSoupStew} min={0} max={20} />
           </div>
 
           {/* Q2: 단 음료 */}
@@ -47,7 +98,7 @@ export function DietSurveyPage() {
               </p>
               <Tag label="당류" />
             </div>
-            <TextInput placeholder="예: 3잔" />
+            <StepperInput label="잔" value={sweetDrink} onChange={setSweetDrink} min={0} max={30} />
           </div>
 
           {/* Q3: 튀긴 음식 */}
@@ -59,7 +110,7 @@ export function DietSurveyPage() {
               </p>
               <Tag label="지방" />
             </div>
-            <TextInput placeholder="예: 주 3회" />
+            <StepperInput label="회" value={friedFood} onChange={setFriedFood} min={0} max={21} />
           </div>
 
           {/* Q4: 채소 */}
@@ -72,19 +123,32 @@ export function DietSurveyPage() {
               <Tag label="식이섬유" />
             </div>
             <div className="flex gap-[12px]">
-              <button className="flex-1 rounded-md border border-border-strong bg-bg px-[16px] py-[10px] text-sm text-text-primary">
+              <button
+                onClick={() => setVegetables(true)}
+                className={`flex-1 rounded-md border px-[16px] py-[10px] text-sm ${
+                  vegetables === true
+                    ? "border-accent bg-accent font-bold text-bg"
+                    : "border-border-strong bg-bg text-text-primary"
+                }`}
+              >
                 예
               </button>
-              <button className="flex-1 rounded-md border border-border-strong bg-bg px-[16px] py-[10px] text-sm text-text-primary">
+              <button
+                onClick={() => setVegetables(false)}
+                className={`flex-1 rounded-md border px-[16px] py-[10px] text-sm ${
+                  vegetables === false
+                    ? "border-accent bg-accent font-bold text-bg"
+                    : "border-border-strong bg-bg text-text-primary"
+                }`}
+              >
                 아니오
               </button>
             </div>
           </div>
         </div>
 
-        {/* 완료 버튼 */}
         <div className="mt-[24px] w-[640px]">
-          <BtnPrimary label="완료" height={48} className="w-full" />
+          <BtnPrimary label="완료" loading={loading} onClick={handleSubmit} height={48} className="w-full" />
         </div>
       </main>
     </div>

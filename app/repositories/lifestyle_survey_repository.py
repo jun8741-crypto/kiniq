@@ -47,3 +47,6 @@ class LifestyleSurveyRepository:
 
     async def get_by_id(self, survey_id: int, user_id: int) -> LifestyleSurvey | None:
         return await LifestyleSurvey.get_or_none(id=survey_id, user_id=user_id)
+
+    async def exists_by_user(self, user_id: int) -> bool:
+        return await LifestyleSurvey.filter(user_id=user_id).exists()
