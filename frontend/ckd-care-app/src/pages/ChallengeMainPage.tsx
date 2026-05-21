@@ -94,10 +94,16 @@ export function ChallengeMainPage() {
     }
   }
 
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
   const activeList = myList.filter((uc) => uc.status === "ACTIVE");
   const doneToday = activeList.filter(checkedToday).length;
   const pct = activeList.length > 0 ? Math.round((doneToday / activeList.length) * 100) : 0;
   const joinedIds = new Set(myList.map((uc) => uc.challenge_id));
+
+  function toggleExpand(id: number) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
 
   if (loading) return (
     <div className="flex min-h-screen flex-col bg-bg-alt">
@@ -148,23 +154,30 @@ export function ChallengeMainPage() {
               return (
                 <div
                   key={uc.id}
-                  className={`flex items-center gap-[16px] rounded-md border-l-4 ${BORDER_COLOR[c.category]} border border-border bg-bg p-[16px]`}
+                  className={`rounded-md border-l-4 ${BORDER_COLOR[c.category]} border border-border bg-bg`}
                 >
-                  <div className={`flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full ${done ? "bg-success" : "border-2 border-border-strong"}`}>
-                    {done && <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" /></svg>}
+                  <div className="flex items-center gap-[16px] p-[16px]">
+                    <div className={`flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full ${done ? "bg-success" : "border-2 border-border-strong"}`}>
+                      {done && <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" /></svg>}
+                    </div>
+                    <Icon size={20} className="shrink-0 text-text-secondary" />
+                    <div className="flex-1 cursor-pointer" onClick={() => toggleExpand(c.id)}>
+                      <p className="text-sm font-bold text-text-primary">{c.name}</p>
+                      <p className="text-xs text-text-muted">{CATEGORY_LABEL[c.category]} · {uc.total_checkins}/{c.duration_days}일 · 연속 {uc.streak_count}일</p>
+                    </div>
+                    <BtnPrimary
+                      label={done ? "완료" : "체크인"}
+                      disabled={done}
+                      loading={checkingIn === uc.id}
+                      onClick={() => { if (!done) handleCheckin(uc.id); }}
+                      className="min-w-[72px]"
+                    />
                   </div>
-                  <Icon size={20} className="shrink-0 text-text-secondary" />
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-text-primary">{c.name}</p>
-                    <p className="text-xs text-text-muted">{CATEGORY_LABEL[c.category]} · {uc.total_checkins}/{c.duration_days}일 · 연속 {uc.streak_count}일</p>
-                  </div>
-                  <BtnPrimary
-                    label={done ? "완료" : "체크인"}
-                    disabled={done}
-                    loading={checkingIn === uc.id}
-                    onClick={() => !done && handleCheckin(uc.id)}
-                    className="min-w-[72px]"
-                  />
+                  {expandedId === c.id && (
+                    <div className="border-t border-border px-[16px] py-[12px]">
+                      <p className="text-sm text-text-secondary">{c.description}</p>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -183,20 +196,27 @@ export function ChallengeMainPage() {
               {available.filter((c) => !joinedIds.has(c.id)).map((c) => {
                 const Icon = CATEGORY_ICON[c.category];
                 return (
-                  <div key={c.id} className="flex items-center gap-[16px] rounded-md border border-border bg-bg p-[16px]">
-                    <Icon size={20} className="shrink-0 text-text-secondary" />
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-text-primary">{c.name}</p>
-                      <p className="text-xs text-text-muted">{CATEGORY_LABEL[c.category]} · {c.duration_days}일</p>
+                  <div key={c.id} className="rounded-md border border-border bg-bg">
+                    <div className="flex items-center gap-[16px] p-[16px]">
+                      <Icon size={20} className="shrink-0 text-text-secondary" />
+                      <div className="flex-1 cursor-pointer" onClick={() => toggleExpand(c.id)}>
+                        <p className="text-sm font-bold text-text-primary">{c.name}</p>
+                        <p className="text-xs text-text-muted">{CATEGORY_LABEL[c.category]} · {c.duration_days}일</p>
+                      </div>
+                      <button
+                        onClick={() => handleJoin(c.id)}
+                        disabled={joining === c.id}
+                        className="flex items-center gap-1 rounded-md border border-accent px-[12px] py-[6px] text-sm text-accent disabled:opacity-50"
+                      >
+                        <Plus size={14} />
+                        {joining === c.id ? "참여 중..." : "참여"}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleJoin(c.id)}
-                      disabled={joining === c.id}
-                      className="flex items-center gap-1 rounded-md border border-accent px-[12px] py-[6px] text-sm text-accent disabled:opacity-50"
-                    >
-                      <Plus size={14} />
-                      {joining === c.id ? "참여 중..." : "참여"}
-                    </button>
+                    {expandedId === c.id && (
+                      <div className="border-t border-border px-[16px] py-[12px]">
+                        <p className="text-sm text-text-secondary">{c.description}</p>
+                      </div>
+                    )}
                   </div>
                 );
               })}

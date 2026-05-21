@@ -8,7 +8,7 @@ from fastapi.responses import RedirectResponse
 
 from app.core import config
 from app.core.config import Env
-from app.dtos.auth import LoginRequest, LoginResponse, SignUpRequest, TokenRefreshResponse
+from app.dtos.auth import ForgotPasswordRequest, ForgotPasswordResponse, LoginRequest, LoginResponse, SignUpRequest, TokenRefreshResponse
 from app.repositories.user_repository import UserRepository
 from app.services.auth import AuthService
 from app.services.jwt import JwtService
@@ -198,3 +198,18 @@ async def token_refresh(
     return Response(
         content=TokenRefreshResponse(access_token=str(access_token)).model_dump(), status_code=status.HTTP_200_OK
     )
+
+
+@auth_router.post(
+    "/forgot-password",
+    response_model=ForgotPasswordResponse,
+    status_code=status.HTTP_200_OK,
+    summary="임시 비밀번호 발급",
+    description="이메일로 임시 비밀번호를 발급합니다. 발급 즉시 기존 비밀번호는 무효화됩니다.",
+)
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    auth_service: Annotated[AuthService, Depends(AuthService)],
+) -> Response:
+    temp_pw = await auth_service.issue_temp_password(email=str(request.email))
+    return Response(content=ForgotPasswordResponse(temp_password=temp_pw).model_dump(), status_code=status.HTTP_200_OK)

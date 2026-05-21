@@ -36,4 +36,5 @@ export const authApi = {
   changePassword: (body: { current_password: string; new_password: string }) =>
     api.patch<void>("/users/me/password", body),
   deleteAccount: () => api.delete<void>("/users/me"),
+  forgotPassword: (email: string) => api.post<{ temp_password: string }>("/auth/forgot-password", { email }),
 };

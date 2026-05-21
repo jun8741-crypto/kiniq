@@ -23,6 +23,7 @@ export function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
+  const [tempPassword, setTempPassword] = useState("");
 
   async function handleLogin() {
     if (!email || !password) { setError("이메일과 비밀번호를 입력하세요."); return; }
@@ -39,17 +40,18 @@ export function LoginPage() {
     }
   }
 
-  function handleForgotSubmit() {
+  async function handleForgotSubmit() {
     if (!forgotEmail) return;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
-      return;
-    }
     setForgotLoading(true);
-    // TODO: POST /auth/forgot-password API 연동
-    setTimeout(() => {
-      setForgotLoading(false);
+    try {
+      const res = await authApi.forgotPassword(forgotEmail);
+      setTempPassword(res.temp_password);
       setForgotSent(true);
-    }, 800);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "임시 비밀번호 발급에 실패했습니다.");
+    } finally {
+      setForgotLoading(false);
+    }
   }
 
   return (
@@ -78,9 +80,10 @@ export function LoginPage() {
               </div>
 
               {forgotSent ? (
-                <div className="rounded-sm bg-success/10 px-[12px] py-[10px] text-sm text-success">
-                  임시 비밀번호 발송 기능은 현재 준비 중입니다.<br />
-                  불편하신 경우 고객센터(support@ckdcare.example)로 문의해 주세요.
+                <div className="flex flex-col gap-[8px] rounded-sm bg-success/10 px-[12px] py-[10px]">
+                  <p className="text-sm text-success font-bold">임시 비밀번호가 발급됐습니다.</p>
+                  <p className="text-sm text-success">임시 비밀번호: <span className="font-mono font-bold">{tempPassword}</span></p>
+                  <p className="text-xs text-text-secondary">로그인 후 마이페이지에서 비밀번호를 변경해주세요.</p>
                 </div>
               ) : (
                 <>
