@@ -1,16 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TopNav } from "../components/TopNav";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { BtnPrimary } from "../components/BtnPrimary";
-import { TextInput } from "../components/TextInput";
+import { notificationApi, type NotificationSetting } from "../api/notification";
 
-function Toggle({
-  enabled,
-  onChange,
-}: {
-  enabled: boolean;
-  onChange: () => void;
-}) {
+function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void }) {
   return (
     <button
       onClick={onChange}
@@ -28,27 +22,66 @@ function ToggleItem({
   subtitle,
   enabled,
   onToggle,
+  disabled = false,
 }: {
   title: string;
   subtitle: string;
   enabled: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-sm bg-bg-alt p-[12px]">
+    <div className={`flex items-center justify-between rounded-sm bg-bg-alt p-[12px] ${disabled ? "opacity-40" : ""}`}>
       <div className="flex flex-col gap-[2px]">
         <p className="text-sm font-bold text-text-primary">{title}</p>
         <p className="text-xs text-text-secondary">{subtitle}</p>
       </div>
-      <Toggle enabled={enabled} onChange={onToggle} />
+      <Toggle enabled={enabled} onChange={disabled ? () => {} : onToggle} />
     </div>
   );
 }
 
+const DEFAULT_SETTINGS: NotificationSetting = {
+  challenge_joined_enabled: true,
+  checkin_done_enabled: true,
+  challenge_completed_enabled: true,
+  challenge_reminder_enabled: true,
+};
+
 export function NotificationSettingsPage() {
-  const [allNoti, setAllNoti] = useState(true);
-  const [checkupReminder, setCheckupReminder] = useState(true);
-  const [quiz, setQuiz] = useState(false);
+  const [settings, setSettings] = useState<NotificationSetting>(DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    notificationApi
+      .getSettings()
+      .then(setSettings)
+      .catch(() => setError("설정을 불러오지 못했습니다."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  function toggle(key: keyof NotificationSetting) {
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+    setSaved(false);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setError("");
+    try {
+      const updated = await notificationApi.updateSettings(settings);
+      setSettings(updated);
+      setSaved(true);
+    } catch {
+      setError("저장에 실패했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-alt">
@@ -59,38 +92,59 @@ export function NotificationSettingsPage() {
         <div className="flex w-[600px] flex-col gap-[16px] rounded-md border border-border bg-bg p-[32px]">
           <h1 className="text-xl font-bold text-text-primary">알림 설정</h1>
 
-          <ToggleItem
-            title="알림 수신"
-            subtitle="모든 알림 ON/OFF"
-            enabled={allNoti}
-            onToggle={() => setAllNoti(!allNoti)}
+          {loading && <p className="text-sm text-text-secondary">불러오는 중...</p>}
+
+          {error && (
+            <div className="rounded-sm bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>
+          )}
+
+          {saved && (
+            <div className="rounded-sm bg-success/10 px-3 py-2 text-sm text-success">저장됐습니다.</div>
+          )}
+
+          {!loading && (
+            <>
+              <ToggleItem
+                title="챌린지 참여 알림"
+                subtitle="새 챌린지를 시작할 때 알림을 받습니다."
+                enabled={settings.challenge_joined_enabled}
+                onToggle={() => toggle("challenge_joined_enabled")}
+              />
+              <ToggleItem
+                title="체크인 완료 알림"
+                subtitle="챌린지 체크인 후 연속 달성 현황을 알립니다."
+                enabled={settings.checkin_done_enabled}
+                onToggle={() => toggle("checkin_done_enabled")}
+              />
+              <ToggleItem
+                title="챌린지 완료 알림"
+                subtitle="챌린지를 완주했을 때 알림을 받습니다."
+                enabled={settings.challenge_completed_enabled}
+                onToggle={() => toggle("challenge_completed_enabled")}
+              />
+              <ToggleItem
+                title="챌린지 리마인더"
+                subtitle="오늘 체크인을 하지 않은 경우 저녁에 알립니다."
+                enabled={settings.challenge_reminder_enabled}
+                onToggle={() => toggle("challenge_reminder_enabled")}
+              />
+              <ToggleItem
+                title="일일 퀴즈 (P2)"
+                subtitle="매일 아침 건강 O/X 퀴즈 1문항 — 추후 지원"
+                enabled={false}
+                onToggle={() => {}}
+                disabled
+              />
+            </>
+          )}
+
+          <BtnPrimary
+            label="저장"
+            className="w-full"
+            height={48}
+            loading={saving}
+            onClick={handleSave}
           />
-
-          <div className="flex flex-col gap-[8px] rounded-sm bg-bg-alt p-[12px]">
-            <p className="text-sm font-bold text-text-primary">
-              일일 체크인 알림 시간
-            </p>
-            <p className="text-xs text-text-secondary">
-              '왜 안 했어요?' 표현은 사용하지 않습니다.
-            </p>
-            <TextInput label="시간" placeholder="21:00" />
-          </div>
-
-          <ToggleItem
-            title="검진 리마인더"
-            subtitle="국가건강검진 주기 기준 연간 1~2회"
-            enabled={checkupReminder}
-            onToggle={() => setCheckupReminder(!checkupReminder)}
-          />
-
-          <ToggleItem
-            title="일일 퀴즈 (P2)"
-            subtitle="매일 아침 O/X 퀴즈 1문항"
-            enabled={quiz}
-            onToggle={() => setQuiz(!quiz)}
-          />
-
-          <BtnPrimary label="저장" className="w-full" height={48} />
         </div>
       </main>
     </div>

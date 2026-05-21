@@ -23,6 +23,13 @@ export interface NotificationListResponse {
   items: Notification[];
 }
 
+export interface NotificationSetting {
+  challenge_joined_enabled: boolean;
+  checkin_done_enabled: boolean;
+  challenge_completed_enabled: boolean;
+  challenge_reminder_enabled: boolean;
+}
+
 export const notificationApi = {
   list: (unread_only = false, limit = 20, offset = 0) =>
     api.get<NotificationListResponse>(
@@ -32,4 +39,8 @@ export const notificationApi = {
     api.patch<Notification>(`/notifications/${id}/read`, {}),
   markAllRead: () =>
     api.patch<{ updated: number }>("/notifications/read-all", {}),
+  getSettings: () =>
+    api.get<NotificationSetting>("/notifications/settings"),
+  updateSettings: (body: Partial<NotificationSetting>) =>
+    api.patch<NotificationSetting>("/notifications/settings", body),
 };
