@@ -62,7 +62,7 @@ export function LoginPage() {
           <div className="flex flex-col items-center gap-[8px]">
             <h1 className="text-2xl font-bold text-text-primary">CKD CARE</h1>
             <p className="text-sm text-text-secondary text-center">
-              신장 건강 챌린지에 다시 오신 것을 환영합니다
+              신장 건강 관리 챌린지에 오신 것을 환영합니다
             </p>
           </div>
 
