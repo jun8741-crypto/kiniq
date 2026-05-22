@@ -82,7 +82,9 @@ class AuthService:
             # 계정 존재 여부를 노출하지 않기 위해 동일한 응답
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="등록된 이메일이 없습니다.")
         if user.hashed_password.startswith("SOCIAL:"):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="소셜 로그인 계정은 임시 비밀번호를 사용할 수 없습니다.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="소셜 로그인 계정은 임시 비밀번호를 사용할 수 없습니다."
+            )
         alphabet = string.ascii_letters + string.digits + "!@#$"
         temp_pw = "".join(secrets.choice(alphabet) for _ in range(12))
         await self.user_repo.update_instance(user=user, data={"hashed_password": hash_password(temp_pw)})

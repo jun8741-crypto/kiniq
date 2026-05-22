@@ -14,10 +14,10 @@ _GLUCOSE_CRISIS = 400  # mg/dL — 즉각 처치 필요 수준
 _EGFR_G5_THRESHOLD = 15  # mL/min/1.73m² — 신부전 단계
 
 # 그룹 분류 임계값 (설계서 § 4)
-_G1_EGFR_THRESHOLD = 60.0       # eGFR < 60 → G1
-_G2_SBP_THRESHOLD = 130         # SBP ≥ 130 → G2
-_G2_DBP_THRESHOLD = 80          # DBP ≥ 80  → G2
-_G2_GLUCOSE_THRESHOLD = 100.0   # 공복혈당 ≥ 100 → G2
+_G1_EGFR_THRESHOLD = 60.0  # eGFR < 60 → G1
+_G2_SBP_THRESHOLD = 130  # SBP ≥ 130 → G2
+_G2_DBP_THRESHOLD = 80  # DBP ≥ 80  → G2
+_G2_GLUCOSE_THRESHOLD = 100.0  # 공복혈당 ≥ 100 → G2
 
 
 class HealthCheckService:

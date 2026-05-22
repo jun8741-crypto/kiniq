@@ -76,7 +76,9 @@ class NotificationService:
         setting = await self._setting_repo.get_or_create(user_id)
         return NotificationSettingResponse.model_validate(setting)
 
-    async def update_settings(self, user_id: int, data: NotificationSettingUpdateRequest) -> NotificationSettingResponse:
+    async def update_settings(
+        self, user_id: int, data: NotificationSettingUpdateRequest
+    ) -> NotificationSettingResponse:
         updates = data.model_dump(exclude_none=True)
         setting = await self._setting_repo.update(user_id, updates)
         return NotificationSettingResponse.model_validate(setting)

@@ -8,7 +8,14 @@ from fastapi.responses import RedirectResponse
 
 from app.core import config
 from app.core.config import Env
-from app.dtos.auth import ForgotPasswordRequest, ForgotPasswordResponse, LoginRequest, LoginResponse, SignUpRequest, TokenRefreshResponse
+from app.dtos.auth import (
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    LoginRequest,
+    LoginResponse,
+    SignUpRequest,
+    TokenRefreshResponse,
+)
 from app.repositories.user_repository import UserRepository
 from app.services.auth import AuthService
 from app.services.jwt import JwtService
@@ -61,16 +68,19 @@ def _oauth_error_redirect(msg: str) -> RedirectResponse:
 # Kakao OAuth
 # ────────────────────────────────────────────────
 
+
 @auth_router.get("/kakao/login", summary="카카오 로그인 시작", tags=["social-auth"])
 async def kakao_login() -> RedirectResponse:
     if not config.KAKAO_REST_API_KEY:
         raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="카카오 앱 키가 설정되지 않았습니다.")
-    params = urllib.parse.urlencode({
-        "client_id": config.KAKAO_REST_API_KEY,
-        "redirect_uri": config.KAKAO_REDIRECT_URI,
-        "response_type": "code",
-        "scope": "account_email,profile_nickname",
-    })
+    params = urllib.parse.urlencode(
+        {
+            "client_id": config.KAKAO_REST_API_KEY,
+            "redirect_uri": config.KAKAO_REDIRECT_URI,
+            "response_type": "code",
+            "scope": "account_email,profile_nickname",
+        }
+    )
     return RedirectResponse(f"https://kauth.kakao.com/oauth/authorize?{params}")
 
 
@@ -117,26 +127,29 @@ async def kakao_callback(code: str | None = None, error: str | None = None) -> R
     await user_repo.update_last_login(user.id)
     access_token = jwt_service.create_access_token(user)
 
-    return RedirectResponse(
-        f"{config.FRONTEND_URL}/oauth/callback?token={access_token}"
-    )
+    return RedirectResponse(f"{config.FRONTEND_URL}/oauth/callback?token={access_token}")
 
 
 # ────────────────────────────────────────────────
 # Google OAuth
 # ────────────────────────────────────────────────
 
+
 @auth_router.get("/google/login", summary="구글 로그인 시작", tags=["social-auth"])
 async def google_login() -> RedirectResponse:
     if not config.GOOGLE_CLIENT_ID:
-        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Google 클라이언트 ID가 설정되지 않았습니다.")
-    params = urllib.parse.urlencode({
-        "client_id": config.GOOGLE_CLIENT_ID,
-        "redirect_uri": config.GOOGLE_REDIRECT_URI,
-        "response_type": "code",
-        "scope": "openid email profile",
-        "access_type": "online",
-    })
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Google 클라이언트 ID가 설정되지 않았습니다."
+        )
+    params = urllib.parse.urlencode(
+        {
+            "client_id": config.GOOGLE_CLIENT_ID,
+            "redirect_uri": config.GOOGLE_REDIRECT_URI,
+            "response_type": "code",
+            "scope": "openid email profile",
+            "access_type": "online",
+        }
+    )
     return RedirectResponse(f"https://accounts.google.com/o/oauth2/v2/auth?{params}")
 
 
@@ -182,9 +195,7 @@ async def google_callback(code: str | None = None, error: str | None = None) -> 
     await user_repo.update_last_login(user.id)
     access_token = jwt_service.create_access_token(user)
 
-    return RedirectResponse(
-        f"{config.FRONTEND_URL}/oauth/callback?token={access_token}"
-    )
+    return RedirectResponse(f"{config.FRONTEND_URL}/oauth/callback?token={access_token}")
 
 
 @auth_router.get("/token/refresh", response_model=TokenRefreshResponse, status_code=status.HTTP_200_OK)

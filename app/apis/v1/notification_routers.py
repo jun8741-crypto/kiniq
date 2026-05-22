@@ -29,9 +29,7 @@ async def list_notifications(
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> Response:
-    result = await service.get_notifications(
-        user_id=user.id, unread_only=unread_only, limit=limit, offset=offset
-    )
+    result = await service.get_notifications(user_id=user.id, unread_only=unread_only, limit=limit, offset=offset)
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
 
 

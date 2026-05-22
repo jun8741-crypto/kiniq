@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.dtos.dashboard import (
     ChallengeStats,
@@ -49,7 +49,7 @@ class DashboardService:
             latest_health=latest_health,
             challenge_stats=ChallengeStats(**challenge_stats),
             latest_lifestyle=latest_lifestyle,
-            generated_at=datetime.now(tz=timezone.utc),
+            generated_at=datetime.now(tz=UTC),
         )
 
     async def get_egfr_trend(self, user_id: int, limit: int = 12) -> EgfrTrendResponse:
