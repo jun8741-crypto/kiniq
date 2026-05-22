@@ -1,8 +1,8 @@
 # API 명세서 v0.8
 
-> 최종 갱신: 2026-05-20  
-> Base URL: `https://{host}/api/v1`  
-> 인증: Bearer JWT (`Authorization: Bearer <access_token>`)  
+> 최종 갱신: 2026-05-20
+> Base URL: `https://{host}/api/v1`
+> 인증: Bearer JWT (`Authorization: Bearer <access_token>`)
 > 응답 형식: `application/json`
 
 ### 구현 상태 범례
@@ -79,7 +79,7 @@
 |----------|------|------|
 | token | string | 이메일 인증 토큰 (24시간 유효) |
 
-**응답 `200`** — 인증 성공  
+**응답 `200`** — 인증 성공
 **에러** `400` — 만료·유효하지 않은 토큰
 
 ---
@@ -87,7 +87,7 @@
 ### 🔲 POST `/auth/verify-email/resend` — 인증 메일 재발송 (P0)
 > REQ-AUTH-003 — 1시간 3회 제한
 
-**응답 `200`**  
+**응답 `200`**
 **에러** `429` — Rate Limit 초과
 
 ---
@@ -104,10 +104,10 @@
 ```json
 { "access_token": "<JWT>" }
 ```
-> `refresh_token`은 HttpOnly Cookie로 설정됨.  
+> `refresh_token`은 HttpOnly Cookie로 설정됨.
 > Access Token 유효기간: 60분 / Refresh Token: 14일
 
-**에러** `400` — 이메일 또는 비밀번호 오류  
+**에러** `400` — 이메일 또는 비밀번호 오류
 **에러** `423` — 비활성화 계정
 
 ---
@@ -225,7 +225,7 @@
 { "message": "비밀번호가 변경되었습니다." }
 ```
 
-**에러** `400` — 현재 비밀번호 불일치  
+**에러** `400` — 현재 비밀번호 불일치
 **에러** `401` — 인증 필요
 
 ---
@@ -287,8 +287,8 @@
 }
 ```
 
-> `egfr_estimated`, `ckd_stage` — 크레아티닌 입력 시 CKD-EPI 2021 공식으로 즉시 계산.  
-> `ckd_risk_score` — AI 워커 비동기 처리 후 업데이트 (초기값 null).  
+> `egfr_estimated`, `ckd_stage` — 크레아티닌 입력 시 CKD-EPI 2021 공식으로 즉시 계산.
+> `ckd_risk_score` — AI 워커 비동기 처리 후 업데이트 (초기값 null).
 > `safety_warning` — 위험 수치 감지 시 안내 문구 반환 (SBP≥180 또는 혈당≥400 또는 eGFR<15).
 
 | ckd_stage | eGFR 범위 |
@@ -322,7 +322,7 @@
 ### ✅ GET `/health-checks/{id}` — 검진 결과 단건 조회
 인증 필요
 
-**응답 `200`** — HealthCheckResponse  
+**응답 `200`** — HealthCheckResponse
 **에러** `404` — 존재하지 않거나 타인 데이터
 
 ---
@@ -403,7 +403,7 @@
 ### ✅ GET `/lifestyle-surveys/{id}` — 설문 단건 조회
 인증 필요
 
-**응답 `200`** — LifestyleSurveyResponse  
+**응답 `200`** — LifestyleSurveyResponse
 **에러** `404`
 
 ---
@@ -597,7 +597,7 @@
 }
 ```
 
-**category**: `HYDRATION` \| `EXERCISE` \| `DIET` \| `SLEEP` \| `STRESS`  
+**category**: `HYDRATION` \| `EXERCISE` \| `DIET` \| `SLEEP` \| `STRESS`
 **stage**: `1`=입문(7일) \| `2`=초보(14일) \| `3`=중급(21일) \| `4`=숙련(30일)
 
 ---
