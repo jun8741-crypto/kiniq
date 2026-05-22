@@ -84,7 +84,21 @@ uv sync --group app   # FastAPI 서버만
 uv sync --group ai    # AI Worker만
 ```
 
-### 3. 전체 스택 실행 (Docker)
+### 3. pre-commit 훅 설치 (최초 1회)
+
+> 커밋 직전에 ruff lint·format·공백 검사를 자동 실행해 CI 실패를 사전에 막아줍니다.
+
+```bash
+uv run pre-commit install
+```
+
+설치 후 `git commit` 할 때마다 자동으로 검사가 돌아갑니다. 전체 파일을 한 번에 검사하려면:
+
+```bash
+uv run pre-commit run --all-files
+```
+
+### 4. 전체 스택 실행 (Docker)
 
 ```bash
 docker-compose up -d --build
@@ -94,7 +108,7 @@ docker-compose up -d --build
 - **API Swagger**: http://localhost/api/docs
 - **Langfuse UI**: http://localhost:3000
 
-### 4. 개별 실행 (개발용)
+### 5. 개별 실행 (개발용)
 
 ```bash
 # FastAPI 서버 (포트 8001 — 부트캠프 환경 충돌 방지)
@@ -109,9 +123,10 @@ uv run python -m ai_worker.main
 ## 🧪 품질 관리
 
 ```bash
-pytest                          # 테스트
-ruff check . && ruff format .   # 린트·포맷
-mypy app/                       # 타입 체크
+pytest                                    # 테스트
+uv run pre-commit run --all-files         # 린트·포맷·공백 일괄 검사 (커밋 전 권장)
+ruff check . && ruff format .             # 린트·포맷만
+mypy app/                                 # 타입 체크
 ```
 
 또는 스크립트:
