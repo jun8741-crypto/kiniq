@@ -95,6 +95,7 @@ export function ChallengeMainPage() {
   }
 
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<ChallengeCategory | "ALL">("ALL");
 
   const activeList = myList.filter((uc) => uc.status === "ACTIVE");
   const doneToday = activeList.filter(checkedToday).length;
@@ -192,8 +193,26 @@ export function ChallengeMainPage() {
         {available.filter((c) => !joinedIds.has(c.id)).length > 0 && (
           <div className="mt-[32px]">
             <h2 className="mb-[12px] text-lg font-bold text-text-primary">참여 가능한 챌린지</h2>
+
+            {/* 카테고리 탭 */}
+            <div className="mb-[12px] flex gap-[8px] overflow-x-auto pb-[4px]">
+              {(["ALL", "HYDRATION", "EXERCISE", "DIET", "SLEEP", "STRESS"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`shrink-0 rounded-full px-[14px] py-[6px] text-sm font-medium transition-colors ${
+                    activeTab === tab
+                      ? "bg-accent text-white"
+                      : "border border-border bg-bg text-text-secondary hover:border-accent hover:text-accent"
+                  }`}
+                >
+                  {tab === "ALL" ? "전체" : CATEGORY_LABEL[tab]}
+                </button>
+              ))}
+            </div>
+
             <div className="flex flex-col gap-[8px]">
-              {available.filter((c) => !joinedIds.has(c.id)).map((c) => {
+              {available.filter((c) => !joinedIds.has(c.id) && (activeTab === "ALL" || c.category === activeTab)).map((c) => {
                 const Icon = CATEGORY_ICON[c.category];
                 return (
                   <div key={c.id} className="rounded-md border border-border bg-bg">
