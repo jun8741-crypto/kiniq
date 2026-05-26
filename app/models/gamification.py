@@ -25,6 +25,14 @@ class ItemCode(StrEnum):
     SKIN_L_GOLD = "SKIN_L_GOLD"
 
 
+class CharacterSpecies(StrEnum):
+    """부화 시 추첨되는 캐릭터 종 (각 33.33%, 전설 제외 v1.0)."""
+
+    TURTLE = "TURTLE"  # 🐢 고결한 파랑
+    PENGUIN = "PENGUIN"  # 🐧 호기심 많은 차마
+    SQUIRREL = "SQUIRREL"  # 🐿️ 용맹한 찌이
+
+
 class PointTransaction(models.Model):
     id = fields.BigIntField(primary_key=True)
     user = fields.ForeignKeyField("models.User", related_name="point_transactions")
@@ -44,7 +52,11 @@ class UserEgg(models.Model):
     egg_no = fields.IntField(description="사용자 기준 몇 번째 알 (1부터 시작)")
     progress_checkins = fields.IntField(default=0, description="누적 체크인 수 (0~100)")
     current_stage = fields.IntField(default=1, description="1=0~25%, 2=25~50%, 3=50~75%, 4=75~100%, 5=부화")
-    is_legendary = fields.BooleanField(null=True, description="부화 시 5% 추첨 결과. 진행 중엔 NULL")
+    is_legendary = fields.BooleanField(null=True, description="v1.0 비활성 (전설 제거). 항상 False, 향후 부활 여지")
+    species = fields.CharEnumField(
+        enum_type=CharacterSpecies, null=True, description="부화 시 추첨된 종. 진행 중엔 NULL"
+    )
+    character_name = fields.CharField(max_length=30, null=True, description="자동 생성 + 사용자 수정 가능")
     goal_70_alerted = fields.BooleanField(default=False)
     goal_90_alerted = fields.BooleanField(default=False)
     stage_25_bonus_paid = fields.BooleanField(default=False)

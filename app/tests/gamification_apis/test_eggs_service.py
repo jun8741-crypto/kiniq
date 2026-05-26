@@ -4,7 +4,6 @@
 """
 
 from datetime import date
-from unittest.mock import patch
 
 from tortoise.contrib.test import TestCase
 
@@ -83,24 +82,19 @@ class TestEggProgress(TestCase):
         # 99까지 진행
         for _ in range(99):
             await es.progress_and_check(user.id, challenge_id=1)
-        # 100번째 → 부화
-        with patch("secrets.SystemRandom.random", return_value=0.5):  # 일반 알 (5% 미달)
-            update = await es.progress_and_check(user.id, challenge_id=1)
+        # 100번째 → 부화. 전설 v1.0 제거, 3종 중 1종 추첨됨.
+        update = await es.progress_and_check(user.id, challenge_id=1)
         assert update.hatched is True
         assert update.is_legendary is False
+        assert update.species is not None  # 3종 중 하나 추첨
+        assert update.character_name  # 이름 자동 생성
         assert update.new_egg_no == 2
-        # 첫 알은 hatched_at 채워짐, 새 알은 진행 중
+        # 첫 알은 hatched_at·species 채워짐, 새 알은 진행 중
         first_egg = await UserEgg.filter(user_id=user.id, egg_no=1).first()
         assert first_egg.hatched_at is not None
         assert first_egg.current_stage == 5
+        assert first_egg.species is not None
+        assert first_egg.character_name is not None
         second_egg = await UserEgg.filter(user_id=user.id, egg_no=2).first()
         assert second_egg.progress_checkins == 0
-
-    async def test_legendary_5_percent_when_lucky(self) -> None:
-        user = await _make_user()
-        es = EggService()
-        for _ in range(99):
-            await es.progress_and_check(user.id, challenge_id=1)
-        with patch("secrets.SystemRandom.random", return_value=0.03):  # 5% 미만 → 전설
-            update = await es.progress_and_check(user.id, challenge_id=1)
-        assert update.is_legendary is True
+        assert second_egg.species is None  # 부화 전이라 None

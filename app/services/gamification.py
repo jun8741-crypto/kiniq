@@ -38,10 +38,12 @@ class GamificationService:
             egg_no=egg.egg_no,
             progress_checkins=egg.progress_checkins,
             current_stage=egg.current_stage,
-            progress_percent=egg.progress_checkins,  # 100회 = 100% 이므로 동일
+            progress_percent=egg.progress_checkins,
             goal_70_alerted=egg.goal_70_alerted,
             goal_90_alerted=egg.goal_90_alerted,
             is_legendary=egg.is_legendary,
+            species=egg.species,
+            character_name=egg.character_name,
             started_at=egg.started_at,
         )
 
@@ -55,11 +57,37 @@ class GamificationService:
                 EggHistoryItem(
                     egg_no=e.egg_no,
                     is_legendary=e.is_legendary,
+                    species=e.species,
+                    character_name=e.character_name,
                     started_at=e.started_at,
                     hatched_at=e.hatched_at,
                 )
                 for e in items
             ],
+        )
+
+    async def rename_character(self, user_id: int, egg_id: int, new_name: str) -> EggHistoryItem:
+        """부화된 알의 캐릭터 이름 변경."""
+        from app.models.gamification import UserEgg
+
+        egg = await UserEgg.filter(id=egg_id, user_id=user_id).first()
+        if egg is None:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="캐릭터를 찾을 수 없습니다.")
+        if egg.hatched_at is None:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="아직 부화하지 않은 알입니다.")
+        egg.character_name = new_name.strip()
+        await egg.save()
+        return EggHistoryItem(
+            egg_no=egg.egg_no,
+            is_legendary=egg.is_legendary,
+            species=egg.species,
+            character_name=egg.character_name,
+            started_at=egg.started_at,
+            hatched_at=egg.hatched_at,
         )
 
     async def get_charge_mode(self, user_id: int, today: date) -> ChargeModeResponse:

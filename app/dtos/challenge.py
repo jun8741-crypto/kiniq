@@ -61,6 +61,8 @@ class EggUpdateResponse(BaseSerializerModel):
     stage_milestone: int
     hatched: bool
     is_legendary: bool | None
+    species: str | None
+    character_name: str | None
     new_egg_no: int | None
 
 

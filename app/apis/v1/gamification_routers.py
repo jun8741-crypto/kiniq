@@ -6,7 +6,9 @@ from fastapi.responses import ORJSONResponse as Response
 
 from app.dependencies.security import get_request_user
 from app.dtos.gamification import (
+    CharacterRenameRequest,
     ChargeModeResponse,
+    EggHistoryItem,
     EggHistoryResponse,
     EggResponse,
     InventoryResponse,
@@ -86,6 +88,22 @@ async def exit_charge_mode(
     service: Annotated[GamificationService, Depends(GamificationService)],
 ) -> Response:
     result = await service.exit_charge_mode(user.id)
+    return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@gamification_router.patch(
+    "/eggs/{egg_id}/name",
+    response_model=EggHistoryItem,
+    status_code=status.HTTP_200_OK,
+    summary="부화된 캐릭터 이름 변경",
+)
+async def rename_character(
+    egg_id: int,
+    request: CharacterRenameRequest,
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[GamificationService, Depends(GamificationService)],
+) -> Response:
+    result = await service.rename_character(user.id, egg_id, request.name)
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
 
 

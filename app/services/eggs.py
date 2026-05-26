@@ -1,19 +1,19 @@
 """알 부화 시스템 서비스.
 
-명세: docs/gamification-spec-v1.md §1-3
+명세: docs/gamification-spec-v1.md §1-3 (전설 5% v1.0 제거, 3종 33.33%로 대체)
 - 부화 목표: 누적 체크인 100회 (= 100% 진행률)
 - 5단계 임계값: 25 / 50 / 75 / 100 체크인
-- 부화 시 95%/5% 전설 추첨 (random.random() < 0.05)
+- 부화 시 종 추첨 (TURTLE/PENGUIN/SQUIRREL 33.33%) + 이름 자동 생성
 - Goal Gradient 알림: 70%·90% 첫 도달 시 1회씩
 - 스테이지 보너스: 25% +100 / 50% +200 / 75% +350 / 100% +600
 - 부화 후 새 알 자동 생성 (egg_no+1, progress=0)
 """
 
-import secrets
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
-from app.models.gamification import PointReason
+from app.core.utils.character_names import generate_name, pick_species
+from app.models.gamification import CharacterSpecies, PointReason
 from app.models.notification import NotificationType
 from app.repositories.gamification_repository import EggRepository, PointRepository
 from app.repositories.notification_repository import NotificationRepository
@@ -21,7 +21,6 @@ from app.repositories.notification_repository import NotificationRepository
 GOAL_CHECKINS = 100
 STAGE_THRESHOLDS: dict[int, int] = {25: 100, 50: 200, 75: 350, 100: 600}
 GOAL_GRADIENT_ALERTS = [70, 90]
-LEGENDARY_PROBABILITY = 0.05
 
 
 @dataclass
@@ -34,6 +33,8 @@ class EggUpdate:
     stage_milestone: int = 0
     hatched: bool = False
     is_legendary: bool | None = None
+    species: CharacterSpecies | None = None
+    character_name: str | None = None
     new_egg_no: int | None = None
     extras: dict = field(default_factory=dict)
 
@@ -102,31 +103,35 @@ class EggService:
 
         # 100% 도달 → 부화 처리
         if egg.progress_checkins >= GOAL_CHECKINS and egg.hatched_at is None:
-            is_legendary = secrets.SystemRandom().random() < LEGENDARY_PROBABILITY
             now = datetime.now(UTC)
-            egg.is_legendary = is_legendary
+            species = pick_species()
+            character_name = generate_name(species)
+            egg.is_legendary = False  # v1.0 전설 비활성
+            egg.species = species
+            egg.character_name = character_name
             egg.hatched_at = now
             egg.current_stage = 5
             await egg.save()
 
-            title = "전설의 알이 부화했어요!" if is_legendary else "알이 부화했어요!"
-            message = (
-                "5% 확률의 전설 알입니다! 특별한 캐릭터가 함께해요."
-                if is_legendary
-                else "축하합니다! 새 알이 자동으로 시작됩니다."
-            )
+            species_label = {
+                CharacterSpecies.TURTLE: "🐢 거북이",
+                CharacterSpecies.PENGUIN: "🐧 펭귄",
+                CharacterSpecies.SQUIRREL: "🐿️ 다람쥐",
+            }[species]
             await self._notif.create(
                 user_id=user_id,
                 type=NotificationType.EGG_HATCHED,
-                title=title,
-                message=message,
+                title=f"{species_label} 부화!",
+                message=f"'{character_name}' 가 태어났어요. 컬렉션에서 만나보세요.",
                 related_id=egg.id,
             )
 
             # 새 알 자동 시작
             new_egg = await self._eggs.get_or_create_current(user_id)
             update.hatched = True
-            update.is_legendary = is_legendary
+            update.is_legendary = False
+            update.species = species
+            update.character_name = character_name
             update.new_egg_no = new_egg.egg_no
         else:
             await egg.save()

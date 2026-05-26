@@ -158,6 +158,8 @@ class ChallengeService:
                 stage_milestone=egg_update.stage_milestone,
                 hatched=egg_update.hatched,
                 is_legendary=egg_update.is_legendary,
+                species=egg_update.species.value if egg_update.species else None,
+                character_name=egg_update.character_name,
                 new_egg_no=egg_update.new_egg_no,
             ),
         )

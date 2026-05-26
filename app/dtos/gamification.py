@@ -1,7 +1,9 @@
 from datetime import datetime
 
+from pydantic import BaseModel, Field
+
 from app.dtos.base import BaseSerializerModel
-from app.models.gamification import ItemCode
+from app.models.gamification import CharacterSpecies, ItemCode
 
 
 class EggResponse(BaseSerializerModel):
@@ -12,14 +14,22 @@ class EggResponse(BaseSerializerModel):
     goal_70_alerted: bool
     goal_90_alerted: bool
     is_legendary: bool | None
+    species: CharacterSpecies | None
+    character_name: str | None
     started_at: datetime
 
 
 class EggHistoryItem(BaseSerializerModel):
     egg_no: int
     is_legendary: bool | None
+    species: CharacterSpecies | None
+    character_name: str | None
     started_at: datetime
     hatched_at: datetime
+
+
+class CharacterRenameRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=30)
 
 
 class EggHistoryResponse(BaseSerializerModel):
