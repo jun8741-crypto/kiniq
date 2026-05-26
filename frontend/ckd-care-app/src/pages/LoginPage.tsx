@@ -24,6 +24,7 @@ export function LoginPage() {
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [tempPassword, setTempPassword] = useState("");
+  const [forgotError, setForgotError] = useState("");
 
   async function handleLogin() {
     if (!email || !password) { setError("이메일과 비밀번호를 입력하세요."); return; }
@@ -41,14 +42,20 @@ export function LoginPage() {
   }
 
   async function handleForgotSubmit() {
-    if (!forgotEmail) return;
+    if (!forgotEmail) {
+      setForgotError("이메일을 입력해주세요.");
+      return;
+    }
+    setForgotError("");
     setForgotLoading(true);
     try {
       const res = await authApi.forgotPassword(forgotEmail);
       setTempPassword(res.temp_password);
       setForgotSent(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "임시 비밀번호 발급에 실패했습니다.");
+      const msg = e instanceof Error ? e.message : "임시 비밀번호 발급에 실패했습니다.";
+      // 백엔드 404 "등록된 이메일이 없습니다" 등은 그대로 노출
+      setForgotError(msg);
     } finally {
       setForgotLoading(false);
     }
@@ -73,11 +80,17 @@ export function LoginPage() {
                 <p className="text-sm font-bold text-text-primary">비밀번호 찾기</p>
                 <button
                   className="text-xs text-text-muted hover:text-text-secondary"
-                  onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(""); }}
+                  onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(""); setForgotError(""); }}
                 >
                   닫기
                 </button>
               </div>
+
+              {forgotError && (
+                <div className="rounded-sm bg-danger/10 px-[12px] py-[8px] text-sm text-danger">
+                  {forgotError}
+                </div>
+              )}
 
               {forgotSent ? (
                 <div className="flex flex-col gap-[8px] rounded-sm bg-success/10 px-[12px] py-[10px]">
