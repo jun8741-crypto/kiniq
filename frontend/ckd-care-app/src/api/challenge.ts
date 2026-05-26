@@ -34,6 +34,29 @@ export interface UserChallengeListResponse {
   items: UserChallenge[];
 }
 
+export interface CheckinAward {
+  base: number;
+  lucky: boolean;
+  lucky_extra: number;
+  streak_bonus: number;
+  streak_milestone: number;
+  full_participation: boolean;
+  full_participation_bonus: number;
+  total: number;
+}
+
+export interface EggUpdate {
+  progress_checkins: number;
+  current_stage: number;
+  goal_70_just_alerted: boolean;
+  goal_90_just_alerted: boolean;
+  stage_bonus: number;
+  stage_milestone: number;
+  hatched: boolean;
+  is_legendary: boolean | null;
+  new_egg_no: number | null;
+}
+
 export interface CheckInResponse {
   id: number;
   streak_count: number;
@@ -41,6 +64,8 @@ export interface CheckInResponse {
   last_checkin_date: string;
   status: UserChallengeStatus;
   message: string;
+  award: CheckinAward | null;
+  egg: EggUpdate | null;
 }
 
 export const challengeApi = {

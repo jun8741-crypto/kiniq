@@ -4,8 +4,9 @@ import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import { BtnPrimary } from "../components/BtnPrimary";
 import { Card } from "../components/Card";
-import { challengeApi, type Challenge, type UserChallenge, type ChallengeCategory } from "../api/challenge";
+import { challengeApi, type Challenge, type CheckInResponse, type UserChallenge, type ChallengeCategory } from "../api/challenge";
 import type { LucideIcon } from "lucide-react";
+import { CheckinResultModal } from "../components/CheckinResultModal";
 
 const CATEGORY_ICON: Record<ChallengeCategory, LucideIcon> = {
   HYDRATION: Droplets,
@@ -48,6 +49,7 @@ export function ChallengeMainPage() {
   const [joining, setJoining] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [checkinResult, setCheckinResult] = useState<CheckInResponse | null>(null);
 
   async function load() {
     try {
@@ -71,7 +73,7 @@ export function ChallengeMainPage() {
     setError(""); setSuccessMsg("");
     try {
       const res = await challengeApi.checkin(ucId);
-      setSuccessMsg(res.message);
+      setCheckinResult(res);  // 보상 모달 표시
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "체크인 실패");
@@ -116,6 +118,7 @@ export function ChallengeMainPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-alt">
+      <CheckinResultModal result={checkinResult} onClose={() => setCheckinResult(null)} />
       <ScreenLabel label="11 · 챌린지 메인 (REQ-CHG-01)" />
       <TopNav />
       <main className="flex flex-1 flex-col p-[32px]">
