@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Coins, Sparkles, Flame, Award, Egg } from "lucide-react";
 import type { CheckInResponse } from "../api/challenge";
+import { SPECIES_EMOJI, SPECIES_LABEL, type CharacterSpecies } from "../api/gamification";
 
 interface Props {
   result: CheckInResponse | null;
@@ -37,16 +38,23 @@ export function CheckinResultModal({ result, onClose }: Props) {
   const award = result.award;
   const egg = result.egg;
   const hatched = egg?.hatched;
-  const legendary = egg?.is_legendary;
+  const species = egg?.species as CharacterSpecies | null | undefined;
+  const characterName = egg?.character_name;
 
   // 메인 헤드라인 결정
   let title = "체크인 완료!";
   let subtitle = "";
   let mainIcon = <Coins size={48} className="text-amber-500" />;
+  let hatchedBig: React.ReactNode = null;
 
-  if (hatched) {
-    title = legendary ? "🎉 전설의 알 부화!" : "🎉 알 부화!";
-    subtitle = legendary ? "5% 확률 전설 알입니다." : `${egg.new_egg_no}번째 알이 시작됩니다.`;
+  if (hatched && species) {
+    title = `🎉 ${SPECIES_LABEL[species]} 부화!`;
+    subtitle = characterName ? `'${characterName}' 가 태어났어요.` : "새 알이 자동으로 시작됩니다.";
+    mainIcon = <Egg size={48} className="text-rose-500" />;
+    hatchedBig = <div className="text-7xl">{SPECIES_EMOJI[species]}</div>;
+  } else if (hatched) {
+    title = "🎉 알 부화!";
+    subtitle = `${egg?.new_egg_no}번째 알이 시작됩니다.`;
     mainIcon = <Egg size={64} className="text-rose-500" />;
   } else if (award?.lucky) {
     title = "✨ 럭키 체크인!";
@@ -87,7 +95,7 @@ export function CheckinResultModal({ result, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="rounded-full bg-amber-50 p-4">{mainIcon}</div>
+          {hatchedBig ?? <div className="rounded-full bg-amber-50 p-4">{mainIcon}</div>}
           <h2 className="text-xl font-bold text-text-primary">{title}</h2>
           {subtitle && <p className="text-sm text-text-secondary">{subtitle}</p>}
         </div>

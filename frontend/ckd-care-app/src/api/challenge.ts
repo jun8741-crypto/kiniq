@@ -54,6 +54,8 @@ export interface EggUpdate {
   stage_milestone: number;
   hatched: boolean;
   is_legendary: boolean | null;
+  species: string | null;
+  character_name: string | null;
   new_egg_no: number | null;
 }
 

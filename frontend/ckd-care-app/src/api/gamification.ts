@@ -9,6 +9,20 @@ export type ItemCode =
   | "SKIN_M_PURPLE"
   | "SKIN_L_GOLD";
 
+export type CharacterSpecies = "TURTLE" | "PENGUIN" | "SQUIRREL";
+
+export const SPECIES_EMOJI: Record<CharacterSpecies, string> = {
+  TURTLE: "🐢",
+  PENGUIN: "🐧",
+  SQUIRREL: "🐿️",
+};
+
+export const SPECIES_LABEL: Record<CharacterSpecies, string> = {
+  TURTLE: "거북이",
+  PENGUIN: "펭귄",
+  SQUIRREL: "다람쥐",
+};
+
 export type PointReason =
   | "LOGIN"
   | "CHECKIN"
@@ -28,12 +42,16 @@ export interface EggResponse {
   goal_70_alerted: boolean;
   goal_90_alerted: boolean;
   is_legendary: boolean | null;
+  species: CharacterSpecies | null;
+  character_name: string | null;
   started_at: string;
 }
 
 export interface EggHistoryItem {
   egg_no: number;
   is_legendary: boolean | null;
+  species: CharacterSpecies | null;
+  character_name: string | null;
   started_at: string;
   hatched_at: string;
 }
@@ -105,6 +123,8 @@ export const gamificationApi = {
   getChargeMode: () => api.get<ChargeModeResponse>("/gamification/charge-mode"),
   exitChargeMode: () => api.post<ChargeModeResponse>("/gamification/charge-mode/exit", {}),
   getInventory: () => api.get<InventoryResponse>("/inventory"),
+  renameCharacter: (eggId: number, name: string) =>
+    api.patch<EggHistoryItem>(`/gamification/eggs/${eggId}/name`, { name }),
 };
 
 export const pointsApi = {
