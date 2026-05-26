@@ -19,6 +19,7 @@ from app.dtos.auth import (
 )
 from app.repositories.user_repository import UserRepository
 from app.services.auth import AuthService
+from app.services.charge_mode import ChargeModeService
 from app.services.jwt import JwtService
 from app.services.points import PointService
 
@@ -42,8 +43,11 @@ async def login(
 ) -> Response:
     user = await auth_service.authenticate(request)
     tokens = await auth_service.login(user)
+    today = date.today()
     # 일일 로그인 보상 (당일 첫 로그인 시 +10)
-    await point_service.award_login(user.id, date.today())
+    await point_service.award_login(user.id, today)
+    # 충전 모드 평가 (진입/경고 알림 트리거)
+    await ChargeModeService().evaluate(user.id, today)
     resp = Response(
         content=LoginResponse(access_token=str(tokens["access_token"])).model_dump(), status_code=status.HTTP_200_OK
     )
@@ -130,7 +134,9 @@ async def kakao_callback(code: str | None = None, error: str | None = None) -> R
         email=email, name=name, provider="kakao", provider_id=provider_id
     )
     await user_repo.update_last_login(user.id)
-    await PointService().award_login(user.id, date.today())
+    today = date.today()
+    await PointService().award_login(user.id, today)
+    await ChargeModeService().evaluate(user.id, today)
     access_token = jwt_service.create_access_token(user)
 
     return RedirectResponse(f"{config.FRONTEND_URL}/oauth/callback?token={access_token}")
@@ -199,7 +205,9 @@ async def google_callback(code: str | None = None, error: str | None = None) -> 
         email=email, name=name, provider="google", provider_id=provider_id
     )
     await user_repo.update_last_login(user.id)
-    await PointService().award_login(user.id, date.today())
+    today = date.today()
+    await PointService().award_login(user.id, today)
+    await ChargeModeService().evaluate(user.id, today)
     access_token = jwt_service.create_access_token(user)
 
     return RedirectResponse(f"{config.FRONTEND_URL}/oauth/callback?token={access_token}")

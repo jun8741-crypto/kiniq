@@ -16,6 +16,7 @@ from app.dtos.challenge import (
 from app.models.challenge import ChallengeTrack, UserChallengeStatus
 from app.models.health_check import AppGroup
 from app.repositories.challenge_repository import ChallengeRepository, UserChallengeRepository
+from app.services.charge_mode import ChargeModeService
 from app.services.eggs import EggService
 from app.services.notification import NotificationService
 from app.services.points import PointService
@@ -35,6 +36,7 @@ class ChallengeService:
         self._notif = NotificationService()
         self._points = PointService()
         self._eggs = EggService()
+        self._charge = ChargeModeService()
 
     async def list_challenges(self, app_group: AppGroup | None) -> ChallengeListResponse:
         """사용자 App 그룹에 맞는 챌린지 목록 반환. 그룹 미입력 시 빈 목록."""
@@ -121,6 +123,9 @@ class ChallengeService:
 
         # 알 진행률 +1 + 단계 보너스 + 알림 + 부화 처리
         egg_update = await self._eggs.progress_and_check(user_id=user_id, challenge_id=challenge.id)
+
+        # 충전 모드 평가 (체크인 했으니 active였다면 탈출)
+        await self._charge.evaluate(user_id=user_id, today=today)
 
         if uc.status == UserChallengeStatus.COMPLETED:
             await self._notif.notify_challenge_completed(user_id, challenge.name, uc.total_checkins, uc.id)
