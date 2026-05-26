@@ -1,8 +1,9 @@
-import { User, Bell, LayoutDashboard, Trophy } from "lucide-react";
+import { User, Bell, LayoutDashboard, Trophy, Coins } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { notificationApi } from "../api/notification";
+import { pointsApi } from "../api/gamification";
 
 interface TopNavProps {
   brand?: string;
@@ -12,10 +13,12 @@ export function TopNav({ brand = "CKD CARE" }: TopNavProps) {
   const { token } = useAuth();
   const location = useLocation();
   const [unread, setUnread] = useState(0);
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     if (!token) return;
     notificationApi.list(true, 1).then((r) => setUnread(r.unread_count)).catch(() => {});
+    pointsApi.getBalance().then((r) => setBalance(r.balance)).catch(() => setBalance(null));
   }, [token, location.pathname]);
 
   const navItems = [
@@ -48,6 +51,16 @@ export function TopNav({ brand = "CKD CARE" }: TopNavProps) {
       </div>
 
       <div className="flex items-center gap-[4px]">
+        {balance !== null && (
+          <Link
+            to="/shop"
+            className="flex items-center gap-[4px] rounded-md px-[8px] py-[6px] text-sm text-text-secondary hover:bg-bg-alt"
+            title="포인트 잔액 — 상점으로 이동"
+          >
+            <Coins size={16} className="text-amber-500" />
+            <span className="font-bold">{balance.toLocaleString()}</span>
+          </Link>
+        )}
         <Link
           to="/notifications"
           className="relative flex h-[36px] w-[36px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-alt"
