@@ -4,6 +4,7 @@ import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import { Tag } from "../components/Tag";
 import { Card } from "../components/Card";
+import { EggWidget } from "../components/EggWidget";
 import { dashboardApi, type DashboardSummary, type EgfrTrend } from "../api/dashboard";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -160,15 +161,7 @@ export function DashboardPage() {
               <RiskGauge score={h?.ckd_risk_score ? h.ckd_risk_score * 100 : null} />
             </div>
           </div>
-          <div className="flex w-[280px] flex-col items-center justify-center gap-[8px] rounded-md border border-border bg-bg p-[16px]">
-            <div className="flex h-[120px] w-[100px] items-center justify-center rounded-full bg-success/20">
-              <span className="text-3xl">🥚</span>
-            </div>
-            <p className="text-sm font-bold text-text-primary">나의 헬스 알</p>
-            <p className="text-xs text-text-secondary">
-              달성 챌린지 {cs?.completed_count ?? 0}개 · 최장 {cs?.best_streak ?? 0}일 연속
-            </p>
-          </div>
+          <EggWidget />
         </div>
 
         {/* Row2: eGFR 추세 */}
