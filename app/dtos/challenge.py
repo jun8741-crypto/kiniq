@@ -41,6 +41,17 @@ class UserChallengeListResponse(BaseSerializerModel):
     items: list[UserChallengeResponse]
 
 
+class CheckinAwardResponse(BaseSerializerModel):
+    base: int
+    lucky: bool
+    lucky_extra: int
+    streak_bonus: int
+    streak_milestone: int
+    full_participation: bool
+    full_participation_bonus: int
+    total: int
+
+
 class CheckInResponse(BaseSerializerModel):
     id: int
     streak_count: int
@@ -48,3 +59,4 @@ class CheckInResponse(BaseSerializerModel):
     last_checkin_date: date
     status: UserChallengeStatus
     message: str
+    award: CheckinAwardResponse | None = None

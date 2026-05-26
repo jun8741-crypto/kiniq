@@ -6,6 +6,7 @@ from starlette import status
 from app.dtos.challenge import (
     ChallengeListResponse,
     ChallengeResponse,
+    CheckinAwardResponse,
     CheckInResponse,
     JoinChallengeRequest,
     UserChallengeListResponse,
@@ -15,6 +16,7 @@ from app.models.challenge import ChallengeTrack, UserChallengeStatus
 from app.models.health_check import AppGroup
 from app.repositories.challenge_repository import ChallengeRepository, UserChallengeRepository
 from app.services.notification import NotificationService
+from app.services.points import PointService
 
 _GROUP_TO_TRACK: dict[AppGroup, ChallengeTrack] = {
     AppGroup.G1: ChallengeTrack.A,
@@ -29,6 +31,7 @@ class ChallengeService:
         self._repo = ChallengeRepository()
         self._user_repo = UserChallengeRepository()
         self._notif = NotificationService()
+        self._points = PointService()
 
     async def list_challenges(self, app_group: AppGroup | None) -> ChallengeListResponse:
         """사용자 App 그룹에 맞는 챌린지 목록 반환. 그룹 미입력 시 빈 목록."""
@@ -108,6 +111,11 @@ class ChallengeService:
 
         await self._user_repo.save(uc)
 
+        # 포인트 적립 (체크인 기본 +20 + 럭키 10% + 스트릭 마일스톤 + 풀 참여)
+        award = await self._points.award_checkin(
+            user_id=user_id, challenge_id=challenge.id, streak_count=uc.streak_count, today=today
+        )
+
         if uc.status == UserChallengeStatus.COMPLETED:
             await self._notif.notify_challenge_completed(user_id, challenge.name, uc.total_checkins, uc.id)
         else:
@@ -120,4 +128,14 @@ class ChallengeService:
             last_checkin_date=uc.last_checkin_date,
             status=uc.status,
             message=message,
+            award=CheckinAwardResponse(
+                base=award.base,
+                lucky=award.lucky,
+                lucky_extra=award.lucky_extra,
+                streak_bonus=award.streak_bonus,
+                streak_milestone=award.streak_milestone,
+                full_participation=award.full_participation,
+                full_participation_bonus=award.full_participation_bonus,
+                total=award.total,
+            ),
         )

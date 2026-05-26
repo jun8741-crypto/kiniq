@@ -41,3 +41,6 @@ class UserChallengeRepository:
 
     async def save(self, user_challenge: UserChallenge) -> None:
         await user_challenge.save()
+
+    async def list_active_by_user(self, user_id: int) -> list[UserChallenge]:
+        return await UserChallenge.filter(user_id=user_id, status=UserChallengeStatus.ACTIVE)

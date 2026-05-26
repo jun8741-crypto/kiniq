@@ -1,4 +1,5 @@
 import urllib.parse
+from datetime import date
 from typing import Annotated
 
 import httpx
@@ -19,6 +20,7 @@ from app.dtos.auth import (
 from app.repositories.user_repository import UserRepository
 from app.services.auth import AuthService
 from app.services.jwt import JwtService
+from app.services.points import PointService
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -36,9 +38,12 @@ async def signup(
 async def login(
     request: LoginRequest,
     auth_service: Annotated[AuthService, Depends(AuthService)],
+    point_service: Annotated[PointService, Depends(PointService)],
 ) -> Response:
     user = await auth_service.authenticate(request)
     tokens = await auth_service.login(user)
+    # 일일 로그인 보상 (당일 첫 로그인 시 +10)
+    await point_service.award_login(user.id, date.today())
     resp = Response(
         content=LoginResponse(access_token=str(tokens["access_token"])).model_dump(), status_code=status.HTTP_200_OK
     )
@@ -125,6 +130,7 @@ async def kakao_callback(code: str | None = None, error: str | None = None) -> R
         email=email, name=name, provider="kakao", provider_id=provider_id
     )
     await user_repo.update_last_login(user.id)
+    await PointService().award_login(user.id, date.today())
     access_token = jwt_service.create_access_token(user)
 
     return RedirectResponse(f"{config.FRONTEND_URL}/oauth/callback?token={access_token}")
@@ -193,6 +199,7 @@ async def google_callback(code: str | None = None, error: str | None = None) -> 
         email=email, name=name, provider="google", provider_id=provider_id
     )
     await user_repo.update_last_login(user.id)
+    await PointService().award_login(user.id, date.today())
     access_token = jwt_service.create_access_token(user)
 
     return RedirectResponse(f"{config.FRONTEND_URL}/oauth/callback?token={access_token}")
