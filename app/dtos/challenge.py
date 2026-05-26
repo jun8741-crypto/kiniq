@@ -52,6 +52,18 @@ class CheckinAwardResponse(BaseSerializerModel):
     total: int
 
 
+class EggUpdateResponse(BaseSerializerModel):
+    progress_checkins: int
+    current_stage: int
+    goal_70_just_alerted: bool
+    goal_90_just_alerted: bool
+    stage_bonus: int
+    stage_milestone: int
+    hatched: bool
+    is_legendary: bool | None
+    new_egg_no: int | None
+
+
 class CheckInResponse(BaseSerializerModel):
     id: int
     streak_count: int
@@ -60,3 +72,4 @@ class CheckInResponse(BaseSerializerModel):
     status: UserChallengeStatus
     message: str
     award: CheckinAwardResponse | None = None
+    egg: EggUpdateResponse | None = None

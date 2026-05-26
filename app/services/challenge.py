@@ -8,6 +8,7 @@ from app.dtos.challenge import (
     ChallengeResponse,
     CheckinAwardResponse,
     CheckInResponse,
+    EggUpdateResponse,
     JoinChallengeRequest,
     UserChallengeListResponse,
     UserChallengeResponse,
@@ -15,6 +16,7 @@ from app.dtos.challenge import (
 from app.models.challenge import ChallengeTrack, UserChallengeStatus
 from app.models.health_check import AppGroup
 from app.repositories.challenge_repository import ChallengeRepository, UserChallengeRepository
+from app.services.eggs import EggService
 from app.services.notification import NotificationService
 from app.services.points import PointService
 
@@ -32,6 +34,7 @@ class ChallengeService:
         self._user_repo = UserChallengeRepository()
         self._notif = NotificationService()
         self._points = PointService()
+        self._eggs = EggService()
 
     async def list_challenges(self, app_group: AppGroup | None) -> ChallengeListResponse:
         """사용자 App 그룹에 맞는 챌린지 목록 반환. 그룹 미입력 시 빈 목록."""
@@ -116,6 +119,9 @@ class ChallengeService:
             user_id=user_id, challenge_id=challenge.id, streak_count=uc.streak_count, today=today
         )
 
+        # 알 진행률 +1 + 단계 보너스 + 알림 + 부화 처리
+        egg_update = await self._eggs.progress_and_check(user_id=user_id, challenge_id=challenge.id)
+
         if uc.status == UserChallengeStatus.COMPLETED:
             await self._notif.notify_challenge_completed(user_id, challenge.name, uc.total_checkins, uc.id)
         else:
@@ -137,5 +143,16 @@ class ChallengeService:
                 full_participation=award.full_participation,
                 full_participation_bonus=award.full_participation_bonus,
                 total=award.total,
+            ),
+            egg=EggUpdateResponse(
+                progress_checkins=egg_update.progress_checkins,
+                current_stage=egg_update.current_stage,
+                goal_70_just_alerted=egg_update.goal_70_just_alerted,
+                goal_90_just_alerted=egg_update.goal_90_just_alerted,
+                stage_bonus=egg_update.stage_bonus,
+                stage_milestone=egg_update.stage_milestone,
+                hatched=egg_update.hatched,
+                is_legendary=egg_update.is_legendary,
+                new_egg_no=egg_update.new_egg_no,
             ),
         )
