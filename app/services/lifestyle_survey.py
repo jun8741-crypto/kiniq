@@ -18,7 +18,8 @@ class LifestyleSurveyService:
         user_id: int,
         dto: LifestyleSurveyCreateRequest,
     ) -> LifestyleSurveyResponse:
-        survey = await self._repo.create(
+        """설문 제출 — 기존 응답 있으면 갱신, 없으면 생성. 최신 1건만 유지."""
+        survey = await self._repo.upsert(
             user_id=user_id,
             surveyed_date=dto.surveyed_date,
             smoking_status=dto.smoking_status,
