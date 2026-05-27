@@ -6,6 +6,7 @@ import { Tag } from "../components/Tag";
 import { Card } from "../components/Card";
 import { EggWidget } from "../components/EggWidget";
 import { dashboardApi, type DashboardSummary, type EgfrTrend } from "../api/dashboard";
+import { pointsApi } from "../api/gamification";
 import { useAuth } from "../contexts/AuthContext";
 
 function EgfrGauge({ value }: { value: number | null }) {
@@ -113,6 +114,21 @@ export function DashboardPage() {
   const [trend, setTrend] = useState<EgfrTrend | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceMsg, setAttendanceMsg] = useState("");
+
+  async function handleAttendance() {
+    setAttendanceLoading(true);
+    setAttendanceMsg("");
+    try {
+      const res = await pointsApi.attendance();
+      setAttendanceMsg(res.message);
+    } catch (e) {
+      setAttendanceMsg(e instanceof Error ? e.message : "출석체크 실패");
+    } finally {
+      setAttendanceLoading(false);
+    }
+  }
 
   useEffect(() => {
     Promise.all([dashboardApi.getSummary(), dashboardApi.getEgfrTrend()])
@@ -143,7 +159,7 @@ export function DashboardPage() {
           <div className="mb-4 rounded-sm bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>
         )}
 
-        {/* 헤더 + 오늘 체크인 CTA */}
+        {/* 헤더 + 출석체크 CTA */}
         <div className="flex items-center justify-between gap-[12px]">
           <div className="flex items-center gap-[12px]">
             <h1 className="text-2xl font-bold text-text-primary">
@@ -151,13 +167,21 @@ export function DashboardPage() {
             </h1>
             {h?.ckd_stage && <Tag label={CKD_STAGE_LABEL[h.ckd_stage] ?? h.ckd_stage} />}
           </div>
-          <Link
-            to="/daily-checkin"
-            className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-bg hover:bg-accent/90"
+          <button
+            onClick={handleAttendance}
+            disabled={attendanceLoading}
+            className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-bg hover:bg-accent/90 disabled:opacity-50"
           >
-            오늘의 체크인 →
-          </Link>
+            {attendanceLoading ? "처리 중..." : "오늘의 출석체크"}
+          </button>
         </div>
+
+        {/* 출석체크 결과 메시지 */}
+        {attendanceMsg && (
+          <div className="mt-3 rounded-sm bg-success/10 px-3 py-2 text-sm text-success">
+            {attendanceMsg}
+          </div>
+        )}
 
         {/* Row1: 계기판 + 헬스 알 */}
         <div className="mt-[24px] flex gap-[24px]">

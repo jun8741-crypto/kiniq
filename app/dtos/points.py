@@ -34,3 +34,10 @@ class PurchaseResponse(BaseSerializerModel):
     new_quantity: int
     spent: int
     new_balance: int
+
+
+class AttendanceResponse(BaseSerializerModel):
+    awarded: bool
+    awarded_points: int
+    balance: int
+    message: str

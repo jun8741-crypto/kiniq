@@ -71,11 +71,16 @@ class TestPurchase(TestCase):
         inv_qty = await InventoryRepository().get_quantity(user.id, ItemCode.MINI_BOOSTER)
         assert inv_qty == 1
 
-    async def test_booster_no_max_cap(self) -> None:
+    async def test_booster_max_1_cap(self) -> None:
         user = await _make_user(points=2000)
         svc = InventoryService()
         await svc.purchase(user.id, ItemCode.MINI_BOOSTER)
-        await svc.purchase(user.id, ItemCode.MINI_BOOSTER)
-        await svc.purchase(user.id, ItemCode.MINI_BOOSTER)
+        # 2번째는 캡 초과 → 409
+        try:
+            await svc.purchase(user.id, ItemCode.MINI_BOOSTER)
+            raise AssertionError("expected HTTPException")
+        except HTTPException as e:
+            assert e.status_code == 409
+            assert "이미 보유" in e.detail or "최대" in e.detail
         qty = await InventoryRepository().get_quantity(user.id, ItemCode.MINI_BOOSTER)
-        assert qty == 3
+        assert qty == 1

@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
@@ -5,6 +6,7 @@ from fastapi.responses import ORJSONResponse as Response
 
 from app.dependencies.security import get_request_user
 from app.dtos.points import (
+    AttendanceResponse,
     PointBalanceResponse,
     PointTransactionItem,
     PointTransactionListResponse,
@@ -14,8 +16,10 @@ from app.dtos.points import (
 from app.models.users import User
 from app.repositories.gamification_repository import PointRepository
 from app.services.inventory import InventoryService
+from app.services.points import LOGIN_BONUS, PointService
 
 points_router = APIRouter(prefix="/points", tags=["points"])
+attendance_router = APIRouter(prefix="/attendance", tags=["attendance"])
 
 
 @points_router.get(
@@ -57,6 +61,27 @@ async def list_transactions(
             PointTransactionItem(id=t.id, amount=t.amount, reason=t.reason, extra=t.extra, created_at=t.created_at)
             for t in items
         ],
+    )
+    return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@attendance_router.post(
+    "/check-in",
+    response_model=AttendanceResponse,
+    status_code=status.HTTP_200_OK,
+    summary="오늘의 출석체크 (멱등)",
+    description="당일 첫 호출이면 +10pt 적립, 이미 했으면 awarded=False 반환. 사용자가 명시적으로 누르는 버튼용.",
+)
+async def daily_attendance(
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[PointService, Depends(PointService)],
+) -> Response:
+    today = date.today()
+    awarded = await service.award_login(user.id, today)
+    balance = await PointRepository().get_balance(user.id)
+    message = f"출석체크 완료! +{LOGIN_BONUS}pt 적립됐어요." if awarded else "오늘은 이미 출석체크 했어요."
+    result = AttendanceResponse(
+        awarded=awarded, awarded_points=LOGIN_BONUS if awarded else 0, balance=balance, message=message
     )
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
 

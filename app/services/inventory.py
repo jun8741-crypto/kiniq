@@ -26,6 +26,8 @@ ITEM_PRICE: dict[ItemCode, int] = {
 # 보유 한도 (없으면 무제한)
 ITEM_MAX_QUANTITY: dict[ItemCode, int] = {
     ItemCode.PROTECT: 2,
+    # 부스터는 1개 캡 — 사용 후 재방문 유도 (자주 사두는 패턴 차단)
+    ItemCode.MINI_BOOSTER: 1,
     # 스킨은 1개씩 (중복 구매 차단)
     ItemCode.SKIN_S_BLUE: 1,
     ItemCode.SKIN_S_GREEN: 1,

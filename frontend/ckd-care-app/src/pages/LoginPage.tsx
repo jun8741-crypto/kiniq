@@ -46,6 +46,11 @@ export function LoginPage() {
       setForgotError("이메일을 입력해주세요.");
       return;
     }
+    // 클라이언트 측 이메일 형식 검증 (백엔드 영어 에러 차단)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
+      setForgotError("올바른 이메일 형식이 아닙니다.");
+      return;
+    }
     setForgotError("");
     setForgotLoading(true);
     try {
@@ -53,8 +58,13 @@ export function LoginPage() {
       setTempPassword(res.temp_password);
       setForgotSent(true);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "임시 비밀번호 발급에 실패했습니다.";
-      // 백엔드 404 "등록된 이메일이 없습니다" 등은 그대로 노출
+      const raw = e instanceof Error ? e.message : "";
+      // 백엔드 영어 에러를 한국어로 매핑
+      let msg = "임시 비밀번호 발급에 실패했습니다.";
+      if (raw.includes("등록된 이메일")) msg = "등록된 이메일이 없습니다.";
+      else if (raw.includes("소셜 로그인")) msg = "소셜 로그인 계정은 임시 비밀번호를 사용할 수 없습니다.";
+      else if (raw.toLowerCase().includes("email")) msg = "올바른 이메일 형식이 아닙니다.";
+      else if (raw) msg = raw;
       setForgotError(msg);
     } finally {
       setForgotLoading(false);

@@ -137,10 +137,18 @@ export const SKIN_LABEL: Record<Exclude<ItemCode, "PROTECT" | "MINI_BOOSTER">, {
   SKIN_L_GOLD: { name: "골드 스킨 (대)", color: "bg-yellow-200" },
 };
 
+export interface AttendanceResponse {
+  awarded: boolean;
+  awarded_points: number;
+  balance: number;
+  message: string;
+}
+
 export const pointsApi = {
   getBalance: () => api.get<PointBalanceResponse>("/points/balance"),
   getTransactions: (limit = 20, offset = 0) =>
     api.get<PointTransactionListResponse>(`/points/transactions?limit=${limit}&offset=${offset}`),
   purchase: (item_code: ItemCode) =>
     api.post<PurchaseResponse>("/points/purchase", { item_code }),
+  attendance: () => api.post<AttendanceResponse>("/attendance/check-in", {}),
 };
