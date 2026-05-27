@@ -32,6 +32,14 @@ class CharacterRenameRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=30)
 
 
+class SkinEquipRequest(BaseModel):
+    item_code: ItemCode | None = Field(None, description="장착할 스킨 코드. null이면 해제(기본 외형).")
+
+
+class SkinEquipResponse(BaseSerializerModel):
+    active_skin_code: ItemCode | None
+
+
 class EggHistoryResponse(BaseSerializerModel):
     total: int
     legendary_count: int

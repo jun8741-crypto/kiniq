@@ -66,6 +66,27 @@ class GamificationService:
             ],
         )
 
+    async def equip_skin(self, user_id: int, skin_code: str | None) -> str | None:
+        """스킨 장착 또는 해제(None). 보유 안 한 스킨이면 400."""
+        from app.models.gamification import ItemCode
+        from app.models.users import User
+
+        if skin_code is not None:
+            # 보유 여부 검증
+            try:
+                code = ItemCode(skin_code)
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="잘못된 아이템 코드입니다."
+                ) from exc
+            qty = await self._inv.get_quantity(user_id, code)
+            if qty == 0:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="보유하지 않은 스킨입니다.")
+        user = await User.get(id=user_id)
+        user.active_skin_code = skin_code
+        await user.save()
+        return user.active_skin_code
+
     async def rename_character(self, user_id: int, egg_id: int, new_name: str) -> EggHistoryItem:
         """부화된 알의 캐릭터 이름 변경."""
         from app.models.gamification import UserEgg
@@ -116,24 +137,24 @@ class GamificationService:
         )
 
     async def get_mascot(self, user_id: int, today: date) -> MascotResponse:
+        from app.models.users import User
+
         current_egg = await self.get_current_egg(user_id)
         charge = await self.get_charge_mode(user_id, today)
         history = await self._eggs.get_history(user_id)
         legendary_unlocked = any(e.is_legendary for e in history)
 
-        # 스킨: 보유한 것 중 가장 비싼 거 (단순화) — 없으면 None
-        from app.services.inventory import ITEM_PRICE
-
-        owned = await self._inv.list_for_user(user_id)
-        skin_codes = [
-            ItemCode.SKIN_S_BLUE,
-            ItemCode.SKIN_S_GREEN,
-            ItemCode.SKIN_M_RED,
-            ItemCode.SKIN_M_PURPLE,
-            ItemCode.SKIN_L_GOLD,
-        ]
-        owned_skins = [r.item_code for r in owned if r.item_code in skin_codes and r.quantity > 0]
-        skin_active = max(owned_skins, key=lambda c: ITEM_PRICE[c]) if owned_skins else None
+        # 사용자가 선택한 스킨 (없으면 None). 보유하지 않은 스킨이 저장돼 있으면 None 반환.
+        user = await User.get(id=user_id)
+        skin_active: ItemCode | None = None
+        if user.active_skin_code:
+            try:
+                code = ItemCode(user.active_skin_code)
+                qty = await self._inv.get_quantity(user_id, code)
+                if qty > 0:
+                    skin_active = code
+            except ValueError:
+                skin_active = None
 
         return MascotResponse(
             current_egg=current_egg,

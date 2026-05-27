@@ -19,6 +19,7 @@ class User(models.Model):
     is_active = fields.BooleanField(default=True)
     is_admin = fields.BooleanField(default=False)
     last_login = fields.DatetimeField(null=True)
+    active_skin_code = fields.CharField(max_length=20, null=True, description="현재 장착한 스킨 ItemCode (null=기본)")
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 

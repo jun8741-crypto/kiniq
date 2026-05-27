@@ -13,6 +13,8 @@ from app.dtos.gamification import (
     EggResponse,
     InventoryResponse,
     MascotResponse,
+    SkinEquipRequest,
+    SkinEquipResponse,
 )
 from app.models.users import User
 from app.services.gamification import GamificationService
@@ -105,6 +107,22 @@ async def rename_character(
 ) -> Response:
     result = await service.rename_character(user.id, egg_id, request.name)
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@gamification_router.post(
+    "/skin/equip",
+    response_model=SkinEquipResponse,
+    status_code=status.HTTP_200_OK,
+    summary="스킨 장착/해제",
+)
+async def equip_skin(
+    request: SkinEquipRequest,
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[GamificationService, Depends(GamificationService)],
+) -> Response:
+    code = request.item_code.value if request.item_code else None
+    new_code = await service.equip_skin(user.id, code)
+    return Response(SkinEquipResponse(active_skin_code=new_code).model_dump(), status_code=status.HTTP_200_OK)
 
 
 @inventory_router.get(

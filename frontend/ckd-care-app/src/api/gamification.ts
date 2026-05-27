@@ -125,6 +125,16 @@ export const gamificationApi = {
   getInventory: () => api.get<InventoryResponse>("/inventory"),
   renameCharacter: (eggId: number, name: string) =>
     api.patch<EggHistoryItem>(`/gamification/eggs/${eggId}/name`, { name }),
+  equipSkin: (item_code: ItemCode | null) =>
+    api.post<{ active_skin_code: ItemCode | null }>("/gamification/skin/equip", { item_code }),
+};
+
+export const SKIN_LABEL: Record<Exclude<ItemCode, "PROTECT" | "MINI_BOOSTER">, { name: string; color: string }> = {
+  SKIN_S_BLUE: { name: "블루 스킨 (소)", color: "bg-blue-200" },
+  SKIN_S_GREEN: { name: "그린 스킨 (소)", color: "bg-green-200" },
+  SKIN_M_RED: { name: "레드 스킨 (중)", color: "bg-red-200" },
+  SKIN_M_PURPLE: { name: "퍼플 스킨 (중)", color: "bg-purple-200" },
+  SKIN_L_GOLD: { name: "골드 스킨 (대)", color: "bg-yellow-200" },
 };
 
 export const pointsApi = {

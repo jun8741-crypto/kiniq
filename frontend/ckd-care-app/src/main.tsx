@@ -33,6 +33,7 @@ import { EmergencyGuardPage } from "./pages/EmergencyGuardPage";
 import { OAuthCallbackPage } from "./pages/OAuthCallbackPage";
 import { ShopPage } from "./pages/ShopPage";
 import { PointHistoryPage } from "./pages/PointHistoryPage";
+import { CollectionPage } from "./pages/CollectionPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isLoading } = useAuth();
@@ -75,6 +76,7 @@ function AppRoutes() {
       <Route path="/emergency" element={<PrivateRoute><EmergencyGuardPage /></PrivateRoute>} />
       <Route path="/shop" element={<PrivateRoute><ShopPage /></PrivateRoute>} />
       <Route path="/points/transactions" element={<PrivateRoute><PointHistoryPage /></PrivateRoute>} />
+      <Route path="/collection" element={<PrivateRoute><CollectionPage /></PrivateRoute>} />
     </Routes>
   );
 }
