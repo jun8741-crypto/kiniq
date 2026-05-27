@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-# 발표 시연 직전에 demo 계정 상태를 빠르게 조작하는 헬퍼.
+# 발표 시연 직전에 demo 계정 상태를 빠르게 조작하는 헬퍼 (v2 — 4단계 진화 시스템).
 #
 # 사용:
-#   ./scripts/demo_fast_forward.sh                # 사용법 출력
-#   ./scripts/demo_fast_forward.sh near-hatch     # 알 99% (다음 체크인 1번 = 부화)
-#   ./scripts/demo_fast_forward.sh stage-25       # 알 24/100 (다음 체크인 = 25% 보너스 시연)
-#   ./scripts/demo_fast_forward.sh stage-50       # 알 49/100 (50% 보너스)
-#   ./scripts/demo_fast_forward.sh stage-75       # 알 74/100 (75% 보너스)
-#   ./scripts/demo_fast_forward.sh streak-3       # 스트릭 2 (다음 체크인 = 3일 보너스 +30pt)
-#   ./scripts/demo_fast_forward.sh streak-7       # 스트릭 6 (다음 체크인 = 7일 보너스 +70pt)
-#   ./scripts/demo_fast_forward.sh charge-mode    # 마지막 체크인을 7일 전으로 → 다음 로그인 시 충전 모드 진입
-#   ./scripts/demo_fast_forward.sh reset          # 시드 스크립트 재실행 (모든 상태 초기화)
-#   ./scripts/demo_fast_forward.sh status         # 현재 상태 출력
+#   ./scripts/demo_fast_forward.sh                   # 사용법 출력
+#   ./scripts/demo_fast_forward.sh near-hatch        # 9회 (다음 체크인 = 부화 + 종 추첨)
+#   ./scripts/demo_fast_forward.sh near-stage-2      # 39회 (다음 체크인 = 2단계 진화 +200pt)
+#   ./scripts/demo_fast_forward.sh near-stage-3      # 99회 (다음 체크인 = 3단계 진화 +350pt)
+#   ./scripts/demo_fast_forward.sh near-stage-4      # 199회 (다음 체크인 = 4단계 최종 +600pt)
+#   ./scripts/demo_fast_forward.sh near-final-alert  # 179회 (다음 체크인 = 'Goal Gradient' 알림)
+#   ./scripts/demo_fast_forward.sh streak-3          # 스트릭 2 (다음 체크인 = 3일 보너스 +30pt)
+#   ./scripts/demo_fast_forward.sh streak-7          # 스트릭 6 (다음 체크인 = 7일 보너스 +70pt)
+#   ./scripts/demo_fast_forward.sh charge-mode       # 마지막 체크인 7일 전 → 다음 로그인 시 진입
+#   ./scripts/demo_fast_forward.sh reset             # 시드 스크립트 재실행
+#   ./scripts/demo_fast_forward.sh status            # 현재 상태 출력
 
 set -e
 
@@ -29,38 +30,46 @@ get_user_id() {
         "SELECT id FROM users WHERE email='$EMAIL';"
 }
 
+# 진화 단계 임계 (eggs.py 와 동기화)
+# 부화: 10 / 2단계: 40 / 3단계: 100 / 4단계: 200 / Goal Gradient: 180
+
 case "${1:-}" in
     near-hatch)
-        echo "🥚 알 진행률 99% 설정 (다음 체크인 1번 = 부화)"
+        echo "🥚 알 9회 설정 (다음 체크인 = 부화 + 종 추첨 모달)"
         USER_ID=$(get_user_id)
-        psql_exec "UPDATE user_eggs SET progress_checkins=99, current_stage=4, goal_70_alerted=true, goal_90_alerted=true, stage_25_bonus_paid=true, stage_50_bonus_paid=true, stage_75_bonus_paid=true WHERE user_id=$USER_ID AND hatched_at IS NULL;"
-        echo "✓ 완료. 시연 시 체크인 1번 누르면 부화 모달 + 종 추첨 표시"
+        psql_exec "UPDATE user_eggs SET progress_checkins=9, current_stage=0, species=NULL, character_name=NULL, hatched_at=NULL, goal_70_alerted=false, goal_90_alerted=false, stage_25_bonus_paid=false, stage_50_bonus_paid=false, stage_75_bonus_paid=false, stage_100_bonus_paid=false WHERE user_id=$USER_ID AND current_stage < 4;"
+        echo "✓ 완료. 시연 시 체크인 1번 = 부화 (종 추첨 + 이름 생성 + 컨페티)"
         ;;
-    stage-25)
-        echo "🥚 알 진행률 24/100 설정 (다음 체크인 = 25% 보너스 +100pt)"
+    near-stage-2)
+        echo "🥚 알 39회 설정 (다음 체크인 = 2단계 진화 +200pt)"
         USER_ID=$(get_user_id)
-        psql_exec "UPDATE user_eggs SET progress_checkins=24, current_stage=1, goal_70_alerted=false, goal_90_alerted=false, stage_25_bonus_paid=false WHERE user_id=$USER_ID AND hatched_at IS NULL;"
+        psql_exec "UPDATE user_eggs SET progress_checkins=39, current_stage=1, stage_25_bonus_paid=true, stage_50_bonus_paid=false, stage_75_bonus_paid=false, stage_100_bonus_paid=false, goal_70_alerted=false, goal_90_alerted=false WHERE user_id=$USER_ID AND current_stage < 4;"
+        echo "✓ 완료. 캐릭터가 이미 부화한 상태에서 진화 시연 가능"
+        ;;
+    near-stage-3)
+        echo "🥚 알 99회 설정 (다음 체크인 = 3단계 진화 +350pt)"
+        USER_ID=$(get_user_id)
+        psql_exec "UPDATE user_eggs SET progress_checkins=99, current_stage=2, stage_25_bonus_paid=true, stage_50_bonus_paid=true, stage_75_bonus_paid=false, stage_100_bonus_paid=false, goal_70_alerted=false, goal_90_alerted=false WHERE user_id=$USER_ID AND current_stage < 4;"
         echo "✓ 완료"
         ;;
-    stage-50)
-        echo "🥚 알 진행률 49/100 설정 (다음 체크인 = 50% 보너스 +200pt)"
+    near-stage-4)
+        echo "🥚 알 199회 설정 (다음 체크인 = 4단계 최종 진화 +600pt)"
         USER_ID=$(get_user_id)
-        psql_exec "UPDATE user_eggs SET progress_checkins=49, current_stage=2, goal_70_alerted=false, goal_90_alerted=false, stage_25_bonus_paid=true, stage_50_bonus_paid=false WHERE user_id=$USER_ID AND hatched_at IS NULL;"
-        echo "✓ 완료"
+        psql_exec "UPDATE user_eggs SET progress_checkins=199, current_stage=3, stage_25_bonus_paid=true, stage_50_bonus_paid=true, stage_75_bonus_paid=true, stage_100_bonus_paid=false, goal_70_alerted=false, goal_90_alerted=true WHERE user_id=$USER_ID AND current_stage < 4;"
+        echo "✓ 완료. 시연 시 완전체 진화 모달 + 노란 강조"
         ;;
-    stage-75)
-        echo "🥚 알 진행률 74/100 설정 (다음 체크인 = 75% 보너스 +350pt, 70% 알림 발동)"
+    near-final-alert)
+        echo "🔔 알 179회 설정 (다음 체크인 = '최종 진화 임박' 알림 발동)"
         USER_ID=$(get_user_id)
-        psql_exec "UPDATE user_eggs SET progress_checkins=74, current_stage=3, goal_70_alerted=false, goal_90_alerted=false, stage_25_bonus_paid=true, stage_50_bonus_paid=true, stage_75_bonus_paid=false WHERE user_id=$USER_ID AND hatched_at IS NULL;"
-        echo "✓ 완료"
+        psql_exec "UPDATE user_eggs SET progress_checkins=179, current_stage=3, stage_25_bonus_paid=true, stage_50_bonus_paid=true, stage_75_bonus_paid=true, stage_100_bonus_paid=false, goal_70_alerted=false, goal_90_alerted=false WHERE user_id=$USER_ID AND current_stage < 4;"
+        echo "✓ 완료. 시연 시 빨강 강조 + Goal Gradient 알림"
         ;;
     streak-3)
         echo "🔥 스트릭 2 설정 (다음 체크인 = 3일 보너스 +30pt)"
         USER_ID=$(get_user_id)
         psql_exec "UPDATE user_challenges SET streak_count=2, last_checkin_date=CURRENT_DATE - INTERVAL '1 day' WHERE user_id=$USER_ID AND status='ACTIVE';"
-        echo "✓ 완료. 단, 스트릭 보너스는 챌린지×마일스톤 멱등이라 이전에 받은 적 있으면 안 받음"
-        echo "  포인트 이력에서 PROTECT_CONSUME 이외의 STREAK_BONUS milestone=3 row 미리 삭제 권장:"
-        echo "  docker exec postgres psql -U ckduser -d ckd_challenge -c \"DELETE FROM point_transactions WHERE user_id=$USER_ID AND reason='STREAK_BONUS' AND extra->>'milestone'='3';\""
+        psql_exec "DELETE FROM point_transactions WHERE user_id=$USER_ID AND reason='STREAK_BONUS' AND extra->>'milestone'='3';"
+        echo "✓ 완료"
         ;;
     streak-7)
         echo "🔥 스트릭 6 설정 (다음 체크인 = 7일 보너스 +70pt)"
@@ -74,18 +83,18 @@ case "${1:-}" in
         USER_ID=$(get_user_id)
         psql_exec "UPDATE user_challenges SET last_checkin_date=CURRENT_DATE - INTERVAL '7 days' WHERE user_id=$USER_ID;"
         psql_exec "UPDATE user_charge_mode SET is_active=false, warning_4d_alerted=false, warning_5d_alerted=false, warning_6d_alerted=false WHERE user_id=$USER_ID;"
-        echo "✓ 완료. 시연 시 로그인 또는 체크인 호출 시 자동 진입"
+        echo "✓ 완료"
         ;;
     reset)
-        echo "🔄 demo 계정 전체 초기화 (시드 스크립트 재실행)"
+        echo "🔄 demo 계정 전체 초기화"
         DB_HOST=localhost uv run python scripts/seed_demo_user.py
         ;;
     status)
         USER_ID=$(get_user_id)
         echo "📊 현재 demo 계정 상태 (user_id=$USER_ID)"
         echo ""
-        echo "[알 진행률]"
-        psql_exec "SELECT egg_no, progress_checkins, current_stage, hatched_at, species, character_name FROM user_eggs WHERE user_id=$USER_ID ORDER BY egg_no;"
+        echo "[알/캐릭터 진행률]"
+        psql_exec "SELECT egg_no, progress_checkins, current_stage, species, character_name, hatched_at FROM user_eggs WHERE user_id=$USER_ID ORDER BY egg_no;"
         echo ""
         echo "[챌린지 스트릭]"
         psql_exec "SELECT challenge_id, streak_count, total_checkins, last_checkin_date FROM user_challenges WHERE user_id=$USER_ID;"
@@ -100,22 +109,31 @@ case "${1:-}" in
         psql_exec "SELECT is_active, entered_at, exited_at FROM user_charge_mode WHERE user_id=$USER_ID;"
         ;;
     *)
-        echo "demo 계정 시연 헬퍼"
-        echo ""
-        echo "사용법:"
-        echo "  ./scripts/demo_fast_forward.sh <명령>"
-        echo ""
-        echo "명령:"
-        echo "  near-hatch    알 99% → 다음 체크인 = 부화 시연"
-        echo "  stage-25      알 24/100 → 다음 체크인 = 25% 보너스 +100"
-        echo "  stage-50      알 49/100 → 다음 체크인 = 50% 보너스 +200"
-        echo "  stage-75      알 74/100 → 다음 체크인 = 75% 보너스 +350 + 70% 알림"
-        echo "  streak-3      스트릭 2 → 다음 체크인 = 3일 보너스 +30"
-        echo "  streak-7      스트릭 6 → 다음 체크인 = 7일 보너스 +70"
-        echo "  charge-mode   마지막 체크인 7일 전 → 로그인 시 쉬어가기 진입"
-        echo "  reset         시드 스크립트 재실행 (전체 초기화)"
-        echo "  status        현재 상태 출력"
-        echo ""
-        echo "예: ./scripts/demo_fast_forward.sh near-hatch"
+        cat <<EOF
+demo 계정 시연 헬퍼 (v2 — 4단계 진화 시스템)
+
+진화 임계: 부화 10 / 2단계 40 / 3단계 100 / 4단계 200
+
+사용:
+  ./scripts/demo_fast_forward.sh <명령>
+
+진화 명령:
+  near-hatch         9회 → 다음 체크인 = 부화 (종 추첨 + 컨페티)
+  near-stage-2      39회 → 다음 체크인 = 2단계 진화 +200pt
+  near-stage-3      99회 → 다음 체크인 = 3단계 진화 +350pt
+  near-stage-4     199회 → 다음 체크인 = 4단계 최종 진화 +600pt
+  near-final-alert 179회 → 다음 체크인 = 최종 진화 임박 알림
+
+게이미피케이션 명령:
+  streak-3       스트릭 2 → 다음 체크인 = 3일 보너스 +30
+  streak-7       스트릭 6 → 다음 체크인 = 7일 보너스 +70
+  charge-mode    7일 전 체크인 → 로그인 시 쉬어가기 진입
+
+유틸:
+  reset          시드 스크립트 재실행 (전체 초기화)
+  status         현재 상태 출력
+
+예: ./scripts/demo_fast_forward.sh near-hatch
+EOF
         ;;
 esac

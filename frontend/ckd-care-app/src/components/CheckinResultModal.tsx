@@ -19,7 +19,7 @@ export function CheckinResultModal({ result, onClose }: Props) {
     if (!result) return;
     const award = result.award;
     const egg = result.egg;
-    const shouldConfetti = !!(award?.lucky || egg?.hatched || egg?.stage_milestone);
+    const shouldConfetti = !!(award?.lucky || egg?.hatched || egg?.evolved_to || egg?.stage_milestone);
     if (!shouldConfetti) {
       setConfetti([]);
       return;
@@ -39,6 +39,7 @@ export function CheckinResultModal({ result, onClose }: Props) {
   const award = result.award;
   const egg = result.egg;
   const hatched = egg?.hatched;
+  const evolvedTo = egg?.evolved_to;
   const species = egg?.species as CharacterSpecies | null | undefined;
   const characterName = egg?.character_name;
 
@@ -52,16 +53,32 @@ export function CheckinResultModal({ result, onClose }: Props) {
   );
 
   if (hatched && species) {
+    // 1단계 부화 (종 추첨)
     title = `🎉 ${SPECIES_LABEL[species]} 부화!`;
-    subtitle = characterName ? `'${characterName}' 가 태어났어요.` : "새 알이 자동으로 시작됩니다.";
+    subtitle = characterName ? `'${characterName}' 가 태어났어요.` : "1단계 캐릭터가 등장했어요.";
     iconNode = (
       <div className="flex h-[112px] w-[112px] items-center justify-center rounded-full bg-rose-50">
         <span className="text-6xl leading-none">{SPECIES_EMOJI[species]}</span>
       </div>
     );
+  } else if (evolvedTo && species) {
+    // 2/3/4 단계 진화
+    const isFinal = evolvedTo === 4;
+    const evolutionName = isFinal ? "완전체!" : evolvedTo === 3 ? "더 커졌어요" : "더 자랐어요";
+    title = isFinal
+      ? `🌟 ${characterName ?? "캐릭터"} 가 완전체로 진화!`
+      : `✨ ${characterName ?? "캐릭터"} 가 ${evolvedTo}단계로!`;
+    subtitle = isFinal
+      ? "최종 진화 완료! 컬렉션에서 확인해보세요."
+      : evolutionName;
+    iconNode = (
+      <div className={`flex h-[112px] w-[112px] items-center justify-center rounded-full ${isFinal ? "bg-yellow-50" : "bg-emerald-50"}`}>
+        <span className="text-6xl leading-none">{SPECIES_EMOJI[species]}</span>
+      </div>
+    );
   } else if (hatched) {
     title = "🎉 알 부화!";
-    subtitle = `${egg?.new_egg_no}번째 알이 시작됩니다.`;
+    subtitle = "1단계 캐릭터가 등장했어요.";
     iconNode = (
       <div className="flex h-[88px] w-[88px] items-center justify-center rounded-full bg-rose-50">
         <Egg size={44} className="text-rose-500" />

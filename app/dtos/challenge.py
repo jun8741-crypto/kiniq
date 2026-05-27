@@ -54,12 +54,13 @@ class CheckinAwardResponse(BaseSerializerModel):
 
 class EggUpdateResponse(BaseSerializerModel):
     progress_checkins: int
-    current_stage: int
+    current_stage: int  # 0=알, 1=부화, 2/3/4=진화 단계
     goal_70_just_alerted: bool
     goal_90_just_alerted: bool
     stage_bonus: int
-    stage_milestone: int
-    hatched: bool
+    stage_milestone: int  # 도달한 임계 (10/40/100/200)
+    hatched: bool  # 1단계 부화 (종 추첨 시점)
+    evolved_to: int | None  # 진화한 단계 번호 (2/3/4), 부화일 땐 None
     is_legendary: bool | None
     species: str | None
     character_name: str | None

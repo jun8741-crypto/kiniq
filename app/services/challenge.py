@@ -161,6 +161,7 @@ class ChallengeService:
                 stage_bonus=egg_update.stage_bonus,
                 stage_milestone=egg_update.stage_milestone,
                 hatched=egg_update.hatched,
+                evolved_to=egg_update.evolved_to,
                 is_legendary=egg_update.is_legendary,
                 species=egg_update.species.value if egg_update.species else None,
                 character_name=egg_update.character_name,

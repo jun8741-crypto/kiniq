@@ -47,12 +47,13 @@ export interface CheckinAward {
 
 export interface EggUpdate {
   progress_checkins: number;
-  current_stage: number;
+  current_stage: number;  // 0=알, 1=부화, 2/3/4=진화 단계
   goal_70_just_alerted: boolean;
   goal_90_just_alerted: boolean;
   stage_bonus: number;
-  stage_milestone: number;
-  hatched: boolean;
+  stage_milestone: number;  // 도달한 임계 (10/40/100/200)
+  hatched: boolean;  // 1단계 부화 (종 추첨)
+  evolved_to: number | null;  // 진화한 단계 (2/3/4)
   is_legendary: boolean | null;
   species: string | null;
   character_name: string | null;

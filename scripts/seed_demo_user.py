@@ -11,7 +11,7 @@
 
 import asyncio
 import sys
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 # 프로젝트 루트를 import path에 추가
@@ -104,21 +104,28 @@ async def create_demo() -> None:
         user_challenges.append(uc)
         print(f"  ✓ #{ch.id} {ch.name} — 누적 {uc.total_checkins}회, 연속 5일")
 
-    print("[4] 알 부화 진행률 80% (4단계, 부화 임박)")
+    print("[4] 알 부화 진행률 30/200 (1단계 부화된 캐릭터, 2단계 진화 직전)")
+    from app.models.gamification import CharacterSpecies
+
     egg = await UserEgg.create(
         user_id=user.id,
         egg_no=1,
-        progress_checkins=80,
-        current_stage=4,
-        is_legendary=None,
-        goal_70_alerted=True,
+        progress_checkins=30,
+        current_stage=1,
+        species=CharacterSpecies.TURTLE,
+        character_name="고결한 파랑",
+        hatched_at=datetime.now(UTC) - timedelta(days=20),
+        is_legendary=False,
+        goal_70_alerted=False,
         goal_90_alerted=False,
-        stage_25_bonus_paid=True,
-        stage_50_bonus_paid=True,
-        stage_75_bonus_paid=True,
+        stage_25_bonus_paid=True,  # 부화 보너스 지급됨
+        stage_50_bonus_paid=False,
+        stage_75_bonus_paid=False,
         stage_100_bonus_paid=False,
     )
-    print(f"  ✓ egg_no={egg.egg_no} progress={egg.progress_checkins}/100 stage={egg.current_stage}")
+    print(
+        f"  ✓ egg_no={egg.egg_no} progress={egg.progress_checkins}/200 stage={egg.current_stage} ({egg.species} '{egg.character_name}')"
+    )
 
     print("[5] 포인트 트랜잭션으로 잔액 10,000pt 세팅")
     # 누적 적립 분포: login·checkin·streak·stage 다양하게
@@ -177,7 +184,7 @@ async def create_demo() -> None:
     print(f"  이메일: {DEMO_EMAIL}")
     print(f"  비밀번호: {DEMO_PASSWORD}")
     print("  포인트 잔액: 10,000pt")
-    print("  알 진행률: 80% (부화까지 20회)")
+    print("  진화 단계: 1단계 부화 ('고결한 파랑' 🐢, 30/200, 2단계 진화까지 10번)")
     print("  활성 챌린지: 3개")
     print("  보유 아이템: 보호권 1, 부스터 1")
     print("  미읽음 알림: 3건")
