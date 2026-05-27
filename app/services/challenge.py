@@ -20,6 +20,7 @@ from app.services.charge_mode import ChargeModeService
 from app.services.eggs import EggService
 from app.services.notification import NotificationService
 from app.services.points import PointService
+from app.services.streak_protect import StreakProtectService
 
 _GROUP_TO_TRACK: dict[AppGroup, ChallengeTrack] = {
     AppGroup.G1: ChallengeTrack.A,
@@ -81,6 +82,9 @@ class ChallengeService:
         )
 
     async def checkin(self, user_challenge_id: int, user_id: int, today: date) -> CheckInResponse:
+        # 체크인 처리 전에 어제 보호권 자동 소모 평가 (streak 계산에 영향)
+        await StreakProtectService().evaluate(user_id, today)
+
         uc = await self._user_repo.get_by_id(user_challenge_id, user_id)
         if uc is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="참여 중인 챌린지를 찾을 수 없습니다.")

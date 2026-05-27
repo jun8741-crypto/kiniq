@@ -22,6 +22,7 @@ from app.services.auth import AuthService
 from app.services.charge_mode import ChargeModeService
 from app.services.jwt import JwtService
 from app.services.points import PointService
+from app.services.streak_protect import StreakProtectService
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -46,6 +47,8 @@ async def login(
     today = date.today()
     # 일일 로그인 보상 (당일 첫 로그인 시 +10)
     await point_service.award_login(user.id, today)
+    # 스트릭 보호권 자동 소모 평가 (어제 체크인 0회 + 보호권 보유 시)
+    await StreakProtectService().evaluate(user.id, today)
     # 충전 모드 평가 (진입/경고 알림 트리거)
     await ChargeModeService().evaluate(user.id, today)
     resp = Response(
@@ -136,6 +139,7 @@ async def kakao_callback(code: str | None = None, error: str | None = None) -> R
     await user_repo.update_last_login(user.id)
     today = date.today()
     await PointService().award_login(user.id, today)
+    await StreakProtectService().evaluate(user.id, today)
     await ChargeModeService().evaluate(user.id, today)
     access_token = jwt_service.create_access_token(user)
 
@@ -207,6 +211,7 @@ async def google_callback(code: str | None = None, error: str | None = None) -> 
     await user_repo.update_last_login(user.id)
     today = date.today()
     await PointService().award_login(user.id, today)
+    await StreakProtectService().evaluate(user.id, today)
     await ChargeModeService().evaluate(user.id, today)
     access_token = jwt_service.create_access_token(user)
 
