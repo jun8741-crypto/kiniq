@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { gamificationApi, type MascotResponse } from "../api/gamification";
 
 const STAGE_EMOJI = ["🥚", "🥚", "🐣", "🐥", "🐤", "🎉"];
@@ -98,10 +99,13 @@ export function EggWidget() {
 
       {/* 충전 모드 표시 */}
       {isCharge && (
-        <div className="w-full rounded-md bg-slate-100 px-2 py-1.5 text-center">
+        <Link
+          to="/rest-mode"
+          className="w-full rounded-md bg-slate-100 px-2 py-1.5 text-center hover:bg-slate-200"
+        >
           <p className="text-xs font-bold text-slate-700">😴 쉬어가기 모드</p>
-          <p className="text-xs text-slate-500">체크인 1번이면 정상으로 돌아와요</p>
-        </div>
+          <p className="text-xs text-slate-500">자세히 보기 →</p>
+        </Link>
       )}
     </div>
   );

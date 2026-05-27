@@ -34,6 +34,7 @@ import { OAuthCallbackPage } from "./pages/OAuthCallbackPage";
 import { ShopPage } from "./pages/ShopPage";
 import { PointHistoryPage } from "./pages/PointHistoryPage";
 import { CollectionPage } from "./pages/CollectionPage";
+import { RestModePage } from "./pages/RestModePage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isLoading } = useAuth();
@@ -77,6 +78,7 @@ function AppRoutes() {
       <Route path="/shop" element={<PrivateRoute><ShopPage /></PrivateRoute>} />
       <Route path="/points/transactions" element={<PrivateRoute><PointHistoryPage /></PrivateRoute>} />
       <Route path="/collection" element={<PrivateRoute><CollectionPage /></PrivateRoute>} />
+      <Route path="/rest-mode" element={<PrivateRoute><RestModePage /></PrivateRoute>} />
     </Routes>
   );
 }

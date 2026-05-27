@@ -143,12 +143,20 @@ export function DashboardPage() {
           <div className="mb-4 rounded-sm bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>
         )}
 
-        {/* 헤더 */}
-        <div className="flex items-center gap-[12px]">
-          <h1 className="text-2xl font-bold text-text-primary">
-            안녕하세요, {user?.name ?? "—"} 님
-          </h1>
-          {h?.ckd_stage && <Tag label={CKD_STAGE_LABEL[h.ckd_stage] ?? h.ckd_stage} />}
+        {/* 헤더 + 오늘 체크인 CTA */}
+        <div className="flex items-center justify-between gap-[12px]">
+          <div className="flex items-center gap-[12px]">
+            <h1 className="text-2xl font-bold text-text-primary">
+              안녕하세요, {user?.name ?? "—"} 님
+            </h1>
+            {h?.ckd_stage && <Tag label={CKD_STAGE_LABEL[h.ckd_stage] ?? h.ckd_stage} />}
+          </div>
+          <Link
+            to="/daily-checkin"
+            className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-bg hover:bg-accent/90"
+          >
+            오늘의 체크인 →
+          </Link>
         </div>
 
         {/* Row1: 계기판 + 헬스 알 */}
