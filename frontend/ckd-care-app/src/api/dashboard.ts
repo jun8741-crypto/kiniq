@@ -42,7 +42,27 @@ export interface EgfrTrend {
   data_points: EgfrDataPoint[];
 }
 
+export type ChallengeCategory = "HYDRATION" | "EXERCISE" | "DIET" | "SLEEP" | "STRESS";
+
+export interface CategoryContribution {
+  category: ChallengeCategory;
+  weight: number;
+  progress_percent: number;
+  contribution: number;
+}
+
+export interface EgfrSimulation {
+  actual_egfr: number | null;
+  predicted_egfr: number | null;
+  boost_amount: number;
+  applicable: boolean;
+  reason: string | null;
+  contributions: CategoryContribution[];
+  max_boost_mlmin: number;
+}
+
 export const dashboardApi = {
   getSummary: () => api.get<DashboardSummary>("/dashboard/summary"),
   getEgfrTrend: (limit = 12) => api.get<EgfrTrend>(`/dashboard/egfr-trend?limit=${limit}`),
+  getEgfrSimulation: () => api.get<EgfrSimulation>("/dashboard/egfr-simulation"),
 };

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import ORJSONResponse as Response
 
 from app.dependencies.security import get_request_user
-from app.dtos.dashboard import DashboardSummaryResponse, EgfrTrendResponse
+from app.dtos.dashboard import DashboardSummaryResponse, EgfrSimulationResponse, EgfrTrendResponse
 from app.models.users import User
 from app.services.dashboard import DashboardService
 
@@ -39,4 +39,19 @@ async def get_egfr_trend(
     limit: Annotated[int, Query(ge=1, le=24, description="최대 반환 개수 (기본 12)")] = 12,
 ) -> Response:
     result = await service.get_egfr_trend(user_id=user.id, limit=limit)
+    return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@dashboard_router.get(
+    "/egfr-simulation",
+    response_model=EgfrSimulationResponse,
+    status_code=status.HTTP_200_OK,
+    summary="챌린지 반영 예상 eGFR (REQ-DASH-003)",
+    description=("실측 eGFR + Σ(카테고리 진행률 × 가중치 × MAX_BOOST). G4~G5(eGFR<30) 사용자에게는 시뮬레이션 미적용."),
+)
+async def get_egfr_simulation(
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[DashboardService, Depends(DashboardService)],
+) -> Response:
+    result = await service.get_egfr_simulation(user_id=user.id)
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)

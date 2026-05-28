@@ -11,13 +11,21 @@ from app.dtos.challenge import (
     CheckinAwardResponse,
     CheckInResponse,
     EggUpdateResponse,
+    EmotionDay,
     HeatmapDay,
     HeatmapResponse,
     JoinChallengeRequest,
     UserChallengeListResponse,
     UserChallengeResponse,
+    WeeklyEmotionResponse,
 )
-from app.models.challenge import ChallengeCategory, ChallengeTrack, UserChallengeStatus
+from app.models.challenge import (
+    ChallengeCategory,
+    ChallengeTrack,
+    CheckinEmotion,
+    CheckinEmotionLog,
+    UserChallengeStatus,
+)
 from app.models.health_check import AppGroup
 from app.repositories.challenge_repository import ChallengeRepository, UserChallengeRepository
 from app.services.charge_mode import ChargeModeService
@@ -85,7 +93,9 @@ class ChallengeService:
             items=[UserChallengeResponse.model_validate(uc) for uc in items],
         )
 
-    async def checkin(self, user_challenge_id: int, user_id: int, today: date) -> CheckInResponse:
+    async def checkin(
+        self, user_challenge_id: int, user_id: int, today: date, emotion: CheckinEmotion | None = None
+    ) -> CheckInResponse:
         # 체크인 처리 전에 어제 보호권 자동 소모 평가 (streak 계산에 영향)
         await StreakProtectService().evaluate(user_id, today)
 
@@ -112,6 +122,15 @@ class ChallengeService:
 
         uc.total_checkins += 1
         uc.last_checkin_date = today
+        if emotion is not None:
+            uc.last_emotion = emotion
+            # 일별 감정 로그 (같은 날 여러 챌린지 체크인하면 마지막 감정으로 덮어쓰기)
+            existing_log = await CheckinEmotionLog.filter(user_id=user_id, log_date=today).first()
+            if existing_log:
+                existing_log.emotion = emotion
+                await existing_log.save()
+            else:
+                await CheckinEmotionLog.create(user_id=user_id, log_date=today, emotion=emotion)
 
         # 챌린지 완료 체크 (fetch challenge duration_days)
         challenge = await uc.challenge
@@ -253,3 +272,19 @@ class ChallengeService:
                 )
             )
         return CategoryProgressResponse(items=items)
+
+    async def get_weekly_emotion(self, user_id: int) -> WeeklyEmotionResponse:
+        """최근 7일 감정 기록 (REQ-DASH-001 ⑤ 감정 듀얼 축)."""
+        from datetime import timedelta
+
+        today = date.today()
+        start = today - timedelta(days=6)
+        logs = await CheckinEmotionLog.filter(user_id=user_id, log_date__gte=start).all()
+        by_date = {log.log_date: log.emotion for log in logs}
+
+        days = []
+        cur = start
+        while cur <= today:
+            days.append(EmotionDay(date=cur, emotion=by_date.get(cur)))
+            cur += timedelta(days=1)
+        return WeeklyEmotionResponse(days=days)

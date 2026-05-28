@@ -8,6 +8,7 @@ import { EggWidget } from "../components/EggWidget";
 import { HeatmapWidget } from "../components/HeatmapWidget";
 import { RadialMiniWidget } from "../components/RadialMiniWidget";
 import { WeeklyProgressWidget } from "../components/WeeklyProgressWidget";
+import { EgfrSimulationWidget } from "../components/EgfrSimulationWidget";
 import { dashboardApi, type DashboardSummary, type EgfrTrend } from "../api/dashboard";
 import { pointsApi } from "../api/gamification";
 import { useAuth } from "../contexts/AuthContext";
@@ -229,9 +230,12 @@ export function DashboardPage() {
           <EggWidget />
         </div>
 
-        {/* Row2: eGFR 추세 */}
-        <div className="mt-[24px]">
-          <EgfrTrendChart trend={trend} />
+        {/* Row2: eGFR 추세 + 시뮬레이션 */}
+        <div className="mt-[24px] grid grid-cols-3 gap-[16px]">
+          <div className="col-span-2">
+            <EgfrTrendChart trend={trend} />
+          </div>
+          <EgfrSimulationWidget />
         </div>
 
         {/* Row2b: 챌린지 잔디 히트맵 */}

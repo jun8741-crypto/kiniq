@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { challengeApi, type HeatmapDay } from "../api/challenge";
+import { challengeApi, EMOTION_EMOJI, type HeatmapDay } from "../api/challenge";
 
 const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
 
@@ -11,6 +11,13 @@ export function WeeklyProgressWidget() {
     staleTime: 5 * 60 * 1000,
   });
   const days: HeatmapDay[] | null = data ? data.days.slice(-7) : null;
+
+  // 감정 듀얼 축 데이터
+  const { data: emotionData } = useQuery({
+    queryKey: ["challenges", "weekly-emotion"],
+    queryFn: () => challengeApi.weeklyEmotion().catch(() => null),
+    staleTime: 5 * 60 * 1000,
+  });
 
   if (loading) {
     return (
@@ -36,17 +43,23 @@ export function WeeklyProgressWidget() {
           {activeDays}/7일 · 누적 {totalCheckins}회
         </p>
       </div>
-      <div className="flex h-[100px] items-end gap-2">
+      <div className="flex h-[120px] items-end gap-2">
         {days.map((d, i) => {
           const height = d.count > 0 ? Math.max((d.count / maxCount) * 80, 8) : 4;
           const isToday = i === days.length - 1;
+          // 감정 데이터 매칭 (날짜 기준)
+          const emo = emotionData?.days.find((e) => e.date === d.date)?.emotion;
           return (
             <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
+              {/* 감정 이모지 (상단) */}
+              <span className="text-base leading-none" style={{ minHeight: "1.2em" }}>
+                {emo ? EMOTION_EMOJI[emo] : ""}
+              </span>
               <div className="flex flex-1 items-end">
                 <div
                   className={`w-full rounded-t ${d.count === 0 ? "bg-gray-200" : "bg-accent"} ${isToday ? "ring-2 ring-amber-400" : ""}`}
                   style={{ height: `${height}px` }}
-                  title={`${d.date}: ${d.count}회`}
+                  title={`${d.date}: ${d.count}회${emo ? ` · ${EMOTION_EMOJI[emo]}` : ""}`}
                 />
               </div>
               <span className="text-[10px] font-bold text-text-secondary">{d.count}</span>
@@ -55,6 +68,7 @@ export function WeeklyProgressWidget() {
           );
         })}
       </div>
+      <p className="mt-2 text-[10px] text-text-muted">막대 = 체크인 횟수 · 이모지 = 그 날의 감정</p>
     </div>
   );
 }

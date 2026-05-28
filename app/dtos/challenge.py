@@ -3,7 +3,12 @@ from datetime import date, datetime
 from pydantic import BaseModel
 
 from app.dtos.base import BaseSerializerModel
-from app.models.challenge import ChallengeCategory, ChallengeTrack, UserChallengeStatus
+from app.models.challenge import (
+    ChallengeCategory,
+    ChallengeTrack,
+    CheckinEmotion,
+    UserChallengeStatus,
+)
 
 
 class ChallengeResponse(BaseSerializerModel):
@@ -63,6 +68,19 @@ class CategoryProgress(BaseSerializerModel):
 
 class CategoryProgressResponse(BaseSerializerModel):
     items: list[CategoryProgress]  # 5종 (HYDRATION/EXERCISE/DIET/SLEEP/STRESS)
+
+
+class CheckinRequest(BaseModel):
+    emotion: CheckinEmotion | None = None  # 선택, 그 날의 감정
+
+
+class EmotionDay(BaseSerializerModel):
+    date: date
+    emotion: CheckinEmotion | None  # 그 날 기록된 감정 (없으면 None)
+
+
+class WeeklyEmotionResponse(BaseSerializerModel):
+    days: list[EmotionDay]  # 최근 7일
 
 
 class CheckinAwardResponse(BaseSerializerModel):

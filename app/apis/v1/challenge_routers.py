@@ -8,11 +8,13 @@ from app.dependencies.security import get_request_user
 from app.dtos.challenge import (
     CategoryProgressResponse,
     ChallengeListResponse,
+    CheckinRequest,
     CheckInResponse,
     HeatmapResponse,
     JoinChallengeRequest,
     UserChallengeListResponse,
     UserChallengeResponse,
+    WeeklyEmotionResponse,
 )
 from app.models.health_check import AppGroup
 from app.models.users import User
@@ -97,13 +99,31 @@ async def checkin(
     user_challenge_id: int,
     user: Annotated[User, Depends(get_request_user)],
     service: Annotated[ChallengeService, Depends(ChallengeService)],
+    request: CheckinRequest | None = None,
 ) -> Response:
+    emotion = request.emotion if request else None
     result = await service.checkin(
         user_challenge_id=user_challenge_id,
         user_id=user.id,
         today=date.today(),
+        emotion=emotion,
     )
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@challenge_router.get(
+    "/weekly-emotion",
+    response_model=WeeklyEmotionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="주간 감정 기록 (REQ-DASH-001 ⑤)",
+    description="최근 7일 일별 체크인 감정. 감정 듀얼 축 차트용.",
+)
+async def get_weekly_emotion(
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[ChallengeService, Depends(ChallengeService)],
+) -> Response:
+    result = await service.get_weekly_emotion(user_id=user.id)
+    return Response(result.model_dump(mode="json"), status_code=status.HTTP_200_OK)
 
 
 @challenge_router.get(

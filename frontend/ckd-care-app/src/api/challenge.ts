@@ -105,4 +105,33 @@ export const challengeApi = {
     api.post<CheckInResponse>(`/user-challenges/${userChallengeId}/checkin`, {}),
   heatmap: (weeks = 26) => api.get<HeatmapResponse>(`/challenges/heatmap?weeks=${weeks}`),
   categoryProgress: () => api.get<CategoryProgressResponse>("/challenges/category-progress"),
+  weeklyEmotion: () => api.get<WeeklyEmotionResponse>("/challenges/weekly-emotion"),
 };
+
+export type CheckinEmotion =
+  | "VERY_HAPPY"
+  | "HAPPY"
+  | "NEUTRAL"
+  | "ANXIOUS"
+  | "SAD"
+  | "ANGRY"
+  | "TIRED";
+
+export const EMOTION_EMOJI: Record<CheckinEmotion, string> = {
+  VERY_HAPPY: "😄",
+  HAPPY: "🙂",
+  NEUTRAL: "😐",
+  ANXIOUS: "😟",
+  SAD: "😢",
+  ANGRY: "😠",
+  TIRED: "😴",
+};
+
+export interface EmotionDay {
+  date: string;
+  emotion: CheckinEmotion | null;
+}
+
+export interface WeeklyEmotionResponse {
+  days: EmotionDay[];
+}
