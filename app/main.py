@@ -6,6 +6,7 @@ from tortoise import Tortoise
 
 from app.apis.v1 import v1_routers
 from app.core.db.databases import TORTOISE_APP_MODELS, TORTOISE_ORM, run_migrations
+from app.core.error_handlers import register_error_handlers
 from app.core.seed import seed_challenges
 
 
@@ -28,4 +29,5 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
+register_error_handlers(app)
 app.include_router(v1_routers)
