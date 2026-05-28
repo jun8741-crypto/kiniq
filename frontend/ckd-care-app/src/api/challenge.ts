@@ -71,6 +71,18 @@ export interface CheckInResponse {
   egg: EggUpdate | null;
 }
 
+export interface HeatmapDay {
+  date: string;
+  count: number;
+}
+
+export interface HeatmapResponse {
+  weeks: number;
+  today: string;
+  days: HeatmapDay[];
+  max_count: number;
+}
+
 export const challengeApi = {
   list: () => api.get<ChallengeListResponse>("/challenges"),
   myList: (limit = 20, offset = 0) =>
@@ -79,4 +91,5 @@ export const challengeApi = {
     api.post<UserChallenge>("/user-challenges", { challenge_id, started_at }),
   checkin: (userChallengeId: number) =>
     api.post<CheckInResponse>(`/user-challenges/${userChallengeId}/checkin`, {}),
+  heatmap: (weeks = 26) => api.get<HeatmapResponse>(`/challenges/heatmap?weeks=${weeks}`),
 };

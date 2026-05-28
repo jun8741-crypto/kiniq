@@ -9,6 +9,8 @@ from app.dtos.challenge import (
     CheckinAwardResponse,
     CheckInResponse,
     EggUpdateResponse,
+    HeatmapDay,
+    HeatmapResponse,
     JoinChallengeRequest,
     UserChallengeListResponse,
     UserChallengeResponse,
@@ -168,3 +170,46 @@ class ChallengeService:
                 new_egg_no=egg_update.new_egg_no,
             ),
         )
+
+    async def get_heatmap(self, user_id: int, weeks: int = 26) -> HeatmapResponse:
+        """챌린지 잔디 히트맵용 일별 체크인 카운트.
+
+        PointTransaction.reason=CHECKIN/LUCKY 기준으로 일별 카운트 집계.
+        주 시작은 월요일.
+        """
+        from datetime import timedelta
+
+        from app.models.gamification import PointReason, PointTransaction
+
+        today = date.today()
+        # 26주(=182일) 전부터, 단 주 단위 정렬을 위해 월요일로 맞춤
+        weeks_ago_monday = today - timedelta(days=today.weekday() + (weeks - 1) * 7)
+        end_date = today
+        # 시작일 자정 이후의 체크인만
+        from datetime import datetime, time
+
+        start_dt = datetime.combine(weeks_ago_monday, time.min)
+        rows = await PointTransaction.filter(
+            user_id=user_id,
+            reason__in=[PointReason.CHECKIN, PointReason.LUCKY],
+            created_at__gte=start_dt,
+        ).values("created_at")
+
+        # 일별 카운트
+        counts: dict[date, int] = {}
+        for row in rows:
+            d = row["created_at"].date()
+            counts[d] = counts.get(d, 0) + 1
+
+        # 시작일부터 오늘까지 모든 날짜 채우기
+        days = []
+        max_count = 0
+        cur = weeks_ago_monday
+        while cur <= end_date:
+            c = counts.get(cur, 0)
+            days.append(HeatmapDay(date=cur, count=c))
+            if c > max_count:
+                max_count = c
+            cur += timedelta(days=1)
+
+        return HeatmapResponse(weeks=weeks, today=today, days=days, max_count=max_count)

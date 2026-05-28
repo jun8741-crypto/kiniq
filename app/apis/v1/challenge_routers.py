@@ -8,6 +8,7 @@ from app.dependencies.security import get_request_user
 from app.dtos.challenge import (
     ChallengeListResponse,
     CheckInResponse,
+    HeatmapResponse,
     JoinChallengeRequest,
     UserChallengeListResponse,
     UserChallengeResponse,
@@ -102,3 +103,19 @@ async def checkin(
         today=date.today(),
     )
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@challenge_router.get(
+    "/heatmap",
+    response_model=HeatmapResponse,
+    status_code=status.HTTP_200_OK,
+    summary="챌린지 잔디 히트맵 (REQ-DASH-001 ③)",
+    description="최근 N주(기본 26주) 일별 체크인 횟수. 주 시작은 월요일.",
+)
+async def get_heatmap(
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[ChallengeService, Depends(ChallengeService)],
+    weeks: Annotated[int, Query(ge=1, le=52)] = 26,
+) -> Response:
+    result = await service.get_heatmap(user_id=user.id, weeks=weeks)
+    return Response(result.model_dump(mode="json"), status_code=status.HTTP_200_OK)

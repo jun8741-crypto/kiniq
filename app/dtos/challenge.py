@@ -41,6 +41,18 @@ class UserChallengeListResponse(BaseSerializerModel):
     items: list[UserChallengeResponse]
 
 
+class HeatmapDay(BaseSerializerModel):
+    date: date  # YYYY-MM-DD
+    count: int  # 그 날 체크인 횟수
+
+
+class HeatmapResponse(BaseSerializerModel):
+    weeks: int  # 표시 주 수 (26)
+    today: date
+    days: list[HeatmapDay]  # weeks*7개 (오래된 날짜부터)
+    max_count: int  # 색상 단계 결정용
+
+
 class CheckinAwardResponse(BaseSerializerModel):
     base: int
     lucky: bool
