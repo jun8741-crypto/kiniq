@@ -3,7 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import { BtnPrimary } from "../components/BtnPrimary";
-import { lifestyleSurveyApi, type SmokingStatus, type DrinkingFrequency, type StressLevel } from "../api/lifestyleSurvey";
+import {
+  lifestyleSurveyApi,
+  type SmokingStatus,
+  type DrinkingFrequency,
+  type StressLevel,
+  type MaritalStatus,
+} from "../api/lifestyleSurvey";
 
 function SelectGroup<T extends string>({
   label, options, value, onChange,
@@ -67,10 +73,21 @@ export function LifestyleSurveyPage() {
   const [exerciseDays, setExerciseDays] = useState(0);
   const [sleepHours, setSleepHours] = useState(7);
   const [waterIntake, setWaterIntake] = useState(1.5);
+  // REQ-DATA-006 신규
+  const [vigorousDays, setVigorousDays] = useState(0);
+  const [vigorousMinutes, setVigorousMinutes] = useState(0);
+  const [moderateDays, setModerateDays] = useState(0);
+  const [moderateMinutes, setModerateMinutes] = useState(0);
+  const [sittingHours, setSittingHours] = useState(8);
+  const [marital, setMarital] = useState<MaritalStatus | "">("");
+  const [famDiabetes, setFamDiabetes] = useState(false);
+  const [famHypertension, setFamHypertension] = useState(false);
+  const [famHeart, setFamHeart] = useState(false);
 
   async function handleSubmit() {
     if (!smoking || !drinking) {
-      setError("흡연 상태와 음주 빈도는 필수 항목입니다."); return;
+      setError("흡연 상태와 음주 빈도는 필수 항목입니다.");
+      return;
     }
     setError("");
     setLoading(true);
@@ -83,6 +100,15 @@ export function LifestyleSurveyPage() {
         sleep_hours_per_day: sleepHours,
         daily_water_intake: waterIntake,
         stress_level: stress || null,
+        vigorous_exercise_days: vigorousDays,
+        vigorous_exercise_minutes: vigorousMinutes,
+        moderate_exercise_days: moderateDays,
+        moderate_exercise_minutes: moderateMinutes,
+        sitting_hours_per_day: sittingHours,
+        marital_status: marital || null,
+        family_history_diabetes: famDiabetes,
+        family_history_hypertension: famHypertension,
+        family_history_heart_disease: famHeart,
       });
       navigate("/dashboard");
     } catch (e) {
@@ -157,12 +183,104 @@ export function LifestyleSurveyPage() {
           <div className="flex flex-col gap-[24px]">
             <div className="rounded-md border border-border bg-bg p-[16px]">
               <p className="mb-[12px] text-md font-bold text-text-primary">신체활동</p>
-              <StepperInput
-                label="주간 운동 일수 (일)"
-                value={exerciseDays}
-                onChange={setExerciseDays}
-                min={0} max={7}
+              <div className="flex flex-col gap-[16px]">
+                <StepperInput
+                  label="주간 총 운동 일수 (일)"
+                  value={exerciseDays}
+                  onChange={setExerciseDays}
+                  min={0}
+                  max={7}
+                />
+                <div className="grid grid-cols-2 gap-[12px]">
+                  <StepperInput
+                    label="고강도 운동 일수"
+                    value={vigorousDays}
+                    onChange={setVigorousDays}
+                    min={0}
+                    max={7}
+                  />
+                  <StepperInput
+                    label="하루 평균 분"
+                    value={vigorousMinutes}
+                    onChange={setVigorousMinutes}
+                    min={0}
+                    max={300}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-[12px]">
+                  <StepperInput
+                    label="중강도 운동 일수"
+                    value={moderateDays}
+                    onChange={setModerateDays}
+                    min={0}
+                    max={7}
+                  />
+                  <StepperInput
+                    label="하루 평균 분"
+                    value={moderateMinutes}
+                    onChange={setModerateMinutes}
+                    min={0}
+                    max={300}
+                  />
+                </div>
+                <StepperInput
+                  label="하루 좌식 시간 (시간)"
+                  value={sittingHours}
+                  onChange={setSittingHours}
+                  min={0}
+                  max={24}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-md border border-border bg-bg p-[16px]">
+              <p className="mb-[12px] text-md font-bold text-text-primary">결혼 여부</p>
+              <SelectGroup<MaritalStatus>
+                label="결혼 상태"
+                value={marital}
+                onChange={setMarital}
+                options={[
+                  { value: "SINGLE", label: "미혼" },
+                  { value: "MARRIED", label: "기혼" },
+                  { value: "DIVORCED", label: "이혼" },
+                  { value: "WIDOWED", label: "사별" },
+                  { value: "OTHER", label: "기타" },
+                ]}
               />
+            </div>
+
+            <div className="rounded-md border border-border bg-bg p-[16px]">
+              <p className="mb-[12px] text-md font-bold text-text-primary">가족력</p>
+              <p className="mb-[8px] text-xs text-text-muted">직계가족 중 진단받은 적 있는 질환을 선택하세요.</p>
+              <div className="flex flex-col gap-[8px]">
+                <label className="flex items-center gap-[8px] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={famDiabetes}
+                    onChange={(e) => setFamDiabetes(e.target.checked)}
+                    className="h-4 w-4 accent-accent"
+                  />
+                  <span className="text-sm text-text-primary">당뇨</span>
+                </label>
+                <label className="flex items-center gap-[8px] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={famHypertension}
+                    onChange={(e) => setFamHypertension(e.target.checked)}
+                    className="h-4 w-4 accent-accent"
+                  />
+                  <span className="text-sm text-text-primary">고혈압</span>
+                </label>
+                <label className="flex items-center gap-[8px] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={famHeart}
+                    onChange={(e) => setFamHeart(e.target.checked)}
+                    className="h-4 w-4 accent-accent"
+                  />
+                  <span className="text-sm text-text-primary">심장질환</span>
+                </label>
+              </div>
             </div>
 
             <div className="rounded-md border border-border bg-bg p-[16px]">

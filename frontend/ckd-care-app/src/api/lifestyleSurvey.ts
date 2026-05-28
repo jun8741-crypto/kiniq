@@ -3,6 +3,7 @@ import { api } from "./client";
 export type SmokingStatus = "NEVER" | "PAST" | "CURRENT";
 export type DrinkingFrequency = "NEVER" | "OCCASIONALLY" | "WEEKLY" | "DAILY";
 export type StressLevel = "VERY_LOW" | "LOW" | "MODERATE" | "HIGH" | "VERY_HIGH";
+export type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "OTHER";
 
 export interface LifestyleSurveyCreateRequest {
   surveyed_date: string;
@@ -12,6 +13,16 @@ export interface LifestyleSurveyCreateRequest {
   sleep_hours_per_day?: number | null;
   daily_water_intake?: number | null;
   stress_level?: StressLevel | null;
+  // REQ-DATA-006 신규
+  vigorous_exercise_days?: number;
+  vigorous_exercise_minutes?: number;
+  moderate_exercise_days?: number;
+  moderate_exercise_minutes?: number;
+  sitting_hours_per_day?: number | null;
+  marital_status?: MaritalStatus | null;
+  family_history_diabetes?: boolean;
+  family_history_hypertension?: boolean;
+  family_history_heart_disease?: boolean;
 }
 
 export interface LifestyleSurveyResponse {
@@ -24,6 +35,15 @@ export interface LifestyleSurveyResponse {
   sleep_hours_per_day: number | null;
   daily_water_intake: number | null;
   stress_level: StressLevel | null;
+  vigorous_exercise_days: number;
+  vigorous_exercise_minutes: number;
+  moderate_exercise_days: number;
+  moderate_exercise_minutes: number;
+  sitting_hours_per_day: number | null;
+  marital_status: MaritalStatus | null;
+  family_history_diabetes: boolean;
+  family_history_hypertension: boolean;
+  family_history_heart_disease: boolean;
   created_at: string;
 }
 

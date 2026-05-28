@@ -28,6 +28,15 @@ class LifestyleSurveyService:
             sleep_hours_per_day=dto.sleep_hours_per_day,
             daily_water_intake=dto.daily_water_intake,
             stress_level=dto.stress_level,
+            vigorous_exercise_days=dto.vigorous_exercise_days,
+            vigorous_exercise_minutes=dto.vigorous_exercise_minutes,
+            moderate_exercise_days=dto.moderate_exercise_days,
+            moderate_exercise_minutes=dto.moderate_exercise_minutes,
+            sitting_hours_per_day=dto.sitting_hours_per_day,
+            marital_status=dto.marital_status,
+            family_history_diabetes=dto.family_history_diabetes,
+            family_history_hypertension=dto.family_history_hypertension,
+            family_history_heart_disease=dto.family_history_heart_disease,
         )
         return LifestyleSurveyResponse.model_validate(survey)
 
