@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { challengeApi, type HeatmapResponse } from "../api/challenge";
 
 const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -14,16 +14,12 @@ function colorForCount(count: number, max: number): string {
 }
 
 export function HeatmapWidget() {
-  const [data, setData] = useState<HeatmapResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    challengeApi
-      .heatmap(26)
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
-  }, []);
+  // 챌린지 히트맵 — 챌린지 5분 TTL
+  const { data, isLoading: loading } = useQuery<HeatmapResponse | null>({
+    queryKey: ["challenges", "heatmap", 26],
+    queryFn: () => challengeApi.heatmap(26).catch(() => null),
+    staleTime: 5 * 60 * 1000,
+  });
 
   if (loading) {
     return (

@@ -53,6 +53,18 @@ class HeatmapResponse(BaseSerializerModel):
     max_count: int  # 색상 단계 결정용
 
 
+class CategoryProgress(BaseSerializerModel):
+    category: ChallengeCategory
+    percent: int  # 0~100
+    active_count: int  # 해당 카테고리 활성 챌린지 수
+    total_checkins: int
+    total_duration: int
+
+
+class CategoryProgressResponse(BaseSerializerModel):
+    items: list[CategoryProgress]  # 5종 (HYDRATION/EXERCISE/DIET/SLEEP/STRESS)
+
+
 class CheckinAwardResponse(BaseSerializerModel):
     base: int
     lucky: bool

@@ -83,6 +83,18 @@ export interface HeatmapResponse {
   max_count: number;
 }
 
+export interface CategoryProgress {
+  category: ChallengeCategory;
+  percent: number;
+  active_count: number;
+  total_checkins: number;
+  total_duration: number;
+}
+
+export interface CategoryProgressResponse {
+  items: CategoryProgress[];
+}
+
 export const challengeApi = {
   list: () => api.get<ChallengeListResponse>("/challenges"),
   myList: (limit = 20, offset = 0) =>
@@ -92,4 +104,5 @@ export const challengeApi = {
   checkin: (userChallengeId: number) =>
     api.post<CheckInResponse>(`/user-challenges/${userChallengeId}/checkin`, {}),
   heatmap: (weeks = 26) => api.get<HeatmapResponse>(`/challenges/heatmap?weeks=${weeks}`),
+  categoryProgress: () => api.get<CategoryProgressResponse>("/challenges/category-progress"),
 };

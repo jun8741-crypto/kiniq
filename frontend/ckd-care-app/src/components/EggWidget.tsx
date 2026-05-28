@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { gamificationApi, SPECIES_EMOJI, type MascotResponse } from "../api/gamification";
 
 // 진화 단계 시각화 (이미지 첨부 전까지 이모지)
@@ -29,16 +29,12 @@ function nextThreshold(progress: number): { name: string; remaining: number } | 
 }
 
 export function EggWidget() {
-  const [data, setData] = useState<MascotResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    gamificationApi
-      .getMascot()
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
-  }, []);
+  // 캐릭터·알 진행률 — 캐릭터 5분 TTL (REQ-DASH-004)
+  const { data, isLoading: loading } = useQuery<MascotResponse | null>({
+    queryKey: ["gamification", "mascot"],
+    queryFn: () => gamificationApi.getMascot().catch(() => null),
+    staleTime: 5 * 60 * 1000,
+  });
 
   if (loading) {
     return (

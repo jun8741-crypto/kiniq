@@ -4,6 +4,8 @@ from fastapi import HTTPException
 from starlette import status
 
 from app.dtos.challenge import (
+    CategoryProgress,
+    CategoryProgressResponse,
     ChallengeListResponse,
     ChallengeResponse,
     CheckinAwardResponse,
@@ -15,7 +17,7 @@ from app.dtos.challenge import (
     UserChallengeListResponse,
     UserChallengeResponse,
 )
-from app.models.challenge import ChallengeTrack, UserChallengeStatus
+from app.models.challenge import ChallengeCategory, ChallengeTrack, UserChallengeStatus
 from app.models.health_check import AppGroup
 from app.repositories.challenge_repository import ChallengeRepository, UserChallengeRepository
 from app.services.charge_mode import ChargeModeService
@@ -213,3 +215,41 @@ class ChallengeService:
             cur += timedelta(days=1)
 
         return HeatmapResponse(weeks=weeks, today=today, days=days, max_count=max_count)
+
+    async def get_category_progress(self, user_id: int) -> CategoryProgressResponse:
+        """카테고리 5종별 active 챌린지 평균 진행률 (REQ-DASH-001 ⑥)."""
+        active_list = await self._user_repo.list_active_by_user(user_id)
+        # 카테고리별 집계
+        by_cat: dict[ChallengeCategory, dict] = {
+            cat: {"active_count": 0, "total_checkins": 0, "total_duration": 0} for cat in ChallengeCategory
+        }
+        for uc in active_list:
+            ch = await uc.challenge
+            cat = ch.category
+            by_cat[cat]["active_count"] += 1
+            by_cat[cat]["total_checkins"] += uc.total_checkins
+            by_cat[cat]["total_duration"] += ch.duration_days
+
+        items = []
+        # 명세 순서: HYDRATION/EXERCISE/DIET/SLEEP/STRESS
+        for cat in [
+            ChallengeCategory.HYDRATION,
+            ChallengeCategory.EXERCISE,
+            ChallengeCategory.DIET,
+            ChallengeCategory.SLEEP,
+            ChallengeCategory.STRESS,
+        ]:
+            data = by_cat[cat]
+            percent = 0
+            if data["total_duration"] > 0:
+                percent = int(min(100, round(data["total_checkins"] / data["total_duration"] * 100)))
+            items.append(
+                CategoryProgress(
+                    category=cat,
+                    percent=percent,
+                    active_count=data["active_count"],
+                    total_checkins=data["total_checkins"],
+                    total_duration=data["total_duration"],
+                )
+            )
+        return CategoryProgressResponse(items=items)

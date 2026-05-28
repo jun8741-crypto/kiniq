@@ -6,6 +6,7 @@ from fastapi.responses import ORJSONResponse as Response
 
 from app.dependencies.security import get_request_user
 from app.dtos.challenge import (
+    CategoryProgressResponse,
     ChallengeListResponse,
     CheckInResponse,
     HeatmapResponse,
@@ -103,6 +104,21 @@ async def checkin(
         today=date.today(),
     )
     return Response(result.model_dump(), status_code=status.HTTP_200_OK)
+
+
+@challenge_router.get(
+    "/category-progress",
+    response_model=CategoryProgressResponse,
+    status_code=status.HTTP_200_OK,
+    summary="카테고리별 라디알 진행률 (REQ-DASH-001 ⑥)",
+    description="수분/운동/식단/수면/스트레스 5종 카테고리별 active 챌린지 평균 진행률.",
+)
+async def get_category_progress(
+    user: Annotated[User, Depends(get_request_user)],
+    service: Annotated[ChallengeService, Depends(ChallengeService)],
+) -> Response:
+    result = await service.get_category_progress(user_id=user.id)
+    return Response(result.model_dump(mode="json"), status_code=status.HTTP_200_OK)
 
 
 @challenge_router.get(
