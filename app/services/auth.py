@@ -1,5 +1,7 @@
+import math
 import secrets
 import string
+from datetime import UTC, datetime, timedelta
 
 from fastapi.exceptions import HTTPException
 from pydantic import EmailStr
@@ -13,6 +15,10 @@ from app.dtos.auth import LoginRequest, SignUpRequest
 from app.models.users import User
 from app.repositories.user_repository import UserRepository
 from app.services.jwt import JwtService
+
+# REQ-AUTH-007 비밀번호 오류 잠금
+MAX_FAILED_ATTEMPTS = 5
+LOCK_DURATION_MINUTES = 30
 
 
 class AuthService:
@@ -52,15 +58,45 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST, detail="이메일 또는 비밀번호가 올바르지 않습니다."
             )
 
-        # 비밀번호 검증
-        if not verify_password(data.password, user.hashed_password):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="이메일 또는 비밀번호가 올바르지 않습니다."
-            )
-
-        # 활성 사용자 체크
+        # 비활성 계정 (탈퇴 등) 우선 차단
         if not user.is_active:
             raise HTTPException(status_code=status.HTTP_423_LOCKED, detail="비활성화된 계정입니다.")
+
+        # REQ-AUTH-007: 잠금 상태 체크
+        now = datetime.now(UTC)
+        if user.locked_until and user.locked_until > now:
+            remaining_seconds = (user.locked_until - now).total_seconds()
+            remaining_minutes = math.ceil(remaining_seconds / 60)
+            raise HTTPException(
+                status_code=status.HTTP_423_LOCKED,
+                detail=f"비밀번호 {MAX_FAILED_ATTEMPTS}회 이상 틀려 계정이 잠겼습니다. {remaining_minutes}분 후 다시 시도해주세요.",
+            )
+
+        # 비밀번호 검증
+        if not verify_password(data.password, user.hashed_password):
+            # 실패 카운터 +1
+            user.failed_login_count += 1
+            if user.failed_login_count >= MAX_FAILED_ATTEMPTS:
+                # 5회 도달 — 30분 잠금 후 카운터 리셋
+                user.locked_until = now + timedelta(minutes=LOCK_DURATION_MINUTES)
+                user.failed_login_count = 0
+                await user.save(update_fields=["failed_login_count", "locked_until", "updated_at"])
+                raise HTTPException(
+                    status_code=status.HTTP_423_LOCKED,
+                    detail=f"비밀번호를 {MAX_FAILED_ATTEMPTS}회 틀렸습니다. {LOCK_DURATION_MINUTES}분 후 다시 시도해주세요.",
+                )
+            await user.save(update_fields=["failed_login_count", "updated_at"])
+            remaining_attempts = MAX_FAILED_ATTEMPTS - user.failed_login_count
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"이메일 또는 비밀번호가 올바르지 않습니다. ({remaining_attempts}회 남음)",
+            )
+
+        # 비밀번호 성공 — 카운터·잠금 리셋
+        if user.failed_login_count > 0 or user.locked_until is not None:
+            user.failed_login_count = 0
+            user.locked_until = None
+            await user.save(update_fields=["failed_login_count", "locked_until", "updated_at"])
 
         return user
 
