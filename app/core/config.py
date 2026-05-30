@@ -33,6 +33,7 @@ class Config(BaseSettings):
     COOKIE_DOMAIN: str = "localhost"
 
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 14 * 24 * 60
+    # v0.7 결정: Access 15분 / Refresh 7일 (Rotate). 단위는 둘 다 '분'으로 통일 — tokens.py에서 timedelta(minutes=...)로 사용
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 7 * 24 * 60  # 10080분 = 7일
     JWT_LEEWAY: int = 5

@@ -89,7 +89,8 @@ class AccessToken(Token):
 
 class RefreshToken(Token):
     token_type = "refresh"
-    lifetime = timedelta(days=config.REFRESH_TOKEN_EXPIRE_MINUTES)
+    # 단위 버그 수정: 변수는 '분' 단위이므로 minutes= 사용 (이전 days= → 약 55년 유효 버그)
+    lifetime = timedelta(minutes=config.REFRESH_TOKEN_EXPIRE_MINUTES)
     no_copy_claims = ("type", "exp", "jti")
 
     @property
