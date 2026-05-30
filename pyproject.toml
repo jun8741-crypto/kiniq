@@ -21,6 +21,19 @@ ai = [
     "torchaudio",
     "sentence-transformers>=5.2.0"
 ]
+rag = [
+    # RAG 스택 (LangGraph StateGraph Self-corrective RAG — Phase 2~6)
+    "openai>=1.0",
+    "qdrant-client>=1.7",
+    "langchain>=1.0",
+    "langchain-openai",
+    "langchain-qdrant",
+    "langgraph>=0.2",
+    "langfuse>=3.0",
+    "pypdf>=4.0",
+    "pymupdf4llm>=0.0.17",
+    "tiktoken",
+]
 app = [
     "aerich>=0.9.2",
     "asyncmy>=0.2.11",

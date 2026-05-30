@@ -1,0 +1,15 @@
+# PoC 비밀·원본 자료 제외
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# 데이터 (재배포 금지)
+data/*.pdf
+data/*.txt
+
+# Qdrant 로컬 캐시 (인덱싱 결과, 재생성 가능)
+qdrant_local/
+
+# OS
+.DS_Store

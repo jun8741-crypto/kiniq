@@ -1,0 +1,142 @@
+"""RAG 인덱싱 전역 상수 (단일 진실 공급원).
+
+2026-05-29 RAG 심층점검(memory: project_rag_audit_2026-05-29) + probe_headers.py 실측 +
+06_chunking_strategy 학습카드 + project_api_model_policy 기준.
+chunking.py·embedder.py·qdrant_uploader.py 가 이 상수를 공유 import 한다.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+# ─────────────────────────────────────────────
+# 경로
+# ─────────────────────────────────────────────
+PKG_ROOT = Path(__file__).resolve().parent          # src/rag_indexing/
+DATA_DIR = PKG_ROOT / "data"                         # 원본 PDF/MD (PDF는 .gitignore)
+CHUNKS_DIR = PKG_ROOT / "chunks"                     # chunking.py JSONL 덤프 출력 (.gitignore 권장)
+
+# ─────────────────────────────────────────────
+# doc_type 매핑 (폴더 → 분류) — payload.doc_type 의 단일 정의
+# ─────────────────────────────────────────────
+DOC_TYPE_BY_FOLDER = {
+    "kdigo": "clinical",          # 영문 임상 가이드라인 (KDIGO)
+    "ksn_guideline": "clinical",  # 국문 임상 진료지침 (KSN 당뇨병/고혈압 콩팥병)
+    "knsn": "nutrition",          # 국문 영양·환자교육 (KSN 영양 + 질병관리청 바로알기)
+    "lifestyle": "lifestyle",     # 생활습관 (운동·금연·절주·수면·스트레스)
+}
+
+# ─────────────────────────────────────────────
+# 입력 형식 분기 (probe_headers 실측 기준)
+#   PDF (16개): 영문·국문 모두 ## 헤더 추출 OK → MarkdownHeader 청킹
+#   MD  (47개): ## 구조 전무(# 제목 1개씩) → MarkdownHeader 스킵, 제목 주입 + Recursive
+# ─────────────────────────────────────────────
+PDF_GLOBS = [
+    "kdigo/*.pdf",
+    "ksn_guideline/*.pdf",
+    "knsn/*.pdf",
+    "lifestyle/*.pdf",
+]
+MD_GLOBS = [
+    "lifestyle/nosmokeguide/*.md",
+    "lifestyle/alcohol/*.md",
+    "lifestyle/sleep/*.md",
+    "lifestyle/stress/*.md",
+]
+
+# ─────────────────────────────────────────────
+# 언어 판정 (payload.language) — 영문 소스 stem 집합이 단일 정의, 나머지는 ko
+#   kdigo 폴더 4개 + ISN 운동 합의문 1개만 영문. 그 외(국문 진료지침·영양·생활습관) ko.
+# ─────────────────────────────────────────────
+EN_PDF_STEMS = {
+    "KDIGO-2021-Blood-Pressure-in-CKD-Guideline",
+    "KDIGO-2022-Diabetes-CKD",
+    "KDIGO-2024-CKD-Guideline",
+    "NKF-About-CKD-patient",
+    "ISN-2024-Exercise-CKD-consensus",
+}
+
+# ─────────────────────────────────────────────
+# 인덱싱 제외 (파일명 부분문자열 매칭)
+#   소아청소년편 = 타겟(40세+) 밖 / CKRT = 중환자 지속신대체요법 시술
+# ─────────────────────────────────────────────
+SKIP_FILE_SUBSTRINGS = ["소아청소년", "CKRT"]
+# 검증용: raw PDF 16개 → SKIP 후 14개 (chunking.py 에서 assert)
+EXPECTED_RAW_PDF = 16
+EXPECTED_INDEXED_PDF = 14
+
+# ─────────────────────────────────────────────
+# 청킹 (Parent-Child 2단 — 06_chunking_strategy + PoC C단계 + probe)
+# ─────────────────────────────────────────────
+# PDF: MarkdownHeaderTextSplitter (# · ## 기준 / probe상 ###=0 이라 제외) → Recursive
+MARKDOWN_HEADERS = [("#", "h1"), ("##", "h2")]
+# Parent = 답변 맥락(넓음) / Child = 정밀 검색(좁음, 임베딩 대상)
+PARENT_CHUNK_SIZE = 2000
+PARENT_CHUNK_OVERLAP = 200
+CHILD_CHUNK_SIZE = 400
+CHILD_CHUNK_OVERLAP = 80
+# Recursive 분할 separator (단락 우선) — 헤더 없는 MD/긴 섹션에 사용
+RECURSIVE_SEPARATORS = ["\n\n", "\n", ". ", " ", ""]
+
+# reference 번호 후처리 제거 (단위 동반 수치·권고번호는 chunking.py 에서 lookahead 보호)
+STRIP_REFERENCES = True
+# 보호 대상 예: "2,000mg"(단위), "Recommendation 3.3.1.1"(권고번호) → 제거 금지
+
+# ─────────────────────────────────────────────
+# Qdrant collection (parent 는 벡터X 텍스트 저장만 → dev/prod 분리 불요)
+# ─────────────────────────────────────────────
+COLLECTION_CHILD_DEV = "medical_kb_dev"     # child 벡터, embed-3-small 1536d
+COLLECTION_CHILD_PROD = "medical_kb_prod"   # child 벡터, embed-3-large 3072d
+COLLECTION_PARENT = "medical_kb_parents"    # parent (벡터 없음, parent_id 로 조회)
+
+# ─────────────────────────────────────────────
+# 임베딩 모델 정책 (project_api_model_policy)
+#   small→large 변경 시 차원 1536→3072 → collection 재구축 필수
+# ─────────────────────────────────────────────
+EMBEDDING_MODEL_DEV = "text-embedding-3-small"
+EMBEDDING_MODEL_PROD = "text-embedding-3-large"
+EMBEDDING_DIM_DEV = 1536
+EMBEDDING_DIM_PROD = 3072
+
+# ─────────────────────────────────────────────
+# age_group 태깅 (P1-4 — chunking_audit 2026-05-29) — 소아 콘텐츠 식별 규칙
+#   타겟은 40세+ 성인 CKD. 소아 챕터는 드롭하지 않고 payload.age_group='pediatric' 으로
+#   태깅(무손실)해 retriever 가 성인 서비스에서 age_group!=pediatric 으로 격리한다.
+#   uploader(부착)·retriever(필터)가 이 규칙을 공유하는 단일 진실.
+#     • KSN 국문 진료지침: source 가 KSN- 으로 시작하고 h2 에 '소아' 포함 (당뇨병 9장·고혈압 8장)
+#     • KDIGO 영문: h2 에 pediatric/children/adolescent 포함 (성인 가이드라인 내 소아 섹션)
+# ─────────────────────────────────────────────
+PEDIATRIC_SOURCE_PREFIX = "KSN"
+PEDIATRIC_H2_KEYWORD_KO = "소아"
+PEDIATRIC_H2_KEYWORDS_EN = ("pediatric", "children", "adolescent")
+AGE_GROUP_DEFAULT = "adult"
+AGE_GROUP_PEDIATRIC = "pediatric"
+
+# ─────────────────────────────────────────────
+# Qdrant 업로드 (qdrant_uploader.py)
+# ─────────────────────────────────────────────
+QDRANT_DISTANCE = "Cosine"      # child 벡터 검색 거리 (정규화 임베딩 표준)
+UPLOAD_BATCH_SIZE = 256         # upsert 배치 크기
+# 로컬 스크립트 실행용 기본 URL (docker-compose 내부 호스트명 'qdrant' 가 아닌 localhost).
+# env QDRANT_URL 이 있으면 그것을 우선한다.
+QDRANT_LOCAL_URL = "http://localhost:6333"
+
+# ─────────────────────────────────────────────
+# payload 메타 스키마 (chunking.py 가 child/parent 에 부착, uploader 가 text·age_group 추가)
+#   doc_type(폴더 기반)·source·section(헤더)·parent_id·hash·reference_removed
+# ─────────────────────────────────────────────
+PAYLOAD_FIELDS = [
+    "doc_type",          # clinical | nutrition | lifestyle
+    "source",            # 파일 stem (예: KDIGO-2024-CKD-Guideline)
+    "language",          # ko | en
+    "h1", "h2",          # MarkdownHeader 그룹 (MD는 frontmatter title → h1)
+    "page",              # PDF 페이지 (가능 시)
+    "parent_id",         # child → parent 조회 키
+    "chunk_idx",
+    "age_group",         # adult | pediatric (uploader 가 부착 — P1-4)
+    "text",              # 원문 (uploader 가 부착 — 검색 결과 반환용)
+]
+
+# ─────────────────────────────────────────────
+# 재현성
+# ─────────────────────────────────────────────
+SEED = 42

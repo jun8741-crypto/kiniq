@@ -90,6 +90,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      qdrant:
+        condition: service_started   # RAG 벡터 검색 (REQ-RAG)
 
   # 5. Nginx (웹 서버 - 요청 리버스 프록시로 전달)
   nginx:
@@ -105,9 +107,25 @@ services:
     depends_on:
       - fastapi
 
+  # 6. Qdrant (RAG 벡터 DB — 의미 검색, REQ-RAG)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: always
+    ports:
+      - "6333:6333"   # REST API + 웹 대시보드 (http://localhost:6333/dashboard)
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage   # 벡터·컬렉션 영구 저장 (컨테이너 삭제돼도 유지)
+    networks:
+      - ws
+    # Qdrant 이미지에 셸/curl이 없어 compose healthcheck는 생략.
+    # ai-worker는 condition: service_started로 의존하고, 앱 레벨에서 /readyz 확인 권장.
+
 volumes:
   mysql_data:
   static_volume:
+  qdrant_data:   # Qdrant 벡터 스토리지
 
 networks:
   ws:
