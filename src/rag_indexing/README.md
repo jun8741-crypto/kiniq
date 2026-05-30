@@ -4,7 +4,7 @@
 > 원본 문서(가이드라인 PDF·환자교육 MD)를 청킹·임베딩해 **Qdrant 벡터 DB에 적재**한다.
 > 추론 트랙(질문→검색→생성)은 `ai_worker/rag/`에서 별도로 구현한다 (Phase 4, 미구현).
 
-**최종 갱신**: 2026-05-30 · 인덱싱 ✅ 완료 / 추론 ⏳ Phase 4
+**최종 갱신**: 2026-05-30 · 인덱싱 ✅ / 추론 ✅ (Phase 4 완료) / API·평가 ⏳ Phase 5~6
 
 ---
 
@@ -23,7 +23,7 @@ flowchart LR
     D --> F["medical_kb_parents<br/>parent 4,109 (맥락조회)"]
 ```
 
-### Part 2 · 추론 (온라인 런타임) — `ai_worker/rag/` ⏳ Phase 4
+### Part 2 · 추론 (온라인 런타임) — `ai_worker/rag/` ✅ Phase 4 완료
 
 ```mermaid
 flowchart TD
@@ -54,7 +54,7 @@ flowchart TD
 | 임베딩 | `embedder.py` → `chunks/embedded_child_chunks.jsonl` | ✅ |
 | 업로드 | `qdrant_uploader.py` → Qdrant 2 collection | ✅ |
 | 검증 | 골든질문 검색 스모크 3/3 정확 | ✅ |
-| 추론 | `ai_worker/rag/` LangGraph | ⏳ Phase 4 |
+| 추론 | `ai_worker/rag/` LangGraph 8노드 + 안전가드 | ✅ (스모크 3/3) |
 
 **실측**: child 13,220 → dedup 후 **12,271** 적재 / parent **4,109** / 임베딩 비용 **$0.031**(dev).
 
@@ -146,11 +146,16 @@ python ../src/rag_indexing/test_uploader.py    # 14
 
 ---
 
-## 다음 — Phase 4 추론 (`ai_worker/rag/`)
+## 추론 (`ai_worker/rag/`) ✅ Phase 4 완료
 
-오늘 검증된 retrieve 경로(child 검색 → `age_group=adult` 필터 → parent 조회)를 LangGraph StateGraph 노드로 감싼다:
-`guard → retrieve → grade_documents → (부족 시) rewrite → generate → post_guard`
+검증된 retrieve 경로(child 검색 → `age_group=adult` 필터 → parent 조회)를 LangGraph StateGraph
+8노드로 감쌌다: `guard → retrieve → grade → rewrite(≤2) → generate → hallucination → answer_grade → post_guard`.
+- `retriever.py`: 본 인덱스(`medical_kb_dev`/`medical_kb_parents`) qdrant-client 직접 검색
+- `safety_guard.py`: 응급(119)·자해(1393)·약물·진단·eGFR<30 차단 + 금지표현 검출 (05 명세)
+- 통합 스모크 3/3, 단위 24 (`ai_worker/rag/test_*.py`)
+- 실행: `from ai_worker.rag import run` → `run("질문", user_context={"eGFR":50})`
 
-- retriever: 본 인덱스(`medical_kb_dev`/`medical_kb_parents`) 검색
-- safety_guard: 응급(119)·자해(1393)·약물 차단
-- Langfuse: 노드별 trace + PII 마스킹
+## 다음 — Phase 5~6
+
+- **Phase 5**: `POST /api/v1/chat/messages` + Redis Stream + SSE + `ai_worker/main.py` task consumer
+- **Phase 6**: 평가셋(정확도·출처 인용률)·Langfuse 실통합·near-duplicate dedup 강화
