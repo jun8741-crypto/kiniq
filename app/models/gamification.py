@@ -51,7 +51,7 @@ class UserEgg(models.Model):
     user = fields.ForeignKeyField("models.User", related_name="eggs")
     egg_no = fields.IntField(description="사용자 기준 몇 번째 알 (1부터 시작)")
     progress_checkins = fields.IntField(default=0, description="누적 체크인 수 (0~100)")
-    current_stage = fields.IntField(default=1, description="1=0~25%, 2=25~50%, 3=50~75%, 4=75~100%, 5=부화")
+    current_stage = fields.IntField(default=0, description="0=알, 1=부화(10), 2=2단계(40), 3=완전체(100)")
     is_legendary = fields.BooleanField(null=True, description="v1.0 비활성 (전설 제거). 항상 False, 향후 부활 여지")
     species = fields.CharEnumField(
         enum_type=CharacterSpecies, null=True, description="부화 시 추첨된 종. 진행 중엔 NULL"

@@ -45,15 +45,7 @@ center, light green limbs, big shiny eyes, friendly smile, kawaii style,
 transparent background
 ```
 
-### 거북이 3단계 (turtle_stage3.png)
-```
-Confident young turtle character, larger size, vivid green shell with
-multiple hexagon patterns, blue scarf around neck, brave expression, big
-expressive eyes, two stars in background (yellow #FBBF24), kawaii heroic
-pose, transparent background
-```
-
-### 거북이 4단계 (turtle_stage4.png)
+### 거북이 3단계 / 완전체 (turtle_stage3.png)
 ```
 Majestic adult turtle hero with golden crown, deep emerald shell with
 intricate hexagon patterns, magical yellow aura glow #FBBF24, sparkles
@@ -77,14 +69,7 @@ and feet, kawaii illustration, soft pastel shading, transparent
 background
 ```
 
-### 펭귄 3단계 (penguin_stage3.png)
-```
-Brave penguin explorer with blue triangular hat with yellow pompom, gold
-star medal on chest with red ribbon, bigger body, determined expression,
-shiny eyes, kawaii heroic pose, sparkles around, transparent background
-```
-
-### 펭귄 4단계 (penguin_stage4.png)
+### 펭귄 3단계 / 완전체 (penguin_stage3.png)
 ```
 Royal majestic penguin with golden jeweled crown with red and blue gems,
 glowing golden aura, red diamond brooch on chest, ultimate evolved form,
@@ -107,14 +92,7 @@ holding a brown acorn with dark cap, light belly, ear tufts, cheerful
 expression, kawaii style, transparent background, soft pastel lighting
 ```
 
-### 다람쥐 3단계 (squirrel_stage3.png)
-```
-Adventurer squirrel with large fluffy gradient tail, blue scarf, holding
-a shiny golden acorn, confident expression, sparkly eyes, two stars in
-background, kawaii heroic pose, transparent background
-```
-
-### 다람쥐 4단계 (squirrel_stage4.png)
+### 다람쥐 3단계 / 완전체 (squirrel_stage3.png)
 ```
 Legendary squirrel king with golden crown with jewels, massive sparkling
 fluffy tail with golden streaks, glowing yellow aura, holding a diamond-
@@ -172,17 +150,7 @@ pose, magical sparkles, transparent background
 - 카와이 스타일, 투명 배경, 1024x1024 PNG
 ```
 
-#### 거북이 3단계
-```
-자신감 넘치는 청년 거북이를 그려줘.
-- 더 크고 선명한 초록 등껍질 + 다채로운 육각형 패턴
-- 목에 파란색 스카프
-- 양옆에 노란 별 2개
-- 용감한 표정, 반짝이는 눈
-- 카와이 영웅 포즈, 투명 배경, 1024x1024 PNG
-```
-
-#### 거북이 4단계 (완전체)
+#### 거북이 3단계 / 완전체
 ```
 신장 건강 앱의 최종 진화 거북이 마스코트, 왕의 풍모.
 - 깊은 에메랄드 등껍질, 정교한 육각형 패턴
@@ -212,17 +180,7 @@ pose, magical sparkles, transparent background
 - 카와이 일러스트, 투명 배경, 1024x1024 PNG
 ```
 
-#### 펭귄 3단계
-```
-탐험가 펭귄 캐릭터를 그려줘.
-- 파란색 삼각 모자(끝에 황금 폼폼)
-- 가슴에 황금 별 메달 (빨간 리본)
-- 더 큰 몸, 자신감 있는 표정, 반짝이는 눈
-- 주변에 작은 별 2개
-- 카와이 영웅 포즈, 투명 배경, 1024x1024 PNG
-```
-
-#### 펭귄 4단계 (완전체)
+#### 펭귄 3단계 / 완전체
 ```
 펭귄 황제, 최종 진화 형태.
 - 머리에 황금 보석 왕관 (빨강·파랑 보석)
@@ -254,18 +212,7 @@ pose, magical sparkles, transparent background
 - 카와이 스타일, 투명 배경, 1024x1024 PNG
 ```
 
-#### 다람쥐 3단계
-```
-모험가 다람쥐를 그려줘.
-- 크고 풍성한 그라데이션 꼬리
-- 목에 파란색 스카프
-- 한 손에 황금 도토리
-- 양옆에 노란 별 2개
-- 자신감 있는 표정, 반짝이는 눈
-- 카와이 영웅 포즈, 투명 배경, 1024x1024 PNG
-```
-
-#### 다람쥐 4단계 (완전체)
+#### 다람쥐 3단계 / 완전체
 ```
 전설의 다람쥐 왕, 최종 진화.
 - 머리에 황금 왕관 (보석 박힘)
@@ -312,9 +259,9 @@ pose, magical sparkles, transparent background
 ```
 frontend/ckd-care-app/public/characters/
 ├── egg.png
-├── turtle_stage1.png ~ turtle_stage4.png
-├── penguin_stage1.png ~ penguin_stage4.png
-└── squirrel_stage1.png ~ squirrel_stage4.png
+├── turtle_stage1.png ~ turtle_stage3.png
+├── penguin_stage1.png ~ penguin_stage3.png
+└── squirrel_stage1.png ~ squirrel_stage3.png
 ```
 
 **2. `src/api/gamification.ts`에서 확장자 한 줄 변경**:
@@ -341,7 +288,6 @@ egg도 같은 함수 안의 `egg.svg`를 `egg.png`로 변경.
   ```bash
   cp turtle_stage1.png turtle_stage2.png
   cp turtle_stage1.png turtle_stage3.png
-  cp turtle_stage1.png turtle_stage4.png
   ```
 - **알 1장 + 종별 1장 = 최소 4장만 있어도 발표 가능**.
 

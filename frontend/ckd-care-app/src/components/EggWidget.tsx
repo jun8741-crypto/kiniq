@@ -3,29 +3,29 @@ import { useQuery } from "@tanstack/react-query";
 import { gamificationApi, type MascotResponse } from "../api/gamification";
 import { CharacterImage } from "./CharacterImage";
 
-// 진화 단계 시각화 — public/characters/*.png 우선, 없으면 CharacterImage가 이모지 fallback
-// 0=알, 1=부화 1단계, 2=2단계, 3=3단계, 4=4단계 완전체
-const STAGE_LABEL = ["알", "1단계", "2단계", "3단계", "완전체"];
+// 진화 단계 시각화 — public/characters/*.svg 우선, 없으면 CharacterImage가 이모지 fallback
+// 0=알, 1=부화 1단계, 2=2단계, 3=3단계 완전체
+const STAGE_LABEL = ["알", "1단계", "2단계", "완전체"];
 
 // 진화 임계값
 const HATCH_AT = 10;
-const GOAL_CHECKINS = 200;
-const GOAL_GRADIENT_FINAL = 180;
+const EVOLVE_2 = 40;
+const GOAL_CHECKINS = 100;
+const GOAL_GRADIENT_FINAL = 90;
 
 function progressColor(progress: number, isCharge: boolean): string {
   if (isCharge) return "#94A3B8";
-  if (progress >= GOAL_GRADIENT_FINAL) return "#DC2626";  // 4단계 임박 빨강
-  if (progress >= 100) return "#F59E0B";  // 3단계 도달 주황
-  if (progress >= 40) return "#16A34A";   // 2단계 도달 초록
-  return "#3B82F6";                        // 부화 전·후 초기 파랑
+  if (progress >= GOAL_GRADIENT_FINAL) return "#DC2626"; // 완전체 임박 빨강
+  if (progress >= EVOLVE_2) return "#F59E0B"; // 2단계 이후 주황
+  if (progress >= HATCH_AT) return "#16A34A"; // 부화 후 초록
+  return "#3B82F6"; // 알 단계 파랑
 }
 
 function nextThreshold(progress: number): { name: string; remaining: number } | null {
   if (progress < HATCH_AT) return { name: "부화", remaining: HATCH_AT - progress };
-  if (progress < 40) return { name: "2단계", remaining: 40 - progress };
-  if (progress < 100) return { name: "3단계", remaining: 100 - progress };
-  if (progress < GOAL_CHECKINS) return { name: "4단계", remaining: GOAL_CHECKINS - progress };
-  return null;  // 4단계 완료
+  if (progress < EVOLVE_2) return { name: "2단계", remaining: EVOLVE_2 - progress };
+  if (progress < GOAL_CHECKINS) return { name: "완전체", remaining: GOAL_CHECKINS - progress };
+  return null;
 }
 
 export function EggWidget() {
@@ -59,13 +59,13 @@ export function EggWidget() {
   const egg = data.current_egg;
   const charge = data.charge_mode;
   const isCharge = charge.is_active;
-  const stageIdx = Math.max(0, Math.min(egg.current_stage, 4));
+  const stageIdx = Math.max(0, Math.min(egg.current_stage, 3));
   const label = STAGE_LABEL[stageIdx];
   const progress = egg.progress_checkins;
   const percentToGoal = Math.round((progress / GOAL_CHECKINS) * 100);
   const color = progressColor(progress, isCharge);
   const next = nextThreshold(progress);
-  const isComplete = stageIdx === 4;
+  const isComplete = stageIdx === 3;
 
   return (
     <div className="flex w-[280px] flex-col items-center gap-[10px] rounded-md border border-border bg-bg p-[16px]">

@@ -62,9 +62,9 @@ export function CheckinResultModal({ result, onClose }: Props) {
       </div>
     );
   } else if (evolvedTo && species) {
-    // 2/3/4 단계 진화
-    const isFinal = evolvedTo === 4;
-    const evolutionName = isFinal ? "완전체!" : evolvedTo === 3 ? "더 커졌어요" : "더 자랐어요";
+    // 2/3 단계 진화 (3=완전체)
+    const isFinal = evolvedTo === 3;
+    const evolutionName = isFinal ? "완전체!" : "더 자랐어요";
     title = isFinal
       ? `🌟 ${characterName ?? "캐릭터"} 가 완전체로 진화!`
       : `✨ ${characterName ?? "캐릭터"} 가 ${evolvedTo}단계로!`;

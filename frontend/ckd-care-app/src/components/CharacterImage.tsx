@@ -16,10 +16,10 @@ interface Props {
 export function CharacterImage({ species, stage, size = 110, emojiClass = "text-5xl" }: Props) {
   const [imageOk, setImageOk] = useState(true);
   const src = characterImagePath(species, stage);
-  const safeStage = Math.max(0, Math.min(stage, 4));
+  const safeStage = Math.max(0, Math.min(stage, 3));
   const fallbackEmoji = stage === 0
     ? "🥚"
-    : (species ? SPECIES_EMOJI[species] : ["🥚", "🐣", "🐥", "🐤", "🌟"][safeStage]);
+    : (species ? SPECIES_EMOJI[species] : ["🥚", "🐣", "🐥", "🌟"][safeStage]);
 
   if (!src || !imageOk) {
     return <span className={emojiClass}>{fallbackEmoji}</span>;

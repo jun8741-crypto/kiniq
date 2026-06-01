@@ -1,24 +1,23 @@
-"""알 → 4단계 진화 시스템 서비스.
+"""알 → 3단계 진화 시스템 서비스.
 
-명세 v2 (2026-05-27 갱신): 단일 알을 4단계까지 키우는 구조.
+명세 v3 (2026-06-01 갱신): 단일 알을 3단계까지 키우는 구조.
 
 진화 흐름:
   체크인 0~9회   → 알 🥚 (stage=0)
   체크인 10회 도달 → 부화! 1단계 캐릭터 등장 (종 추첨 + 이름 생성)
   체크인 40회 도달 → 2단계 진화
-  체크인 100회 도달 → 3단계 진화
-  체크인 200회 도달 → 4단계 최종 진화 (완료, 새 알 자동 시작 X)
+  체크인 100회 도달 → 3단계 최종 진화 (완료, 새 알 자동 시작 X)
 
-진화 보너스: +100 / +200 / +350 / +600 pt (각 단계 도달 시 1회)
-Goal Gradient 알림: 180회 도달 시 1회 ("4단계 임박!")
+진화 보너스: +100 / +400 / +750 pt (균형 분배, 합 1,250pt)
+Goal Gradient 알림: 90회(=3단계 임박, 90%) 도달 시 1회.
 
 DB 필드 재활용 (스키마 변경 없이 의미만 재정의):
   stage_25_bonus_paid   → HATCH_AT(10) 보너스 지급됨
   stage_50_bonus_paid   → EVOLVE_2(40) 진화 보너스 지급됨
-  stage_75_bonus_paid   → EVOLVE_3(100) 진화 보너스 지급됨
-  stage_100_bonus_paid  → EVOLVE_4(200) 최종 진화 보너스 지급됨
-  goal_90_alerted       → 180회 알림 발송됨
-  goal_70_alerted       → (사용 안 함, 향후 부활 여지)
+  stage_75_bonus_paid   → EVOLVE_3(100) 최종 진화 보너스 지급됨
+  stage_100_bonus_paid  → 미사용 (legacy, 향후 부활 여지)
+  goal_90_alerted       → 90회 알림 발송됨
+  goal_70_alerted       → 미사용 (legacy)
 """
 
 from dataclasses import dataclass, field
@@ -34,20 +33,18 @@ from app.repositories.notification_repository import NotificationRepository
 HATCH_AT = 10
 EVOLVE_2 = 40
 EVOLVE_3 = 100
-EVOLVE_4 = 200
 
 # 최종 진화 시점 (= 진행률 100% 기준)
-GOAL_CHECKINS = EVOLVE_4
+GOAL_CHECKINS = EVOLVE_3
 
-# Goal Gradient 알림 (최종 진화 임박)
-GOAL_GRADIENT_FINAL = 180  # 90% 시점
+# Goal Gradient 알림 (최종 진화 임박, 90%)
+GOAL_GRADIENT_FINAL = 90
 
 # 진화 테이블: (임계, 단계번호, 보너스pt, DB flag 이름)
 EVOLUTION_TABLE: list[tuple[int, int, int, str]] = [
     (HATCH_AT, 1, 100, "stage_25_bonus_paid"),
-    (EVOLVE_2, 2, 200, "stage_50_bonus_paid"),
-    (EVOLVE_3, 3, 350, "stage_75_bonus_paid"),
-    (EVOLVE_4, 4, 600, "stage_100_bonus_paid"),
+    (EVOLVE_2, 2, 400, "stage_50_bonus_paid"),
+    (EVOLVE_3, 3, 750, "stage_75_bonus_paid"),
 ]
 
 SPECIES_LABEL: dict[CharacterSpecies, str] = {
@@ -58,25 +55,24 @@ SPECIES_LABEL: dict[CharacterSpecies, str] = {
 
 EVOLUTION_NAMES: dict[int, str] = {
     2: "더 자랐어요",
-    3: "더 커졌어요",
-    4: "완전체!",
+    3: "완전체!",
 }
 
 
 @dataclass
 class EggUpdate:
     progress_checkins: int = 0
-    current_stage: int = 0  # 0=알, 1=부화, 2/3/4=진화 단계
-    goal_70_just_alerted: bool = False  # legacy (사용 안 함)
-    goal_90_just_alerted: bool = False  # 180회 알림 발동
+    current_stage: int = 0  # 0=알, 1=부화, 2=2단계, 3=완전체
+    goal_70_just_alerted: bool = False  # legacy
+    goal_90_just_alerted: bool = False  # 90회 알림 발동
     stage_bonus: int = 0
-    stage_milestone: int = 0  # 도달한 임계 (10/40/100/200)
+    stage_milestone: int = 0  # 도달한 임계 (10/40/100)
     hatched: bool = False  # 부화(1단계) 도달
-    evolved_to: int | None = None  # 진화한 단계 (2/3/4). hatched 일 때는 None
+    evolved_to: int | None = None  # 진화한 단계 (2/3). hatched 일 때는 None
     is_legendary: bool | None = None  # v1.0 비활성
     species: CharacterSpecies | None = None  # 부화 시 결정
     character_name: str | None = None
-    new_egg_no: int | None = None  # 4단계 완료해도 새 알 자동 시작 X (None)
+    new_egg_no: int | None = None  # 3단계 완료해도 새 알 자동 시작 X (None)
     extras: dict = field(default_factory=dict)
 
 
@@ -90,8 +86,8 @@ class EggService:
         """체크인 1회마다 호출. 진행률 +1 + 단계 전환 + 진화/부화 알림 + 보너스."""
         egg = await self._eggs.get_or_create_current(user_id)
 
-        # 4단계 완료 상태면 freeze — 추가 체크인 효과 없음
-        if egg.current_stage >= 4:
+        # 3단계 완료 상태면 freeze — 추가 체크인 효과 없음
+        if egg.current_stage >= 3:
             return EggUpdate(
                 progress_checkins=egg.progress_checkins,
                 current_stage=egg.current_stage,
@@ -140,7 +136,7 @@ class EggService:
                     update.species = species
                     update.character_name = character_name
                 else:
-                    # 진화 (2/3/4 단계)
+                    # 진화 (2/3 단계)
                     name = egg.character_name or "캐릭터"
                     headline = EVOLUTION_NAMES[stage_no]
                     await self._notif.create(
@@ -156,28 +152,26 @@ class EggService:
                 update.stage_bonus = bonus
                 update.stage_milestone = threshold
 
-        # Goal Gradient 알림 (180회 = 4단계 임박, 1회)
+        # Goal Gradient 알림 (90회 = 3단계 임박, 1회)
         if egg.progress_checkins >= GOAL_GRADIENT_FINAL and not egg.goal_90_alerted:
             remaining = GOAL_CHECKINS - egg.progress_checkins
             await self._notif.create(
                 user_id=user_id,
                 type=NotificationType.EGG_GOAL_90,
                 title="최종 진화 임박!",
-                message=f"앞으로 {remaining}번만 더 체크인하면 4단계 완성!",
+                message=f"앞으로 {remaining}번만 더 체크인하면 3단계 완성!",
                 related_id=egg.id,
             )
             egg.goal_90_alerted = True
             update.goal_90_just_alerted = True
 
         await egg.save()
-        # 4단계 도달 = 완료. 새 알 자동 시작 X. (update.new_egg_no는 None 유지)
+        # 3단계 도달 = 완료. 새 알 자동 시작 X. (update.new_egg_no는 None 유지)
         return update
 
     @staticmethod
     def _calc_stage(progress: int) -> int:
-        """0=알, 1=부화, 2=2단계, 3=3단계, 4=4단계 최종."""
-        if progress >= EVOLVE_4:
-            return 4
+        """0=알, 1=부화, 2=2단계, 3=3단계 최종."""
         if progress >= EVOLVE_3:
             return 3
         if progress >= EVOLVE_2:

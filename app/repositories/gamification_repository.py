@@ -51,17 +51,17 @@ class PointRepository:
 
 class EggRepository:
     async def get_current(self, user_id: int) -> UserEgg | None:
-        """4단계 미완료 알. 없으면 None (한 번도 안 가졌거나 모두 완료)."""
-        return await UserEgg.filter(user_id=user_id).exclude(current_stage__gte=4).order_by("-egg_no").first()
+        """3단계 미완료 알. 없으면 None (한 번도 안 가졌거나 모두 완료)."""
+        return await UserEgg.filter(user_id=user_id).exclude(current_stage__gte=3).order_by("-egg_no").first()
 
     async def get_or_create_current(self, user_id: int) -> UserEgg:
-        """진행 중인 알 반환. 모두 4단계 완료면 최근 알(freeze 상태) 반환. 한 번도 없으면 새로 생성."""
+        """진행 중인 알 반환. 모두 3단계 완료면 최근 알(freeze 상태) 반환. 한 번도 없으면 새로 생성."""
         egg = await self.get_current(user_id)
         if egg:
             return egg
         last = await UserEgg.filter(user_id=user_id).order_by("-egg_no").first()
         if last:
-            # 4단계 완료된 알 → 그대로 반환 (진행률 freeze, 새 알 자동 시작 X)
+            # 3단계 완료된 알 → 그대로 반환 (진행률 freeze, 새 알 자동 시작 X)
             return last
         # 처음 — 새 알 생성
         return await UserEgg.create(user_id=user_id, egg_no=1)
