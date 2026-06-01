@@ -37,3 +37,23 @@ class ForgotPasswordRequest(BaseModel):
 
 class ForgotPasswordResponse(BaseModel):
     temp_password: str
+
+
+class PasswordResetRequestBody(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetRequestResponse(BaseModel):
+    sent: bool
+    mode: str
+    demo_code: str | None = None
+    expires_in_seconds: int
+
+
+class PasswordResetVerifyBody(BaseModel):
+    email: EmailStr
+    code: Annotated[str, Field(min_length=6, max_length=6, pattern=r"^\d{6}$")]
+
+
+class PasswordResetVerifyResponse(BaseModel):
+    temp_password: str

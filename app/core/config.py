@@ -44,3 +44,11 @@ class Config(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+
+    # 이메일 (REQ-AUTH 비밀번호 재설정)
+    # EMAIL_MODE: demo = 응답에 코드 반환 (시연용, 외부 호출 X) / production = Resend 실제 발송
+    EMAIL_MODE: str = "demo"
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM: str = "CKD Care <onboarding@resend.dev>"
+    PASSWORD_RESET_CODE_TTL_SECONDS: int = 300  # 5분
+    PASSWORD_RESET_MAX_ATTEMPTS: int = 5

@@ -28,6 +28,13 @@ export interface UserInfo {
   created_at: string;
 }
 
+export interface PasswordResetRequestResponse {
+  sent: boolean;
+  mode: "demo" | "production";
+  demo_code: string | null;
+  expires_in_seconds: number;
+}
+
 export const authApi = {
   login: (body: LoginRequest) => api.post<LoginResponse>("/auth/login", body),
   signup: (body: SignUpRequest) => api.post<{ detail: string }>("/auth/signup", body),
@@ -37,4 +44,9 @@ export const authApi = {
     api.patch<void>("/users/me/password", body),
   deleteAccount: () => api.delete<void>("/users/me"),
   forgotPassword: (email: string) => api.post<{ temp_password: string }>("/auth/forgot-password", { email }),
+  // 새 2단계 흐름
+  requestPasswordReset: (email: string) =>
+    api.post<PasswordResetRequestResponse>("/auth/password-reset/request", { email }),
+  verifyPasswordReset: (email: string, code: string) =>
+    api.post<{ temp_password: string }>("/auth/password-reset/verify", { email, code }),
 };

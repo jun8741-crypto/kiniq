@@ -14,6 +14,10 @@ from app.dtos.auth import (
     ForgotPasswordResponse,
     LoginRequest,
     LoginResponse,
+    PasswordResetRequestBody,
+    PasswordResetRequestResponse,
+    PasswordResetVerifyBody,
+    PasswordResetVerifyResponse,
     SignUpRequest,
     TokenRefreshResponse,
 )
@@ -235,8 +239,9 @@ async def token_refresh(
     "/forgot-password",
     response_model=ForgotPasswordResponse,
     status_code=status.HTTP_200_OK,
-    summary="임시 비밀번호 발급",
-    description="이메일로 임시 비밀번호를 발급합니다. 발급 즉시 기존 비밀번호는 무효화됩니다.",
+    summary="임시 비밀번호 발급 (즉시·구버전)",
+    description="이메일로 임시 비밀번호를 즉시 발급합니다. 발급 즉시 기존 비밀번호는 무효화됩니다.",
+    deprecated=True,
 )
 async def forgot_password(
     request: ForgotPasswordRequest,
@@ -244,3 +249,46 @@ async def forgot_password(
 ) -> Response:
     temp_pw = await auth_service.issue_temp_password(email=str(request.email))
     return Response(content=ForgotPasswordResponse(temp_password=temp_pw).model_dump(), status_code=status.HTTP_200_OK)
+
+
+@auth_router.post(
+    "/password-reset/request",
+    response_model=PasswordResetRequestResponse,
+    status_code=status.HTTP_200_OK,
+    summary="비밀번호 재설정 코드 요청",
+    description=(
+        "이메일로 6자리 인증 코드를 발송합니다 (TTL 5분). EMAIL_MODE=demo일 경우 응답에 코드를 직접 반환합니다(시연용)."
+    ),
+)
+async def request_password_reset(
+    body: PasswordResetRequestBody,
+    auth_service: Annotated[AuthService, Depends(AuthService)],
+) -> Response:
+    result = await auth_service.request_password_reset(email=str(body.email))
+    return Response(
+        content=PasswordResetRequestResponse(
+            sent=result.sent,
+            mode=result.mode,
+            demo_code=result.demo_code,
+            expires_in_seconds=config.PASSWORD_RESET_CODE_TTL_SECONDS,
+        ).model_dump(),
+        status_code=status.HTTP_200_OK,
+    )
+
+
+@auth_router.post(
+    "/password-reset/verify",
+    response_model=PasswordResetVerifyResponse,
+    status_code=status.HTTP_200_OK,
+    summary="비밀번호 재설정 코드 검증 + 임시 비밀번호 발급",
+    description="6자리 코드 검증 후 임시 비밀번호를 발급합니다. 검증 실패 5회 초과 시 코드 무효화.",
+)
+async def verify_password_reset(
+    body: PasswordResetVerifyBody,
+    auth_service: Annotated[AuthService, Depends(AuthService)],
+) -> Response:
+    temp_pw = await auth_service.verify_password_reset(email=str(body.email), code=body.code)
+    return Response(
+        content=PasswordResetVerifyResponse(temp_password=temp_pw).model_dump(),
+        status_code=status.HTTP_200_OK,
+    )

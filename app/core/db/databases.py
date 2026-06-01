@@ -13,6 +13,7 @@ TORTOISE_APP_MODELS = [
     "app.models.diet_survey",
     "app.models.notification_setting",
     "app.models.gamification",
+    "app.models.password_reset",
 ]
 
 TORTOISE_ORM = {

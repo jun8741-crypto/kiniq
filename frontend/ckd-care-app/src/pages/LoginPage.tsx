@@ -18,13 +18,26 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 비밀번호 찾기 상태
+  // 비밀번호 찾기 상태 (2단계 흐름)
   const [showForgot, setShowForgot] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"email" | "code" | "done">("email");
   const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotCode, setForgotCode] = useState("");
+  const [demoCode, setDemoCode] = useState<string | null>(null);
+  const [emailMode, setEmailMode] = useState<"demo" | "production">("demo");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [tempPassword, setTempPassword] = useState("");
   const [forgotError, setForgotError] = useState("");
+
+  function resetForgot() {
+    setShowForgot(false);
+    setForgotStep("email");
+    setForgotEmail("");
+    setForgotCode("");
+    setDemoCode(null);
+    setTempPassword("");
+    setForgotError("");
+  }
 
   async function handleLogin() {
     if (!email || !password) { setError("이메일과 비밀번호를 입력하세요."); return; }
@@ -41,12 +54,11 @@ export function LoginPage() {
     }
   }
 
-  async function handleForgotSubmit() {
+  async function handleRequestCode() {
     if (!forgotEmail) {
       setForgotError("이메일을 입력해주세요.");
       return;
     }
-    // 클라이언트 측 이메일 형식 검증 (백엔드 영어 에러 차단)
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
       setForgotError("올바른 이메일 형식이 아닙니다.");
       return;
@@ -54,16 +66,40 @@ export function LoginPage() {
     setForgotError("");
     setForgotLoading(true);
     try {
-      const res = await authApi.forgotPassword(forgotEmail);
-      setTempPassword(res.temp_password);
-      setForgotSent(true);
+      const res = await authApi.requestPasswordReset(forgotEmail);
+      setEmailMode(res.mode);
+      setDemoCode(res.demo_code);
+      setForgotStep("code");
     } catch (e) {
       const raw = e instanceof Error ? e.message : "";
-      // 백엔드 영어 에러를 한국어로 매핑
-      let msg = "임시 비밀번호 발급에 실패했습니다.";
+      let msg = "인증 코드 발송에 실패했습니다.";
       if (raw.includes("등록된 이메일")) msg = "등록된 이메일이 없습니다.";
-      else if (raw.includes("소셜 로그인")) msg = "소셜 로그인 계정은 임시 비밀번호를 사용할 수 없습니다.";
+      else if (raw.includes("소셜 로그인")) msg = "소셜 로그인 계정은 비밀번호 재설정을 사용할 수 없습니다.";
       else if (raw.toLowerCase().includes("email")) msg = "올바른 이메일 형식이 아닙니다.";
+      else if (raw) msg = raw;
+      setForgotError(msg);
+    } finally {
+      setForgotLoading(false);
+    }
+  }
+
+  async function handleVerifyCode() {
+    if (!/^\d{6}$/.test(forgotCode)) {
+      setForgotError("6자리 숫자 코드를 입력해주세요.");
+      return;
+    }
+    setForgotError("");
+    setForgotLoading(true);
+    try {
+      const res = await authApi.verifyPasswordReset(forgotEmail, forgotCode);
+      setTempPassword(res.temp_password);
+      setForgotStep("done");
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : "";
+      let msg = "인증에 실패했습니다.";
+      if (raw.includes("일치하지 않습니다")) msg = raw;
+      else if (raw.includes("만료") || raw.includes("발급된 인증 코드")) msg = raw;
+      else if (raw.includes("초과")) msg = raw;
       else if (raw) msg = raw;
       setForgotError(msg);
     } finally {
@@ -83,15 +119,14 @@ export function LoginPage() {
             </p>
           </div>
 
-          {/* 비밀번호 찾기 패널 */}
+          {/* 비밀번호 찾기 패널 (2단계 흐름) */}
           {showForgot ? (
             <div className="flex flex-col gap-[16px] rounded-md border border-border bg-bg-alt p-[16px]">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-text-primary">비밀번호 찾기</p>
-                <button
-                  className="text-xs text-text-muted hover:text-text-secondary"
-                  onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(""); setForgotError(""); }}
-                >
+                <p className="text-sm font-bold text-text-primary">
+                  비밀번호 찾기 {forgotStep === "email" ? "(1/2)" : forgotStep === "code" ? "(2/2)" : ""}
+                </p>
+                <button className="text-xs text-text-muted hover:text-text-secondary" onClick={resetForgot}>
                   닫기
                 </button>
               </div>
@@ -102,13 +137,7 @@ export function LoginPage() {
                 </div>
               )}
 
-              {forgotSent ? (
-                <div className="flex flex-col gap-[8px] rounded-sm bg-success/10 px-[12px] py-[10px]">
-                  <p className="text-sm text-success font-bold">임시 비밀번호가 발급됐습니다.</p>
-                  <p className="text-sm text-success">임시 비밀번호: <span className="font-mono font-bold">{tempPassword}</span></p>
-                  <p className="text-xs text-text-secondary">로그인 후 마이페이지에서 비밀번호를 변경해주세요.</p>
-                </div>
-              ) : (
+              {forgotStep === "email" && (
                 <>
                   <TextInput
                     label="가입 시 등록한 이메일"
@@ -117,12 +146,50 @@ export function LoginPage() {
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
                   />
-                  <BtnPrimary
-                    label="임시 비밀번호 받기"
-                    loading={forgotLoading}
-                    onClick={handleForgotSubmit}
-                  />
+                  <BtnPrimary label="인증 코드 받기" loading={forgotLoading} onClick={handleRequestCode} />
+                  <p className="text-xs text-text-muted">
+                    입력하신 이메일로 6자리 인증 코드를 발송합니다. 코드는 5분간 유효합니다.
+                  </p>
                 </>
+              )}
+
+              {forgotStep === "code" && (
+                <>
+                  <div className="rounded-sm bg-info/10 px-[12px] py-[10px] text-sm text-info">
+                    {emailMode === "demo" && demoCode ? (
+                      <>
+                        🧪 <strong>시연 모드</strong> · 발송 대신 코드가 노출됩니다:{" "}
+                        <span className="font-mono font-bold text-lg">{demoCode}</span>
+                      </>
+                    ) : (
+                      <><strong>{forgotEmail}</strong> 로 인증 코드를 발송했어요. 메일함을 확인해주세요.</>
+                    )}
+                  </div>
+                  <TextInput
+                    label="6자리 인증 코드"
+                    placeholder="000000"
+                    type="text"
+                    value={forgotCode}
+                    onChange={(e) => setForgotCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  />
+                  <BtnPrimary label="코드 확인 + 임시 비밀번호 받기" loading={forgotLoading} onClick={handleVerifyCode} />
+                  <button
+                    className="text-xs text-text-muted hover:text-text-secondary self-start"
+                    onClick={() => { setForgotStep("email"); setForgotCode(""); setForgotError(""); setDemoCode(null); }}
+                  >
+                    ← 이메일 다시 입력
+                  </button>
+                </>
+              )}
+
+              {forgotStep === "done" && (
+                <div className="flex flex-col gap-[8px] rounded-sm bg-success/10 px-[12px] py-[10px]">
+                  <p className="text-sm text-success font-bold">임시 비밀번호가 발급됐습니다.</p>
+                  <p className="text-sm text-success">
+                    임시 비밀번호: <span className="font-mono font-bold">{tempPassword}</span>
+                  </p>
+                  <p className="text-xs text-text-secondary">로그인 후 마이페이지에서 비밀번호를 변경해주세요.</p>
+                </div>
               )}
             </div>
           ) : (
