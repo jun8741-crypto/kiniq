@@ -3,12 +3,13 @@ from datetime import date
 from typing import Annotated
 
 import httpx
-from fastapi import APIRouter, Cookie, Depends, HTTPException, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse as Response
 from fastapi.responses import RedirectResponse
 
 from app.core import config
 from app.core.config import Env
+from app.core.rate_limit import limiter
 from app.dtos.auth import (
     ForgotPasswordRequest,
     ForgotPasswordResponse,
@@ -32,21 +33,25 @@ auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @auth_router.post("/signup", status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")
 async def signup(
-    request: SignUpRequest,
+    request: Request,
+    body: SignUpRequest,
     auth_service: Annotated[AuthService, Depends(AuthService)],
 ) -> Response:
-    await auth_service.signup(request)
+    await auth_service.signup(body)
     return Response(content={"detail": "회원가입이 성공적으로 완료되었습니다."}, status_code=status.HTTP_201_CREATED)
 
 
 @auth_router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+@limiter.limit("5/minute")
 async def login(
-    request: LoginRequest,
+    request: Request,
+    body: LoginRequest,
     auth_service: Annotated[AuthService, Depends(AuthService)],
     point_service: Annotated[PointService, Depends(PointService)],
 ) -> Response:
-    user = await auth_service.authenticate(request)
+    user = await auth_service.authenticate(body)
     tokens = await auth_service.login(user)
     today = date.today()
     # 일일 로그인 보상 (당일 첫 로그인 시 +10)
@@ -243,11 +248,13 @@ async def token_refresh(
     description="이메일로 임시 비밀번호를 즉시 발급합니다. 발급 즉시 기존 비밀번호는 무효화됩니다.",
     deprecated=True,
 )
+@limiter.limit("5/minute")
 async def forgot_password(
-    request: ForgotPasswordRequest,
+    request: Request,
+    body: ForgotPasswordRequest,
     auth_service: Annotated[AuthService, Depends(AuthService)],
 ) -> Response:
-    temp_pw = await auth_service.issue_temp_password(email=str(request.email))
+    temp_pw = await auth_service.issue_temp_password(email=str(body.email))
     return Response(content=ForgotPasswordResponse(temp_password=temp_pw).model_dump(), status_code=status.HTTP_200_OK)
 
 
@@ -260,7 +267,9 @@ async def forgot_password(
         "이메일로 6자리 인증 코드를 발송합니다 (TTL 5분). EMAIL_MODE=demo일 경우 응답에 코드를 직접 반환합니다(시연용)."
     ),
 )
+@limiter.limit("5/minute")
 async def request_password_reset(
+    request: Request,
     body: PasswordResetRequestBody,
     auth_service: Annotated[AuthService, Depends(AuthService)],
 ) -> Response:
@@ -283,7 +292,9 @@ async def request_password_reset(
     summary="비밀번호 재설정 코드 검증 + 임시 비밀번호 발급",
     description="6자리 코드 검증 후 임시 비밀번호를 발급합니다. 검증 실패 5회 초과 시 코드 무효화.",
 )
+@limiter.limit("10/minute")
 async def verify_password_reset(
+    request: Request,
     body: PasswordResetVerifyBody,
     auth_service: Annotated[AuthService, Depends(AuthService)],
 ) -> Response:

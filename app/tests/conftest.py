@@ -9,6 +9,10 @@ from tortoise.contrib.test import finalizer, initializer
 
 from app.core import config
 from app.core.db.databases import TORTOISE_APP_MODELS
+from app.core.rate_limit import limiter
+
+# 테스트 중에는 Rate Limit 비활성화 (단일 IP에서 빠르게 호출하므로 5/min 초과)
+limiter.enabled = False
 
 TEST_BASE_URL = "http://test"
 

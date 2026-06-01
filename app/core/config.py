@@ -33,8 +33,9 @@ class Config(BaseSettings):
     COOKIE_DOMAIN: str = "localhost"
 
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 14 * 24 * 60
+    # REQ-SEC-003: Access 15분 / Refresh 7일
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 7 * 24 * 60
     JWT_LEEWAY: int = 5
 
     # 소셜 로그인 (키 미발급 시 빈 문자열 유지 → 호출 시 HTTPException)
