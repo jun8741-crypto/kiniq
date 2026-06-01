@@ -1,6 +1,16 @@
 # API 명세서 v0.8
 
-> 최종 갱신: 2026-05-20
+> ⚠️ **이 문서는 2026-05-20 기준 스냅샷입니다. 최신 명세는 [API명세서_v1.0_CKD.xlsx](API명세서_v1.0_CKD.xlsx) 참조.**
+>
+> v1.0 이후 추가/변경 사항 (xlsx 반영됨):
+> - `POST /auth/password-reset/request` · `/verify` (이메일 인증 2단계 흐름)
+> - `POST /auth/forgot-password` → deprecated (즉시 발급, 하위 호환만)
+> - Rate Limit: 로그인·비번 재설정 5회/분, 일반 60회/분 (slowapi)
+> - JWT: Access 15분 / Refresh 7일
+> - 회원 탈퇴 시 민감의료 즉시 파기 (REQ-SEC-008)
+> - 캐릭터 3단계 진화 (10/40/100, 보너스 +100/+400/+750)
+>
+> 최종 갱신: 2026-05-20 (이후 변경은 xlsx 우선)
 > Base URL: `https://{host}/api/v1`
 > 인증: Bearer JWT (`Authorization: Bearer <access_token>`)
 > 응답 형식: `application/json`
