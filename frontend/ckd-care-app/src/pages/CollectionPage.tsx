@@ -5,13 +5,13 @@ import { TopNav } from "../components/TopNav";
 import {
   gamificationApi,
   SKIN_LABEL,
-  SPECIES_EMOJI,
   SPECIES_LABEL,
   type EggHistoryItem,
   type InventoryItem,
   type ItemCode,
   type MascotResponse,
 } from "../api/gamification";
+import { CharacterImage } from "../components/CharacterImage";
 
 const SKIN_ITEM_CODES: ItemCode[] = [
   "SKIN_S_BLUE",
@@ -137,7 +137,6 @@ export function CollectionPage() {
           ) : (
             <div className="grid grid-cols-3 gap-[16px]">
               {characters.map((c) => {
-                const emoji = c.species ? SPECIES_EMOJI[c.species] : "🥚";
                 const speciesName = c.species ? SPECIES_LABEL[c.species] : "알";
                 const isEditing = editingId === c.egg_no;
                 return (
@@ -146,7 +145,7 @@ export function CollectionPage() {
                     className="flex flex-col items-center gap-[8px] rounded-md border border-border bg-bg p-[16px]"
                   >
                     <div className="flex h-[100px] w-[100px] items-center justify-center rounded-full bg-amber-50">
-                      <span className="text-5xl">{emoji}</span>
+                      <CharacterImage species={c.species} stage={1} size={88} emojiClass="text-5xl" />
                     </div>
                     <p className="text-xs text-text-muted">
                       {c.egg_no}번째 알 · {speciesName}

@@ -23,6 +23,16 @@ export const SPECIES_LABEL: Record<CharacterSpecies, string> = {
   SQUIRREL: "다람쥐",
 };
 
+// 일러스트 경로 매퍼 — public/characters/{종}_stage{1~4}.png 시도, 없으면 이모지 fallback (img onError 처리)
+export function characterImagePath(species: CharacterSpecies | null, stage: number): string | null {
+  if (!species) {
+    return stage === 0 ? "/characters/egg.png" : null;
+  }
+  const safeStage = Math.max(1, Math.min(stage, 4));
+  const slug = species.toLowerCase();
+  return `/characters/${slug}_stage${safeStage}.png`;
+}
+
 export type PointReason =
   | "LOGIN"
   | "CHECKIN"

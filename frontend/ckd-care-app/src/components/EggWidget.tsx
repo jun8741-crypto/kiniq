@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { gamificationApi, SPECIES_EMOJI, type MascotResponse } from "../api/gamification";
+import { gamificationApi, type MascotResponse } from "../api/gamification";
+import { CharacterImage } from "./CharacterImage";
 
-// 진화 단계 시각화 (이미지 첨부 전까지 이모지)
+// 진화 단계 시각화 — public/characters/*.png 우선, 없으면 CharacterImage가 이모지 fallback
 // 0=알, 1=부화 1단계, 2=2단계, 3=3단계, 4=4단계 완전체
-const STAGE_FALLBACK_EMOJI = ["🥚", "🐣", "🐥", "🐤", "🌟"];
 const STAGE_LABEL = ["알", "1단계", "2단계", "3단계", "완전체"];
 
 // 진화 임계값
@@ -48,7 +48,7 @@ export function EggWidget() {
     return (
       <div className="flex w-[280px] flex-col items-center justify-center gap-[8px] rounded-md border border-border bg-bg p-[16px]">
         <div className="flex h-[80px] w-[80px] items-center justify-center rounded-full bg-success/20">
-          <span className="text-3xl">🥚</span>
+          <CharacterImage species={null} stage={0} size={56} emojiClass="text-3xl" />
         </div>
         <p className="text-sm font-bold text-text-primary">나의 헬스 알</p>
         <p className="text-xs text-text-muted">데이터 없음</p>
@@ -60,8 +60,6 @@ export function EggWidget() {
   const charge = data.charge_mode;
   const isCharge = charge.is_active;
   const stageIdx = Math.max(0, Math.min(egg.current_stage, 4));
-  // 부화 이후엔 종 이모지, 그 전엔 알 이모지
-  const emoji = egg.species && stageIdx >= 1 ? SPECIES_EMOJI[egg.species] : STAGE_FALLBACK_EMOJI[stageIdx];
   const label = STAGE_LABEL[stageIdx];
   const progress = egg.progress_checkins;
   const percentToGoal = Math.round((progress / GOAL_CHECKINS) * 100);
@@ -76,7 +74,7 @@ export function EggWidget() {
         className="relative flex h-[110px] w-[110px] items-center justify-center rounded-full"
         style={{ backgroundColor: `${color}20` }}
       >
-        <span className="text-5xl">{emoji}</span>
+        <CharacterImage species={egg.species} stage={stageIdx} size={96} emojiClass="text-5xl" />
         {isComplete && (
           <span className="absolute -top-1 -right-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-bold text-yellow-700">
             ✨ 완전체
