@@ -21,8 +21,8 @@ repos:
       - id: trailing-whitespace
       # YAML 문법 체크
       - id: check-yaml
-      # 거대 파일 커밋 방지 (>500KB)
+      # 거대 파일 커밋 방지 (>3MB) — 캐릭터 일러스트 PNG 수용 (1~3MB)
       - id: check-added-large-files
-        args: ['--maxkb=500']
+        args: ['--maxkb=3000']
       # 충돌 마커(<<<<<<<) 남은 채 커밋 방지
       - id: check-merge-conflict
