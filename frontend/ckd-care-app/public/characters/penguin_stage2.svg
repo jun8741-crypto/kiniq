@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <ellipse cx="110" cy="195" rx="55" ry="6" fill="#000" opacity="0.15"/>
+  <ellipse cx="88" cy="190" rx="15" ry="7" fill="#F59E0B" stroke="#92400E" stroke-width="2"/>
+  <ellipse cx="132" cy="190" rx="15" ry="7" fill="#F59E0B" stroke="#92400E" stroke-width="2"/>
+  <!-- 몸 -->
+  <ellipse cx="110" cy="125" rx="55" ry="65" fill="#1F2937" stroke="#0F172A" stroke-width="3.2"/>
+  <ellipse cx="110" cy="135" rx="35" ry="52" fill="#F9FAFB" stroke="#E5E7EB" stroke-width="1.5"/>
+  <!-- 스카프 (체크무늬 느낌, 노랑+빨강) -->
+  <path d="M 70 110 Q 110 116 150 110 L 150 122 Q 110 128 70 122 Z" fill="#DC2626" stroke="#7F1D1D" stroke-width="1.5"/>
+  <line x1="80" y1="110" x2="80" y2="125" stroke="#FBBF24" stroke-width="2"/>
+  <line x1="100" y1="110" x2="100" y2="125" stroke="#FBBF24" stroke-width="2"/>
+  <line x1="120" y1="110" x2="120" y2="125" stroke="#FBBF24" stroke-width="2"/>
+  <line x1="140" y1="110" x2="140" y2="125" stroke="#FBBF24" stroke-width="2"/>
+  <!-- 날개 -->
+  <ellipse cx="62" cy="125" rx="14" ry="30" fill="#1F2937" stroke="#0F172A" stroke-width="2.5" transform="rotate(-12 62 125)"/>
+  <ellipse cx="158" cy="125" rx="14" ry="30" fill="#1F2937" stroke="#0F172A" stroke-width="2.5" transform="rotate(12 158 125)"/>
+  <!-- 머리 -->
+  <circle cx="110" cy="75" r="36" fill="#1F2937" stroke="#0F172A" stroke-width="3"/>
+  <ellipse cx="110" cy="82" rx="24" ry="24" fill="#F9FAFB"/>
+  <!-- 눈 (눈썹 살짝 위로 — 미소 표현) -->
+  <circle cx="99" cy="75" r="6.5" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
+  <circle cx="121" cy="75" r="6.5" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
+  <circle cx="99" cy="77" r="3.8" fill="#1F2937"/>
+  <circle cx="121" cy="77" r="3.8" fill="#1F2937"/>
+  <circle cx="100.5" cy="75.5" r="1.4" fill="#FFFFFF"/>
+  <circle cx="122.5" cy="75.5" r="1.4" fill="#FFFFFF"/>
+  <!-- 부리 (미소) -->
+  <path d="M 102 90 Q 110 100 118 90 Q 110 96 102 90 Z" fill="#F59E0B" stroke="#92400E" stroke-width="2"/>
+  <!-- 볼터치 -->
+  <circle cx="84" cy="90" r="4.5" fill="#F472B6" opacity="0.6"/>
+  <circle cx="136" cy="90" r="4.5" fill="#F472B6" opacity="0.6"/>
+</svg>

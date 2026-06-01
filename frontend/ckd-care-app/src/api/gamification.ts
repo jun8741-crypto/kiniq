@@ -23,14 +23,15 @@ export const SPECIES_LABEL: Record<CharacterSpecies, string> = {
   SQUIRREL: "다람쥐",
 };
 
-// 일러스트 경로 매퍼 — public/characters/{종}_stage{1~4}.png 시도, 없으면 이모지 fallback (img onError 처리)
+// 일러스트 경로 매퍼 — public/characters/{종}_stage{1~4}.svg 시도, 없으면 이모지 fallback
+// SVG 기본 동봉, AI 일러스트로 교체 시 같은 파일명으로 .png 사용 가능 (확장자만 바꾸려면 .svg→.png)
 export function characterImagePath(species: CharacterSpecies | null, stage: number): string | null {
   if (!species) {
-    return stage === 0 ? "/characters/egg.png" : null;
+    return stage === 0 ? "/characters/egg.svg" : null;
   }
   const safeStage = Math.max(1, Math.min(stage, 4));
   const slug = species.toLowerCase();
-  return `/characters/${slug}_stage${safeStage}.png`;
+  return `/characters/${slug}_stage${safeStage}.svg`;
 }
 
 export type PointReason =

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <ellipse cx="110" cy="198" rx="60" ry="7" fill="#000" opacity="0.17"/>
+  <text x="30" y="55" font-size="22" fill="#FBBF24">★</text>
+  <text x="170" y="65" font-size="18" fill="#FBBF24">✦</text>
+  <ellipse cx="86" cy="192" rx="16" ry="8" fill="#F59E0B" stroke="#92400E" stroke-width="2.2"/>
+  <ellipse cx="134" cy="192" rx="16" ry="8" fill="#F59E0B" stroke="#92400E" stroke-width="2.2"/>
+  <ellipse cx="110" cy="124" rx="60" ry="70" fill="#1F2937" stroke="#0F172A" stroke-width="3.5"/>
+  <ellipse cx="110" cy="135" rx="38" ry="56" fill="#F9FAFB" stroke="#E5E7EB" stroke-width="1.8"/>
+  <!-- 메달 -->
+  <circle cx="110" cy="140" r="14" fill="#FBBF24" stroke="#92400E" stroke-width="2.5"/>
+  <text x="103" y="146" font-size="14" fill="#92400E" font-weight="bold">★</text>
+  <line x1="100" y1="116" x2="110" y2="126" stroke="#DC2626" stroke-width="2.5"/>
+  <line x1="120" y1="116" x2="110" y2="126" stroke="#DC2626" stroke-width="2.5"/>
+  <ellipse cx="58" cy="125" rx="15" ry="32" fill="#1F2937" stroke="#0F172A" stroke-width="2.5" transform="rotate(-14 58 125)"/>
+  <ellipse cx="162" cy="125" rx="15" ry="32" fill="#1F2937" stroke="#0F172A" stroke-width="2.5" transform="rotate(14 162 125)"/>
+  <circle cx="110" cy="72" r="38" fill="#1F2937" stroke="#0F172A" stroke-width="3.2"/>
+  <ellipse cx="110" cy="80" rx="26" ry="26" fill="#F9FAFB"/>
+  <circle cx="98" cy="73" r="7" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
+  <circle cx="122" cy="73" r="7" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
+  <circle cx="98" cy="75" r="4" fill="#1F2937"/>
+  <circle cx="122" cy="75" r="4" fill="#1F2937"/>
+  <circle cx="99.5" cy="73" r="1.5" fill="#FFFFFF"/>
+  <circle cx="123.5" cy="73" r="1.5" fill="#FFFFFF"/>
+  <!-- 자신감 부리 -->
+  <polygon points="100,88 110,102 120,88 116,92 110,90 104,92" fill="#F59E0B" stroke="#92400E" stroke-width="2"/>
+  <circle cx="82" cy="88" r="5" fill="#F472B6" opacity="0.65"/>
+  <circle cx="138" cy="88" r="5" fill="#F472B6" opacity="0.65"/>
+  <!-- 모자 (보청기·삼각모) -->
+  <polygon points="85,42 135,42 110,18" fill="#2563EB" stroke="#1E3A8A" stroke-width="2.5"/>
+  <circle cx="110" cy="20" r="4" fill="#FBBF24" stroke="#92400E" stroke-width="1.5"/>
+</svg>
