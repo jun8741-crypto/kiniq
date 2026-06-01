@@ -47,6 +47,7 @@ import { ShopPage } from "./pages/ShopPage";
 import { PointHistoryPage } from "./pages/PointHistoryPage";
 import { CollectionPage } from "./pages/CollectionPage";
 import { RestModePage } from "./pages/RestModePage";
+import { DisclaimerFooter } from "./components/DisclaimerFooter";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isLoading } = useAuth();
@@ -101,6 +102,7 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />
+          <DisclaimerFooter />
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

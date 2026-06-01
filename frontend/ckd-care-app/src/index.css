@@ -39,6 +39,8 @@ body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   margin: 0;
   color: var(--color-text-primary);
+  /* DisclaimerFooter(고정, ~32px) 가림 방지 */
+  padding-bottom: 36px;
 }
 
 /* 체크인 결과 모달 컨페티 애니메이션 */
