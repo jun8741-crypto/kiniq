@@ -22,6 +22,7 @@ payload 에 원본 chunk_id 를 보존한다. parent 조회는 int(parent_id,16)
     python ../src/rag_indexing/qdrant_uploader.py --dry-run          # Qdrant 없이 태깅·dedup·id 통계만
     python ../src/rag_indexing/qdrant_uploader.py --child-only --limit 100
 """
+
 from __future__ import annotations
 
 import argparse
@@ -85,7 +86,7 @@ def build_payload(row: dict) -> dict:
     payload = dict(row["payload"])
     payload["age_group"] = age_group_for(payload)
     payload["text"] = row["text"]
-    payload["chunk_id"] = row["id"]   # 원본 16-hex (point id 는 정수 변환되므로 보존)
+    payload["chunk_id"] = row["id"]  # 원본 16-hex (point id 는 정수 변환되므로 보존)
     return payload
 
 
@@ -102,12 +103,14 @@ def read_jsonl(path: Path) -> list[dict]:
 # ─────────────────────────────────────────────────────────────────────────────
 def make_client(url: str | None = None):
     from qdrant_client import QdrantClient
+
     url = url or os.getenv("QDRANT_URL") or cfg.QDRANT_LOCAL_URL
     return QdrantClient(url=url)
 
 
 def ensure_child_collection(client, name: str, dim: int, *, recreate: bool) -> None:
     from qdrant_client.models import Distance, VectorParams
+
     if recreate and client.collection_exists(name):
         client.delete_collection(name)
     if not client.collection_exists(name):
@@ -128,23 +131,19 @@ def ensure_parent_collection(client, name: str, *, recreate: bool) -> None:
 
 def upsert_children(client, name: str, children: list[dict], *, batch_size: int) -> None:
     from qdrant_client.models import PointStruct
+
     for start in range(0, len(children), batch_size):
-        batch = children[start:start + batch_size]
-        points = [
-            PointStruct(id=point_id(c["id"]), vector=c["vector"], payload=build_payload(c))
-            for c in batch
-        ]
+        batch = children[start : start + batch_size]
+        points = [PointStruct(id=point_id(c["id"]), vector=c["vector"], payload=build_payload(c)) for c in batch]
         client.upsert(collection_name=name, points=points, wait=True)
 
 
 def upsert_parents(client, name: str, parents: list[dict], *, batch_size: int) -> None:
     from qdrant_client.models import PointStruct
+
     for start in range(0, len(parents), batch_size):
-        batch = parents[start:start + batch_size]
-        points = [
-            PointStruct(id=point_id(p["id"]), vector={}, payload=build_payload(p))
-            for p in batch
-        ]
+        batch = parents[start : start + batch_size]
+        points = [PointStruct(id=point_id(p["id"]), vector={}, payload=build_payload(p)) for p in batch]
         client.upsert(collection_name=name, points=points, wait=True)
 
 
@@ -175,7 +174,9 @@ def summarize(children: list[dict], parents: list[dict], removed: int) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 def main() -> None:
     parser = argparse.ArgumentParser(description="embedded child + parent → Qdrant 업로드")
-    parser.add_argument("--child-in", default=None, help="기본 chunks/embedded_child_chunks.jsonl (dry-run 시 child_chunks.jsonl 폴백)")
+    parser.add_argument(
+        "--child-in", default=None, help="기본 chunks/embedded_child_chunks.jsonl (dry-run 시 child_chunks.jsonl 폴백)"
+    )
     parser.add_argument("--parent-in", default=None, help="기본 chunks/parent_chunks.jsonl")
     parser.add_argument("--recreate", action="store_true", help="collection 삭제 후 재생성")
     parser.add_argument("--child-only", action="store_true")
@@ -199,21 +200,21 @@ def main() -> None:
     elif embedded.exists():
         child_path = embedded
     elif args.dry_run:
-        child_path = raw_child   # 벡터 없이 로직만 검증
+        child_path = raw_child  # 벡터 없이 로직만 검증
     else:
-        raise SystemExit(
-            f"입력 없음: {embedded}\n  먼저 embedder.py 로 임베딩하세요. (구조만 보려면 --dry-run)"
-        )
+        raise SystemExit(f"입력 없음: {embedded}\n  먼저 embedder.py 로 임베딩하세요. (구조만 보려면 --dry-run)")
     parent_path = Path(args.parent_in) if args.parent_in else cfg.CHUNKS_DIR / "parent_chunks.jsonl"
 
     children = read_jsonl(child_path)
     parents = read_jsonl(parent_path)
     if args.limit:
-        children = children[:args.limit]
+        children = children[: args.limit]
 
     has_vector = bool(children) and "vector" in children[0]
-    print(f"입력: child={child_path.name}({len(children):,}, vector={'있음' if has_vector else '없음'}) "
-          f"parent={parent_path.name}({len(parents):,})")
+    print(
+        f"입력: child={child_path.name}({len(children):,}, vector={'있음' if has_vector else '없음'}) "
+        f"parent={parent_path.name}({len(parents):,})"
+    )
     print(f"대상: {child_coll}({dim}d) + {parent_coll}" + ("  [dry-run]" if args.dry_run else ""))
 
     # P1-5 dedup

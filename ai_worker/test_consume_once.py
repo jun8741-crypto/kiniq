@@ -1,4 +1,5 @@
 """ai_worker consumer 통합 테스트 — fakeredis + handle_chat_job mock."""
+
 import json
 
 import fakeredis.aioredis

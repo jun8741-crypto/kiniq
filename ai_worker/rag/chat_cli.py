@@ -13,6 +13,7 @@ envs/.local.env 에서 OPENAI_API_KEY·QDRANT_URL 을 자동 로드하므로 별
     /egfr clear    → eGFR 해제
     exit / quit    → 종료
 """
+
 from __future__ import annotations
 
 import os

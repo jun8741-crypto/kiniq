@@ -1,4 +1,5 @@
 """ai_worker용 Redis 비동기 클라이언트."""
+
 from __future__ import annotations
 
 import redis.asyncio as aioredis

@@ -4,6 +4,7 @@
 채점기는 `with_structured_output(스키마)` 로 Literal 값만 반환하도록 강제한다 (Self-RAG).
 OPENAI_API_KEY 환경변수를 자동 사용.
 """
+
 from __future__ import annotations
 
 from langchain_openai import ChatOpenAI

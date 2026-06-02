@@ -1,4 +1,5 @@
 """백엔드 ↔ ai_worker Redis Stream 페이로드 스키마."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, Field

@@ -1,5 +1,6 @@
 import pytest
-from app.core.redis_client import get_redis, build_redis_url
+
+from app.core.redis_client import build_redis_url, get_redis
 
 
 def test_build_redis_url():

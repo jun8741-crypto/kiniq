@@ -39,6 +39,7 @@ class TestChatService(TestCase):
         chat_module.get_redis = lambda: fake
 
         try:
+
             async def fake_worker():
                 # rag_jobs 스트림에 job이 올 때까지 폴링 후 응답 기록
                 for _ in range(50):
@@ -91,6 +92,7 @@ class TestChatService(TestCase):
         chat_module.get_redis = lambda: fake
 
         try:
+
             async def fake_worker():
                 for _ in range(50):
                     jobs = await fake.xrange(config.RAG_JOBS_STREAM)

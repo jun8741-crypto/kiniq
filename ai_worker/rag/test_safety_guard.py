@@ -4,16 +4,18 @@ pre_retrieval_guard 차단 분류·우선순위, find_forbidden 금지표현 검
 prompt_builder 도 순수 함수라 함께 검증한다. 실행:
     cd 코드루트 && poc/.venv/bin/python ai_worker/rag/test_safety_guard.py
 """
+
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # 코드루트
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # 코드루트
 
 from langchain_core.documents import Document
 
-from ai_worker.rag import prompt_builder, safety_guard as sg
+from ai_worker.rag import prompt_builder
+from ai_worker.rag import safety_guard as sg
 
 
 # ── pre_retrieval_guard 차단 분류 ─────────────────────────────────────────────
@@ -98,13 +100,15 @@ def test_disclaimer_not_duplicated():
 def test_prompt_uses_parent_context_first():
     docs = [Document(page_content="child 본문", metadata={"source": "KDIGO", "page": 5})]
     msgs = prompt_builder.build_generation_messages(
-        "질문", parent_context="넓은 parent 맥락", documents=docs,
+        "질문",
+        parent_context="넓은 parent 맥락",
+        documents=docs,
         user_context={"eGFR": 50, "risk_group": "G2"},
     )
     assert msgs[0]["role"] == "system"
     user = msgs[1]["content"]
-    assert "넓은 parent 맥락" in user      # parent 우선
-    assert "KDIGO" in user                 # child 출처 표기
+    assert "넓은 parent 맥락" in user  # parent 우선
+    assert "KDIGO" in user  # child 출처 표기
     assert "G2" in user and "eGFR=50" in user
 
 
@@ -166,7 +170,9 @@ def test_prompt_egfr_null_adds_screening_hint():
 
 def test_prompt_known_stage_no_screening_hint():
     docs = [Document(page_content="x", metadata={"source": "K", "page": 1})]
-    msgs = prompt_builder.build_generation_messages("질문", "parent", docs, user_context={"eGFR": 50, "risk_group": "G2"})
+    msgs = prompt_builder.build_generation_messages(
+        "질문", "parent", docs, user_context={"eGFR": 50, "risk_group": "G2"}
+    )
     assert "단계 미상" not in msgs[1]["content"] and "G2" in msgs[1]["content"]
 
 

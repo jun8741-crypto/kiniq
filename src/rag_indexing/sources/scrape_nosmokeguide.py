@@ -8,6 +8,7 @@ RAG 인덱싱용 생활습관(금연) 자료 수집. CKD 지식 베이스에 비
 
 재실행하면 최신 목록으로 갱신된다. 표준 라이브러리만 사용(외부 의존성 없음).
 """
+
 import html
 import json
 import re
@@ -22,10 +23,7 @@ LIST_API = (
 )
 DETAIL_API = BASE + "/api/integrate/info-data/quit-smoking-methods/{}?categoryCode=all"
 OUT_DIR = Path(__file__).resolve().parents[1] / "data" / "lifestyle" / "nosmokeguide"
-UA = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
-)
+UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 
 
 def fetch(url: str) -> str:

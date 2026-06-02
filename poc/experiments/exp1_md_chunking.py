@@ -43,7 +43,7 @@ assert os.getenv("OPENAI_API_KEY"), "OPENAI_API_KEY 누락"
 
 PDF_PATH = Path(os.getenv("KDIGO_PDF_PATH", "./data/kdigo_ch3_progression.pdf"))
 QDRANT_PATH = Path(os.getenv("QDRANT_LOCAL_PATH", "./qdrant_local"))
-COLLECTION = "medical_kb_poc_md"   # baseline과 분리
+COLLECTION = "medical_kb_poc_md"  # baseline과 분리
 EMBED_DIM = 1536
 DEFAULT_QUESTION = "G2 단계 CKD 환자의 단백질 섭취 권장량은?"
 
@@ -59,10 +59,7 @@ SYSTEM_PROMPT = (
     "6. 답변 끝에 출처(파일·섹션·페이지)를 명시하세요.\n"
     "7. 마지막 줄에 책임 회피 문구를 붙이세요."
 )
-DISCLAIMER = (
-    "\n\nℹ️ 본 정보는 교육·관리 보조 목적의 안내이며, 의학적 진단·처방을 "
-    "대체하지 않습니다."
-)
+DISCLAIMER = "\n\nℹ️ 본 정보는 교육·관리 보조 목적의 안내이며, 의학적 진단·처방을 대체하지 않습니다."
 
 
 def pdf_to_markdown(path: Path) -> str:
@@ -78,36 +75,37 @@ def pdf_to_markdown(path: Path) -> str:
 def chunk_by_headers(md_text: str) -> list:
     """MarkdownHeaderTextSplitter로 헤더 보존 분할 + Recursive로 2차 분할."""
     headers_to_split = [
-        ("#", "Header_1"),     # Chapter (예: "Chapter 3: Delaying CKD progression")
-        ("##", "Header_2"),    # Section (예: "3.3 Diet")
-        ("###", "Header_3"),   # Subsection (예: "3.3.1 Protein intake")
+        ("#", "Header_1"),  # Chapter (예: "Chapter 3: Delaying CKD progression")
+        ("##", "Header_2"),  # Section (예: "3.3 Diet")
+        ("###", "Header_3"),  # Subsection (예: "3.3.1 Protein intake")
     ]
     md_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split)
     md_chunks = md_splitter.split_text(md_text)
 
     # 2차 분할: 헤더 그룹이 너무 크면 1000자로 재분할
-    recursive = RecursiveCharacterTextSplitter(
-        chunk_size=1000, chunk_overlap=200, separators=["\n\n", "\n", " ", ""]
-    )
+    recursive = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, separators=["\n\n", "\n", " ", ""])
     final_chunks = []
     for doc in md_chunks:
         # 헤더 메타데이터를 모든 sub-청크에 전파
         sub_chunks = recursive.split_text(doc.page_content)
         for idx, text in enumerate(sub_chunks):
-            final_chunks.append({
-                "text": text,
-                "metadata": {
-                    "source": "KDIGO 2024",
-                    "header_1": doc.metadata.get("Header_1", ""),
-                    "header_2": doc.metadata.get("Header_2", ""),
-                    "header_3": doc.metadata.get("Header_3", ""),
-                    "chunk_idx": idx,
-                },
-            })
+            final_chunks.append(
+                {
+                    "text": text,
+                    "metadata": {
+                        "source": "KDIGO 2024",
+                        "header_1": doc.metadata.get("Header_1", ""),
+                        "header_2": doc.metadata.get("Header_2", ""),
+                        "header_3": doc.metadata.get("Header_3", ""),
+                        "chunk_idx": idx,
+                    },
+                }
+            )
     print(f"[2] 청킹: {len(md_chunks)}개 헤더 그룹 → {len(final_chunks)}개 최종 청크")
     # 샘플 헤더 분포 출력
-    sections = set(c["metadata"]["header_3"] or c["metadata"]["header_2"]
-                   for c in final_chunks if c["metadata"]["header_2"])
+    sections = set(
+        c["metadata"]["header_3"] or c["metadata"]["header_2"] for c in final_chunks if c["metadata"]["header_2"]
+    )
     print(f"    인식된 섹션 수: {len(sections)}개 (예: {list(sections)[:3]})")
     return final_chunks
 
@@ -154,15 +152,16 @@ def ask(vs: QdrantVectorStore, question: str, k: int = 3) -> None:
         print(f"      {i}. [score={score:.3f}] [{section}] {snippet}...")
 
     context = "\n\n".join(
-        f"[Section: {d.metadata.get('header_2','?')} > {d.metadata.get('header_3','')}]\n"
-        f"{d.page_content}"
+        f"[Section: {d.metadata.get('header_2', '?')} > {d.metadata.get('header_3', '')}]\n{d.page_content}"
         for d, _ in hits
     )
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3, max_tokens=800)
-    resp = llm.invoke([
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"[참고 문서]\n{context}\n\n[질문]\n{question}"},
-    ])
+    resp = llm.invoke(
+        [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"[참고 문서]\n{context}\n\n[질문]\n{question}"},
+        ]
+    )
     usage = resp.usage_metadata or {}
     print(f"[7] LLM 응답: {usage.get('total_tokens', '?')} tokens")
     print("\n" + "═" * 70 + "\n답변\n" + "═" * 70)

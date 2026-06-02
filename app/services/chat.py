@@ -1,4 +1,5 @@
 """RAG 챗봇 서비스 — user_context 빌드 → Redis 작업 투입 → 응답 대기 → 영속화."""
+
 from __future__ import annotations
 
 import json
@@ -49,11 +50,14 @@ class ChatService:
         job_id = uuid.uuid4().hex
 
         # I-1 고아 방지: USER 메시지 저장을 성공 확인 후로 이동
-        await redis.xadd(config.RAG_JOBS_STREAM, {
-            "job_id": job_id,
-            "question": question,
-            "user_context": json.dumps(user_context),
-        })
+        await redis.xadd(
+            config.RAG_JOBS_STREAM,
+            {
+                "job_id": job_id,
+                "question": question,
+                "user_context": json.dumps(user_context),
+            },
+        )
 
         resp_key = f"{config.RAG_RESP_PREFIX}:{job_id}"
         result = await redis.xread({resp_key: "0"}, count=1, block=config.RAG_TIMEOUT_SEC * 1000)

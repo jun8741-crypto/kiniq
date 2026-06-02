@@ -4,6 +4,7 @@ generate 노드용 메시지를 만든다. Parent-Child 검색 결과에서 **pa
 쓰고(넓은 맥락), child 청크는 출처 표기에 사용한다. 사용자 risk_group(CKD 단계)을 함께 전달해
 권고의 적용 범위를 단계와 함께 답하도록 유도한다 (임의 적용 추론 금지).
 """
+
 from __future__ import annotations
 
 from langchain_core.documents import Document
@@ -46,16 +47,10 @@ def build_generation_messages(
 ) -> list[dict]:
     """generate 노드 입력 메시지. parent 맥락 우선 + child 출처 표기."""
     sources = "\n\n".join(
-        f"[{d.metadata.get('source', '?')} p.{d.metadata.get('page', '?')}]\n{d.page_content}"
-        for d in documents
+        f"[{d.metadata.get('source', '?')} p.{d.metadata.get('page', '?')}]\n{d.page_content}" for d in documents
     )
-    context = parent_context.strip() or sources   # parent 맥락 우선, 없으면 child
-    user_msg = (
-        f"[참고 문서]\n{context}\n\n"
-        f"[출처 청크]\n{sources}"
-        f"{_user_context_line(user_context)}\n\n"
-        f"[질문]\n{query}"
-    )
+    context = parent_context.strip() or sources  # parent 맥락 우선, 없으면 child
+    user_msg = f"[참고 문서]\n{context}\n\n[출처 청크]\n{sources}{_user_context_line(user_context)}\n\n[질문]\n{query}"
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": user_msg},

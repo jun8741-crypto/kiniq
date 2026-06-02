@@ -19,6 +19,7 @@
     python ../src/rag_indexing/run_indexing.py --yes           # 임베딩 비용 확인 생략
     python ../src/rag_indexing/run_indexing.py --prod          # prod 모델·collection
 """
+
 from __future__ import annotations
 
 import argparse
@@ -60,16 +61,22 @@ def _confirm_cost() -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="RAG 인덱싱 3단 통합 실행 (청킹→임베딩→업로드)")
-    parser.add_argument("--stage", choices=("all", *_STAGES), default="all",
-                        help="실행 단계 (기본 all). chunk|embed|upload 로 부분 실행")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="전 단계 dry-run 전파 (OpenAI 키·Docker 불요, 실제 산출물 보존)")
-    parser.add_argument("--prod", action="store_true",
-                        help="embedder·uploader 에 --prod 전파 (large 3072d, medical_kb_prod)")
-    parser.add_argument("--no-recreate", action="store_true",
-                        help="업로드 시 collection 재생성 생략 (기본은 전체 재구축 = --recreate)")
-    parser.add_argument("--yes", "-y", action="store_true",
-                        help="임베딩 비용 확인 프롬프트 생략")
+    parser.add_argument(
+        "--stage",
+        choices=("all", *_STAGES),
+        default="all",
+        help="실행 단계 (기본 all). chunk|embed|upload 로 부분 실행",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="전 단계 dry-run 전파 (OpenAI 키·Docker 불요, 실제 산출물 보존)"
+    )
+    parser.add_argument(
+        "--prod", action="store_true", help="embedder·uploader 에 --prod 전파 (large 3072d, medical_kb_prod)"
+    )
+    parser.add_argument(
+        "--no-recreate", action="store_true", help="업로드 시 collection 재생성 생략 (기본은 전체 재구축 = --recreate)"
+    )
+    parser.add_argument("--yes", "-y", action="store_true", help="임베딩 비용 확인 프롬프트 생략")
     args = parser.parse_args()
 
     run_chunk = args.stage in ("all", "chunk")
@@ -80,11 +87,13 @@ def main() -> None:
     prod = ["--prod"] if args.prod else []
 
     print("=" * 70)
-    print("RAG 인덱싱 파이프라인 — stage={}{}{}".format(
-        args.stage,
-        "  [dry-run]" if args.dry_run else "",
-        "  [prod]" if args.prod else "",
-    ))
+    print(
+        "RAG 인덱싱 파이프라인 — stage={}{}{}".format(
+            args.stage,
+            "  [dry-run]" if args.dry_run else "",
+            "  [prod]" if args.prod else "",
+        )
+    )
     print("=" * 70)
 
     try:
@@ -107,16 +116,16 @@ def main() -> None:
                 upload_flags = upload_flags + ["--recreate"]
             _run(_UPLOADER, upload_flags)
     except subprocess.CalledProcessError as e:
-        raise SystemExit(
-            f"\n✗ 단계 실패 (exit {e.returncode}) — 위 출력 확인 후 해당 단계부터 재실행하세요."
-        )
+        raise SystemExit(f"\n✗ 단계 실패 (exit {e.returncode}) — 위 출력 확인 후 해당 단계부터 재실행하세요.") from e
 
-    print("\n{}\n✓ 완료 (stage={}){}\n{}".format(
-        "=" * 70,
-        args.stage,
-        "  ※ dry-run — 실제 적재 안 됨 (임시 파일 {})".format(_DRYRUN_EMBED_OUT.name) if args.dry_run else "",
-        "=" * 70,
-    ))
+    print(
+        "\n{}\n✓ 완료 (stage={}){}\n{}".format(
+            "=" * 70,
+            args.stage,
+            f"  ※ dry-run — 실제 적재 안 됨 (임시 파일 {_DRYRUN_EMBED_OUT.name})" if args.dry_run else "",
+            "=" * 70,
+        )
+    )
 
 
 if __name__ == "__main__":

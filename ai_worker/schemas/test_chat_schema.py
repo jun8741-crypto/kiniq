@@ -1,4 +1,5 @@
 """ChatJob / ChatResult 스키마 단위 테스트."""
+
 from ai_worker.schemas.chat import ChatJob, ChatResult
 
 

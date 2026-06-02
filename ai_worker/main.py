@@ -3,6 +3,7 @@
 rag_jobs 스트림을 consumer group 으로 읽어 rag_task 에 위임하고, 결과를
 rag_resp:{job_id} 스트림에 기록한다. 실행: python -m ai_worker.main
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -23,9 +24,7 @@ _CONSUMER = "worker-1"
 async def ensure_group(redis) -> None:
     """consumer group 생성 (이미 있으면 무시). 스트림이 없어도 mkstream 으로 생성."""
     try:
-        await redis.xgroup_create(
-            config.RAG_JOBS_STREAM, config.RAG_JOBS_GROUP, id="0", mkstream=True
-        )
+        await redis.xgroup_create(config.RAG_JOBS_STREAM, config.RAG_JOBS_GROUP, id="0", mkstream=True)
     except ResponseError as e:
         if "BUSYGROUP" not in str(e):
             raise

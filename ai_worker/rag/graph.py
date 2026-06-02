@@ -7,6 +7,7 @@ guard → retrieve → grade ─(부족)→ rewrite → retrieve(≤2)
 컴파일된 그래프는 모듈 lazy 싱글턴으로 1회만 만든다(노드 함수의 LLM은 호출 시점 lazy라 컴파일에
 키 불요). Phase 5에서 ai_worker task가 get_graph().invoke(...) 로 호출한다.
 """
+
 from __future__ import annotations
 
 from langgraph.graph import END, START, StateGraph
@@ -45,21 +46,32 @@ def build_graph():
         {"blocked": END, "retrieve": "retrieve"},
     )
     b.add_edge("retrieve", "grade")
-    b.add_conditional_edges("grade", nodes.relevance_router,
-                            {"generate": "generate", "rewrite": "rewrite",
-                             "classify_fallback": "classify_fallback"})
+    b.add_conditional_edges(
+        "grade",
+        nodes.relevance_router,
+        {"generate": "generate", "rewrite": "rewrite", "classify_fallback": "classify_fallback"},
+    )
     b.add_edge("rewrite", "retrieve")
     b.add_edge("generate", "hallucination")
-    b.add_conditional_edges("hallucination", nodes.grounded_router,
-                            {"generate": "generate", "answer_grade": "answer_grade", "post_guard": "post_guard"})
-    b.add_conditional_edges("answer_grade", nodes.answer_router,
-                            {"post_guard": "post_guard", "rewrite": "rewrite"})
+    b.add_conditional_edges(
+        "hallucination",
+        nodes.grounded_router,
+        {"generate": "generate", "answer_grade": "answer_grade", "post_guard": "post_guard"},
+    )
+    b.add_conditional_edges("answer_grade", nodes.answer_router, {"post_guard": "post_guard", "rewrite": "rewrite"})
     b.add_edge("post_guard", END)
 
     # 검색 실패 폴백 분기
-    b.add_conditional_edges("classify_fallback", nodes.fallback_router,
-                            {"blocked": END, "fallback_generate": "fallback_generate",
-                             "referral": "referral_notice", "scope": "scope_notice"})
+    b.add_conditional_edges(
+        "classify_fallback",
+        nodes.fallback_router,
+        {
+            "blocked": END,
+            "fallback_generate": "fallback_generate",
+            "referral": "referral_notice",
+            "scope": "scope_notice",
+        },
+    )
     b.add_edge("fallback_generate", "fallback_post_guard")
     b.add_edge("fallback_post_guard", END)
     b.add_edge("referral_notice", END)
@@ -108,7 +120,7 @@ if __name__ == "__main__":
     ]
     if len(sys.argv) > 1:
         cases = [(" ".join(sys.argv[1:]), None)]
-    print(f"[그래프 컴파일] 노드 8 + 조건부 엣지 4")
+    print("[그래프 컴파일] 노드 8 + 조건부 엣지 4")
     for q, uc in cases:
         print(f"\n{'=' * 72}\n질문: {q}" + (f"  (user_context={uc})" if uc else ""))
         print(f"{'─' * 72}")
