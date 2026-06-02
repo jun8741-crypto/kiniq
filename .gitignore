@@ -13,12 +13,19 @@ wheels/
 *.coverage
 .coverage.*
 
-# Mac 시스템 파일
+# OS / Mac 시스템 파일
 .DS_Store
 **/.DS_Store
 
 # Claude Code
 .claude
+
+# RAG 인덱싱 원본 자료 (재배포 라이선스 / 대용량 — git 제외, 각자 다운로드)
+src/rag_indexing/data/**/*.pdf
+src/rag_indexing/data/**/*.txt
+
+# RAG 청킹 산출물 (chunking.py 재생성 가능 — 대용량 JSONL 덤프)
+src/rag_indexing/chunks/
 
 # Frontend
 frontend/ckd-care-app/node_modules/

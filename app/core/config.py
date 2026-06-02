@@ -30,12 +30,20 @@ class Config(BaseSettings):
     DB_CONNECT_TIMEOUT: int = 5
     DB_CONNECTION_POOL_MAXSIZE: int = 10
 
+    # Redis (RAG 챗봇 작업 큐 — docker-compose redis 서비스)
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    RAG_JOBS_STREAM: str = "rag_jobs"          # 백엔드→worker 작업 스트림
+    RAG_JOBS_GROUP: str = "rag_workers"        # consumer group 이름
+    RAG_RESP_PREFIX: str = "rag_resp"          # 응답 채널 prefix → rag_resp:{job_id}
+    RAG_TIMEOUT_SEC: int = 60                  # 백엔드 응답 대기 상한
+
     COOKIE_DOMAIN: str = "localhost"
 
     JWT_ALGORITHM: str = "HS256"
-    # REQ-SEC-003: Access 15분 / Refresh 7일
+    # v0.7 / REQ-SEC-003: Access 15분 / Refresh 7일 (Rotate). 단위는 둘 다 '분'으로 통일 — tokens.py에서 timedelta(minutes=...)로 사용
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 7 * 24 * 60
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 7 * 24 * 60  # 10080분 = 7일
     JWT_LEEWAY: int = 5
 
     # 소셜 로그인 (키 미발급 시 빈 문자열 유지 → 호출 시 HTTPException)

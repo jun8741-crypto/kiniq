@@ -68,8 +68,10 @@ async def login(
         value=str(tokens["refresh_token"]),
         httponly=True,
         secure=True if config.ENV == Env.PROD else False,
+        samesite="lax",
         domain=config.COOKIE_DOMAIN or None,
-        expires=tokens["access_token"].payload["exp"],
+        # 쿠키 만료를 refresh 토큰 수명과 일치 (이전: access exp(15분)를 잘못 사용 → SEC-2). max_age는 초 단위
+        max_age=config.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
     )
     return resp
 

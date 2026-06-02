@@ -1,0 +1,23 @@
+# Phase 1 PoC 전용 의존성 (본 프로젝트 pyproject.toml과 격리)
+# 설치: uv pip install -r requirements_poc.txt
+# 본 프로젝트 의존성에 흡수 시점: Phase 2 (pyproject.toml의 [dependency-groups.ai] 또는 새 [rag] 그룹으로 이관)
+
+# LangChain v1 (학습카드 03 기반)
+langchain>=1.2
+langchain-openai>=1.1.10
+langchain-qdrant>=0.2
+langchain-text-splitters>=0.3
+
+# OpenAI SDK (Embedding + Chat Completion)
+openai>=1.0
+tiktoken>=0.7
+
+# Qdrant (in-memory 모드, Docker 불필요)
+qdrant-client>=1.7
+
+# 문서 로더
+pypdf>=4.0
+pymupdf4llm>=0.0.17     # 실험 1: PDF → Markdown (헤더 보존)
+
+# 환경 변수
+python-dotenv>=1.0
