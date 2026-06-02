@@ -134,7 +134,8 @@ export function CheckinResultModal({ result, onClose }: Props) {
       ))}
 
       <div
-        className="relative w-full max-w-lg rounded-xl bg-bg p-7 shadow-2xl"
+        className="relative rounded-xl bg-bg p-7 shadow-2xl"
+        style={{ width: "min(520px, calc(100vw - 32px))" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더: 아이콘 + 제목 + 부제목 (가로 정렬) */}

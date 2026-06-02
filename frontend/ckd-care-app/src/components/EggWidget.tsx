@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { backgroundImagePath, gamificationApi, PROFICIENCY_LABEL, type MascotResponse } from "../api/gamification";
+import { gamificationApi, PROFICIENCY_LABEL, type MascotResponse } from "../api/gamification";
+import { BackgroundImage } from "./BackgroundImage";
 import { CharacterImage } from "./CharacterImage";
 
 // 진화 단계 시각화 — public/characters/*.svg 우선, 없으면 CharacterImage가 이모지 fallback
@@ -70,28 +71,27 @@ export function EggWidget() {
   // 챌린지 숙련도에 따른 배경 이미지 (1=잔디·2=산·3=헬스·4=지옥)
   const proficiency = data.proficiency ?? 1;
   const proficiencyLabel = PROFICIENCY_LABEL[proficiency] ?? "입문";
-  const backgroundUrl = backgroundImagePath(proficiency);
 
   return (
-    <div className="flex w-[280px] flex-col items-center gap-[10px] rounded-md border border-border bg-bg p-[16px]">
-      {/* 캐릭터 아이콘 + 숙련도 배경 */}
+    <div className="flex w-[420px] flex-col items-center gap-[10px] rounded-md border border-border bg-bg p-[16px]">
+      {/* 캐릭터 아이콘 + 숙련도 배경 (와이드 사각형, 시연 임팩트 강화) */}
       <div
-        className="relative flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-full ring-2 ring-border"
-        style={{
-          backgroundImage: `url(${backgroundUrl})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        className="relative flex h-[200px] w-full items-center justify-center overflow-hidden rounded-xl ring-2 ring-border shadow-sm"
         title={`숙련도: ${proficiencyLabel}`}
       >
-        <CharacterImage species={egg.species} stage={stageIdx} size={96} emojiClass="text-5xl" />
+        {/* 배경 (PNG → SVG → 그라데이션 fallback) */}
+        <BackgroundImage proficiency={proficiency} />
+        {/* 캐릭터 (배경 위) */}
+        <div className="relative z-10">
+          <CharacterImage species={egg.species} stage={stageIdx} size={140} emojiClass="text-6xl" />
+        </div>
         {isComplete && (
-          <span className="absolute -top-1 -right-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-bold text-yellow-700">
+          <span className="absolute top-2 right-2 z-20 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-bold text-yellow-700 shadow">
             ✨ 완전체
           </span>
         )}
-        {/* 숙련도 배지 (좌상단) */}
-        <span className="absolute -bottom-1 -left-1 rounded-full bg-bg px-2 py-0.5 text-[10px] font-bold text-text-primary ring-1 ring-border">
+        {/* 숙련도 배지 (좌하단) */}
+        <span className="absolute bottom-2 left-2 z-20 rounded-md bg-bg/90 backdrop-blur-sm px-2 py-0.5 text-[11px] font-bold text-text-primary ring-1 ring-border">
           {proficiencyLabel}
         </span>
       </div>

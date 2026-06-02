@@ -14,12 +14,13 @@ import { pointsApi } from "../api/gamification";
 import { useAuth } from "../contexts/AuthContext";
 
 function EgfrGauge({ value }: { value: number | null }) {
-  if (value === null) return <div className="flex h-[200px] items-center justify-center text-sm text-text-muted">데이터 없음</div>;
+  if (value === null) return <div className="flex h-[360px] items-center justify-center text-sm text-text-muted">데이터 없음</div>;
   const max = 120;
   const pct = Math.min(value / max, 1);
   const color = value >= 60 ? "#059669" : value >= 30 ? "#D97706" : "#DC2626";
   const angle = -135 + pct * 270;
-  const cx = 80, cy = 90, r = 60;
+  // 계기판 사이즈 확대 (반지름·중심점 키움)
+  const cx = 140, cy = 150, r = 110;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const startAngle = -135, endAngle = -135 + pct * 270;
   const x1 = cx + r * Math.cos(toRad(startAngle));
@@ -28,36 +29,40 @@ function EgfrGauge({ value }: { value: number | null }) {
   const y2 = cy + r * Math.sin(toRad(endAngle));
   const largeArc = pct * 270 > 180 ? 1 : 0;
   return (
-    <div className="flex flex-col items-center justify-center gap-2 p-4 rounded-md border border-border bg-bg" style={{ height: 200 }}>
-      <svg width="160" height="120" viewBox="0 0 160 120">
+    <div className="flex flex-col items-center justify-center gap-3 p-4 rounded-md border border-border bg-bg" style={{ height: 360 }}>
+      <svg width="280" height="220" viewBox="0 0 280 220">
         <path d={`M ${cx + r * Math.cos(toRad(-135))} ${cy + r * Math.sin(toRad(-135))} A ${r} ${r} 0 1 1 ${cx + r * Math.cos(toRad(135))} ${cy + r * Math.sin(toRad(135))}`}
-          fill="none" stroke="#E5E7EB" strokeWidth="10" strokeLinecap="round" />
+          fill="none" stroke="#E5E7EB" strokeWidth="18" strokeLinecap="round" />
         {pct > 0 && (
           <path d={`M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`}
-            fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" />
+            fill="none" stroke={color} strokeWidth="18" strokeLinecap="round" />
         )}
-        <text x={cx} y={cy - 4} textAnchor="middle" fontSize="20" fontWeight="bold" fill={color}>{Math.round(value)}</text>
-        <text x={cx} y={cy + 14} textAnchor="middle" fontSize="10" fill="#6B7280">mL/min</text>
-        <line x1={cx} y1={cy} x2={cx + (r - 10) * Math.cos(toRad(angle))} y2={cy + (r - 10) * Math.sin(toRad(angle))}
-          stroke="#1F2937" strokeWidth="2" strokeLinecap="round" />
+        <text x={cx} y={cy - 6} textAnchor="middle" fontSize="42" fontWeight="bold" fill={color}>{Math.round(value)}</text>
+        <text x={cx} y={cy + 22} textAnchor="middle" fontSize="16" fill="#6B7280">mL/min</text>
+        <line x1={cx} y1={cy} x2={cx + (r - 18) * Math.cos(toRad(angle))} y2={cy + (r - 18) * Math.sin(toRad(angle))}
+          stroke="#1F2937" strokeWidth="4" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="6" fill="#1F2937"/>
       </svg>
-      <p className="text-xs font-bold text-text-primary">eGFR 계기판</p>
-      <p className="text-[10px] text-text-muted">※ 예상값 (의료 진단 아님)</p>
+      <p className="text-base font-bold text-text-primary">eGFR 계기판</p>
+      <p className="text-xs text-text-muted">※ 예상값 (의료 진단 아님)</p>
     </div>
   );
 }
 
 function RiskGauge({ score }: { score: number | null }) {
-  if (score === null) return <div className="flex h-[200px] items-center justify-center text-sm text-text-muted">데이터 없음</div>;
+  if (score === null) return <div className="flex h-[360px] items-center justify-center text-sm text-text-muted">데이터 없음</div>;
   const color = score < 30 ? "#059669" : score < 60 ? "#D97706" : "#DC2626";
+  const level = score < 30 ? "낮음" : score < 60 ? "중간" : "높음";
   return (
-    <div className="flex flex-col items-center justify-center gap-2 p-4 rounded-md border border-border bg-bg" style={{ height: 200 }}>
-      <div className="relative flex h-[80px] w-[80px] items-center justify-center rounded-full border-8" style={{ borderColor: color }}>
-        <span className="text-xl font-bold" style={{ color }}>{Math.round(score)}%</span>
+    <div className="flex flex-col items-center justify-center gap-3 p-4 rounded-md border border-border bg-bg" style={{ height: 360 }}>
+      <div className="relative flex h-[180px] w-[180px] items-center justify-center rounded-full border-[14px]" style={{ borderColor: color }}>
+        <div className="flex flex-col items-center">
+          <span className="text-5xl font-bold leading-none" style={{ color }}>{Math.round(score)}%</span>
+          <span className="mt-2 text-base font-semibold text-text-secondary">{level}</span>
+        </div>
       </div>
-      <p className="text-xs font-bold text-text-primary">CKD 위험도</p>
-      <p className="text-xs text-text-secondary">{score < 30 ? "낮음" : score < 60 ? "중간" : "높음"}</p>
-      <p className="text-[10px] text-text-muted">※ 예상값 (의료 진단 아님)</p>
+      <p className="text-base font-bold text-text-primary">CKD 위험도</p>
+      <p className="text-xs text-text-muted">※ 예상값 (의료 진단 아님)</p>
     </div>
   );
 }
