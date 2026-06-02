@@ -118,6 +118,73 @@ class TestChatService(TestCase):
         finally:
             chat_module.get_redis = original_get_redis
 
+    async def test_ask_timeout_saves_nothing(self):
+        """timeout(504) 발생 시 DB에 해당 user의 ChatMessage가 0건이어야 한다 (고아 방지 I-1)."""
+        user = await _make_user(email="chat_service_timeout_orphan@example.com")
+        fake = fakeredis.aioredis.FakeRedis(decode_responses=True)
+
+        original_get_redis = chat_module.get_redis
+        original_timeout = config.RAG_TIMEOUT_SEC
+        chat_module.get_redis = lambda: fake
+        config.RAG_TIMEOUT_SEC = 1  # 1초로 단축
+
+        try:
+            from fastapi import HTTPException
+
+            with self.assertRaises(HTTPException) as ctx:
+                await ChatService().ask(user_id=user.id, question="timeout 테스트 질문")
+
+            assert ctx.exception.status_code == 504
+
+            from app.models.chat import ChatMessage
+
+            count = await ChatMessage.filter(user_id=user.id).count()
+            assert count == 0, f"고아 메시지가 생겼습니다: {count}건"
+        finally:
+            chat_module.get_redis = original_get_redis
+            config.RAG_TIMEOUT_SEC = original_timeout
+
+    async def test_ask_empty_answer_raises_500(self):
+        """worker가 {\"answer\": null, \"error\": null}을 반환하면 500 HTTPException이 발생한다 (C-1 null 가드)."""
+        user = await _make_user(email="chat_service_null_answer@example.com")
+        fake = fakeredis.aioredis.FakeRedis(decode_responses=True)
+
+        original_get_redis = chat_module.get_redis
+        chat_module.get_redis = lambda: fake
+
+        try:
+            from fastapi import HTTPException
+
+            async def fake_worker_null():
+                for _ in range(50):
+                    jobs = await fake.xrange(config.RAG_JOBS_STREAM)
+                    if jobs:
+                        job_id = jobs[0][1]["job_id"]
+                        # answer와 error 모두 null인 비정상 페이로드
+                        await fake.xadd(
+                            f"{config.RAG_RESP_PREFIX}:{job_id}",
+                            {"data": json.dumps({"answer": None, "error": None})},
+                        )
+                        return
+                    await asyncio.sleep(0.05)
+
+            worker_task = asyncio.create_task(fake_worker_null())
+
+            with self.assertRaises(HTTPException) as ctx:
+                await ChatService().ask(user_id=user.id, question="null 답변 테스트")
+
+            await worker_task
+            assert ctx.exception.status_code == 500
+            assert "비어있습니다" in ctx.exception.detail
+
+            # null answer 시에도 DB에 아무것도 저장되지 않아야 함
+            from app.models.chat import ChatMessage
+
+            count = await ChatMessage.filter(user_id=user.id).count()
+            assert count == 0, f"null 답변인데 메시지가 저장됐습니다: {count}건"
+        finally:
+            chat_module.get_redis = original_get_redis
+
     async def test_ask_with_health_check_sends_user_context(self):
         """최신 검진 데이터가 있으면 user_context에 eGFR·risk_group이 포함된다."""
         user = await _make_user(email="chat_service_context@example.com")

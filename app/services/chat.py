@@ -36,20 +36,19 @@ class ChatService:
 
         흐름:
         1. 사용자 검진 데이터에서 user_context(eGFR, risk_group) 추출
-        2. USER 메시지 DB 저장
-        3. Redis rag_jobs 스트림에 작업 투입
-        4. rag_resp:{job_id} 스트림에서 응답 대기 (block)
-        5. ASSISTANT 메시지 DB 저장 후 반환
+        2. Redis rag_jobs 스트림에 작업 투입
+        3. rag_resp:{job_id} 스트림에서 응답 대기 (block)
+        4. 성공 시에만 USER·ASSISTANT 메시지를 함께 DB 저장 후 반환
 
         Raises:
             HTTPException 504: RAG_TIMEOUT_SEC 초과 시
-            HTTPException 500: worker가 error 페이로드 반환 시
+            HTTPException 500: worker가 error 페이로드 반환 시, 또는 answer가 비어있을 시
         """
         redis = get_redis()
         user_context = await self._build_user_context(user_id)
         job_id = uuid.uuid4().hex
 
-        await self._repo.add(user_id=user_id, role=ChatRole.USER, content=question)
+        # I-1 고아 방지: USER 메시지 저장을 성공 확인 후로 이동
         await redis.xadd(config.RAG_JOBS_STREAM, {
             "job_id": job_id,
             "question": question,
@@ -69,6 +68,14 @@ class ChatService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="답변 생성 중 오류가 발생했습니다.",
             )
-        answer = payload["answer"]
+        # C-1 null/빈 문자열 가드: answer가 없으면 즉시 500
+        answer = payload.get("answer")
+        if not answer:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="답변 생성 결과가 비어있습니다.",
+            )
+        # 성공 경로에서만 USER·ASSISTANT 메시지를 함께 저장 (I-1)
+        await self._repo.add(user_id=user_id, role=ChatRole.USER, content=question)
         saved = await self._repo.add(user_id=user_id, role=ChatRole.ASSISTANT, content=answer)
         return ChatMessageResponse(answer=answer, created_at=saved.created_at)
