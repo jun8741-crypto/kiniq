@@ -9,18 +9,22 @@ export type ItemCode =
   | "SKIN_M_PURPLE"
   | "SKIN_L_GOLD";
 
-export type CharacterSpecies = "TURTLE" | "PENGUIN" | "SQUIRREL";
+export type CharacterSpecies = "TURTLE" | "PENGUIN" | "SQUIRREL" | "RABBIT" | "PANDA";
 
 export const SPECIES_EMOJI: Record<CharacterSpecies, string> = {
   TURTLE: "🐢",
   PENGUIN: "🐧",
   SQUIRREL: "🐿️",
+  RABBIT: "🐰",
+  PANDA: "🐼",
 };
 
 export const SPECIES_LABEL: Record<CharacterSpecies, string> = {
   TURTLE: "거북이",
   PENGUIN: "펭귄",
   SQUIRREL: "다람쥐",
+  RABBIT: "토끼",
+  PANDA: "판다",
 };
 
 // 일러스트 경로 매퍼 — public/characters/{종}_stage{1~3}.png 우선
@@ -88,7 +92,21 @@ export interface MascotResponse {
   charge_mode: ChargeModeResponse;
   legendary_unlocked: boolean;
   skin_active: ItemCode | null;
+  proficiency: number; // 1=입문, 2=초보, 3=중급, 4=숙련 — EggWidget 배경 결정
 }
+
+// 숙련도 배경 SVG 경로 (PNG 우선, 없으면 SVG fallback)
+export function backgroundImagePath(proficiency: number): string {
+  const safe = Math.max(1, Math.min(proficiency, 4));
+  return `/backgrounds/bg_proficiency${safe}.svg`;
+}
+
+export const PROFICIENCY_LABEL: Record<number, string> = {
+  1: "입문",
+  2: "초보",
+  3: "중급",
+  4: "숙련",
+};
 
 export interface InventoryItem {
   item_code: ItemCode;

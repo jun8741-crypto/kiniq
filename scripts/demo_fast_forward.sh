@@ -72,6 +72,30 @@ case "${1:-}" in
         psql_exec "DELETE FROM point_transactions WHERE user_id=$USER_ID AND reason='STREAK_BONUS' AND extra->>'milestone'='7';"
         echo "✓ 완료"
         ;;
+    proficiency-1)
+        echo "🌱 숙련도 1 (입문/잔디) 설정 — EggWidget 배경: 잔디"
+        USER_ID=$(get_user_id)
+        psql_exec "UPDATE users SET proficiency=1 WHERE id=$USER_ID;"
+        echo "✓ 완료"
+        ;;
+    proficiency-2)
+        echo "🏔️ 숙련도 2 (초보/산스장) 설정 — EggWidget 배경: 산"
+        USER_ID=$(get_user_id)
+        psql_exec "UPDATE users SET proficiency=2 WHERE id=$USER_ID;"
+        echo "✓ 완료"
+        ;;
+    proficiency-3)
+        echo "🏋️ 숙련도 3 (중급/헬스장) 설정 — EggWidget 배경: 헬스장"
+        USER_ID=$(get_user_id)
+        psql_exec "UPDATE users SET proficiency=3 WHERE id=$USER_ID;"
+        echo "✓ 완료"
+        ;;
+    proficiency-4)
+        echo "🥊 숙련도 4 (숙련/지옥) 설정 — EggWidget 배경: UFC 옥타곤"
+        USER_ID=$(get_user_id)
+        psql_exec "UPDATE users SET proficiency=4 WHERE id=$USER_ID;"
+        echo "✓ 완료"
+        ;;
     charge-mode)
         echo "😴 마지막 체크인을 7일 전으로 설정 (다음 로그인 시 쉬어가기 모드 진입)"
         USER_ID=$(get_user_id)
@@ -121,6 +145,12 @@ demo 계정 시연 헬퍼 (v3 — 3단계 진화 시스템)
   streak-3       스트릭 2 → 다음 체크인 = 3일 보너스 +30
   streak-7       스트릭 6 → 다음 체크인 = 7일 보너스 +70
   charge-mode    7일 전 체크인 → 로그인 시 쉬어가기 진입
+
+배경 시연 (챌린지 숙련도 4종):
+  proficiency-1  🌱 잔디 (입문)
+  proficiency-2  🏔️ 산스장 (초보)
+  proficiency-3  🏋️ 헬스장 (중급)
+  proficiency-4  🥊 UFC 옥타곤 (숙련)
 
 유틸:
   reset          시드 스크립트 재실행 (전체 초기화)

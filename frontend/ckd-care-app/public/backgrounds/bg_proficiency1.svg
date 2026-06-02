@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#BBF7D0"/>
+      <stop offset="50%" stop-color="#86EFAC"/>
+      <stop offset="100%" stop-color="#4ADE80"/>
+    </linearGradient>
+  </defs>
+  <rect width="220" height="220" fill="url(#bg1)"/>
+  <!-- 풀잎 -->
+  <path d="M 20 200 L 25 175 L 30 200 Z" fill="#16A34A" opacity="0.6"/>
+  <path d="M 45 200 L 50 170 L 55 200 Z" fill="#16A34A" opacity="0.6"/>
+  <path d="M 75 200 L 80 178 L 85 200 Z" fill="#16A34A" opacity="0.6"/>
+  <path d="M 100 200 L 105 165 L 110 200 Z" fill="#16A34A" opacity="0.6"/>
+  <path d="M 130 200 L 135 175 L 140 200 Z" fill="#16A34A" opacity="0.6"/>
+  <path d="M 155 200 L 160 168 L 165 200 Z" fill="#16A34A" opacity="0.6"/>
+  <path d="M 185 200 L 190 175 L 195 200 Z" fill="#16A34A" opacity="0.6"/>
+  <!-- 꽃 -->
+  <circle cx="40" cy="195" r="3" fill="#FBBF24"/>
+  <circle cx="180" cy="195" r="3" fill="#F472B6"/>
+  <!-- 햇살 -->
+  <circle cx="180" cy="40" r="22" fill="#FCD34D" opacity="0.9"/>
+  <circle cx="180" cy="40" r="14" fill="#FBBF24"/>
+</svg>

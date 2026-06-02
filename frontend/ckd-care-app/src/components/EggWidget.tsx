@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { gamificationApi, type MascotResponse } from "../api/gamification";
+import { backgroundImagePath, gamificationApi, PROFICIENCY_LABEL, type MascotResponse } from "../api/gamification";
 import { CharacterImage } from "./CharacterImage";
 
 // 진화 단계 시각화 — public/characters/*.svg 우선, 없으면 CharacterImage가 이모지 fallback
@@ -67,12 +67,22 @@ export function EggWidget() {
   const next = nextThreshold(progress);
   const isComplete = stageIdx === 3;
 
+  // 챌린지 숙련도에 따른 배경 이미지 (1=잔디·2=산·3=헬스·4=지옥)
+  const proficiency = data.proficiency ?? 1;
+  const proficiencyLabel = PROFICIENCY_LABEL[proficiency] ?? "입문";
+  const backgroundUrl = backgroundImagePath(proficiency);
+
   return (
     <div className="flex w-[280px] flex-col items-center gap-[10px] rounded-md border border-border bg-bg p-[16px]">
-      {/* 캐릭터 아이콘 */}
+      {/* 캐릭터 아이콘 + 숙련도 배경 */}
       <div
-        className="relative flex h-[110px] w-[110px] items-center justify-center rounded-full"
-        style={{ backgroundColor: `${color}20` }}
+        className="relative flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-full ring-2 ring-border"
+        style={{
+          backgroundImage: `url(${backgroundUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        title={`숙련도: ${proficiencyLabel}`}
       >
         <CharacterImage species={egg.species} stage={stageIdx} size={96} emojiClass="text-5xl" />
         {isComplete && (
@@ -80,6 +90,10 @@ export function EggWidget() {
             ✨ 완전체
           </span>
         )}
+        {/* 숙련도 배지 (좌상단) */}
+        <span className="absolute -bottom-1 -left-1 rounded-full bg-bg px-2 py-0.5 text-[10px] font-bold text-text-primary ring-1 ring-border">
+          {proficiencyLabel}
+        </span>
       </div>
 
       {/* 헤더 — 캐릭터 이름 또는 알 상태 */}

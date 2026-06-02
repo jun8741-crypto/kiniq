@@ -51,6 +51,8 @@ SPECIES_LABEL: dict[CharacterSpecies, str] = {
     CharacterSpecies.TURTLE: "🐢 거북이",
     CharacterSpecies.PENGUIN: "🐧 펭귄",
     CharacterSpecies.SQUIRREL: "🐿️ 다람쥐",
+    CharacterSpecies.RABBIT: "🐰 토끼",
+    CharacterSpecies.PANDA: "🐼 판다",
 }
 
 EVOLUTION_NAMES: dict[int, str] = {

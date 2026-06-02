@@ -26,11 +26,13 @@ class ItemCode(StrEnum):
 
 
 class CharacterSpecies(StrEnum):
-    """부화 시 추첨되는 캐릭터 종 (각 33.33%, 전설 제외 v1.0)."""
+    """부화 시 추첨되는 캐릭터 종 (각 20% 균등, v3 5종 확장 2026-06-02)."""
 
-    TURTLE = "TURTLE"  # 🐢 고결한 파랑
-    PENGUIN = "PENGUIN"  # 🐧 호기심 많은 차마
-    SQUIRREL = "SQUIRREL"  # 🐿️ 용맹한 찌이
+    TURTLE = "TURTLE"  # 🐢 거북이
+    PENGUIN = "PENGUIN"  # 🐧 펭귄
+    SQUIRREL = "SQUIRREL"  # 🐿️ 다람쥐
+    RABBIT = "RABBIT"  # 🐰 토끼
+    PANDA = "PANDA"  # 🐼 판다
 
 
 class PointTransaction(models.Model):

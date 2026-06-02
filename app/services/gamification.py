@@ -161,6 +161,7 @@ class GamificationService:
             charge_mode=charge,
             legendary_unlocked=legendary_unlocked,
             skin_active=skin_active,
+            proficiency=user.proficiency,
         )
 
     async def exit_charge_mode(self, user_id: int) -> ChargeModeResponse:

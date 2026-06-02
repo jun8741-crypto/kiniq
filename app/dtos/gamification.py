@@ -72,3 +72,4 @@ class MascotResponse(BaseSerializerModel):
     charge_mode: ChargeModeResponse
     legendary_unlocked: bool  # 부화 이력 중 전설 한 번이라도?
     skin_active: ItemCode | None  # 보유 스킨 중 가장 비싼 거 (단순화)
+    proficiency: int  # 챌린지 숙련도 1~4 (EggWidget 배경 결정용)
