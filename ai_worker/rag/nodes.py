@@ -94,7 +94,7 @@ def relevance_router(s: RAGState) -> str:
         return "generate"
     if s.get("retry_count", 0) < cfg.MAX_REWRITE:
         return "rewrite"
-    return "generate"
+    return "classify_fallback"   # 검색 실패(rewrite 소진) → LLM 폴백 차등 라우팅
 
 
 def grounded_router(s: RAGState) -> str:
@@ -110,3 +110,50 @@ def answer_router(s: RAGState) -> str:
     if s.get("retry_count", 0) < cfg.MAX_REWRITE:
         return "rewrite"
     return "post_guard"
+
+
+# ── LLM 폴백 (검색 실패 차등 라우팅 — medical 검증 5필수 가드) ──────────────────
+def classify_fallback_node(state: RAGState) -> dict:
+    """검색 실패 질문을 4분류. medical 권장 #5: 분류 직전 응급·자해 재검사(멀티턴 대비)."""
+    q = _q(state)
+    blocked = safety_guard.pre_retrieval_guard(q, state.get("user_context"))
+    if blocked:
+        return {"blocked": blocked, "generation": blocked}
+    g = llm_client.domain_grader().invoke(
+        f"{prompt_builder.CLASSIFICATION_SYSTEM_PROMPT}\n\n질문: {q}\n위 기준으로 분류하세요."
+    )
+    return {"domain": g.domain}
+
+
+def fallback_generate_node(state: RAGState) -> dict:
+    """가이드라인 근거 없이 LLM 일반지식 답변 (FALLBACK_SYSTEM_PROMPT 제약·max_tokens 제한)."""
+    msgs = prompt_builder.build_fallback_messages(_q(state))
+    llm = llm_client.get_gen_llm().bind(max_tokens=cfg.FALLBACK_MAX_TOKENS)
+    r = llm.invoke(msgs)
+    return {"generation": r.content}
+
+
+def fallback_post_guard_node(state: RAGState) -> dict:
+    """폴백 답변 안전 확정 — 위험패턴(약물수치·독성·식이수치) 시 대체, 통과 시 폴백 면책."""
+    return {"generation": safety_guard.fallback_finalize(state.get("generation", ""))}
+
+
+def referral_notice_node(state: RAGState) -> dict:
+    """DOMAIN_2_GENERAL(인접질환 비신장) → 전문진료 유도."""
+    return {"generation": safety_guard.REFERRAL_NOTICE}
+
+
+def scope_notice_node(state: RAGState) -> dict:
+    """DOMAIN_3(비의료) → scope 안내."""
+    return {"generation": safety_guard.SCOPE_NOTICE}
+
+
+def fallback_router(s: RAGState) -> str:
+    if s.get("blocked"):
+        return "blocked"
+    d = s.get("domain", "")
+    if d in ("DOMAIN_1", "DOMAIN_2_KIDNEY"):
+        return "fallback_generate"
+    if d == "DOMAIN_2_GENERAL":
+        return "referral"
+    return "scope"   # DOMAIN_3 또는 분류 실패 시 안전하게 scope 안내

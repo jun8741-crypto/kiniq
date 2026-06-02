@@ -21,6 +21,7 @@ class RAGState(MessagesState):
     generation: str
     retry_count: int         # rewrite 횟수 (관련성·미해결)
     gen_retry_count: int     # 재생성 횟수 (환각)
-    # 가드
+    # 가드·폴백
     blocked: str | None      # pre-guard 차단 메시지 (있으면 즉시 END)
+    domain: str              # 검색 실패 시 분류 (DOMAIN_1·DOMAIN_2_KIDNEY·DOMAIN_2_GENERAL·DOMAIN_3)
     user_context: dict       # {eGFR, risk_group, ...} — guard·prompt_builder 입력

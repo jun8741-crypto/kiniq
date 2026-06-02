@@ -9,7 +9,7 @@ from __future__ import annotations
 from langchain_openai import ChatOpenAI
 
 from . import config as cfg
-from .tools import GradeAnswer, GradeDocuments, GradeHallucinations
+from .tools import GradeAnswer, GradeDocuments, GradeDomain, GradeHallucinations
 
 _gen_llm: ChatOpenAI | None = None
 _grade_llm: ChatOpenAI | None = None
@@ -40,3 +40,8 @@ def hallucination_grader():
 
 def answer_grader():
     return get_grade_llm().with_structured_output(GradeAnswer)
+
+
+def domain_grader():
+    """검색 실패 질문의 도메인 분류기 (LLM 폴백 라우팅)."""
+    return get_grade_llm().with_structured_output(GradeDomain)

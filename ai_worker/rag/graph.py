@@ -28,6 +28,12 @@ def build_graph():
         ("hallucination", nodes.hallucination_node),
         ("answer_grade", nodes.answer_node),
         ("post_guard", nodes.post_guard_node),
+        # 검색 실패 폴백 차등 라우팅
+        ("classify_fallback", nodes.classify_fallback_node),
+        ("fallback_generate", nodes.fallback_generate_node),
+        ("fallback_post_guard", nodes.fallback_post_guard_node),
+        ("referral_notice", nodes.referral_notice_node),
+        ("scope_notice", nodes.scope_notice_node),
     ]:
         b.add_node(name, fn)
 
@@ -40,7 +46,8 @@ def build_graph():
     )
     b.add_edge("retrieve", "grade")
     b.add_conditional_edges("grade", nodes.relevance_router,
-                            {"generate": "generate", "rewrite": "rewrite"})
+                            {"generate": "generate", "rewrite": "rewrite",
+                             "classify_fallback": "classify_fallback"})
     b.add_edge("rewrite", "retrieve")
     b.add_edge("generate", "hallucination")
     b.add_conditional_edges("hallucination", nodes.grounded_router,
@@ -48,6 +55,15 @@ def build_graph():
     b.add_conditional_edges("answer_grade", nodes.answer_router,
                             {"post_guard": "post_guard", "rewrite": "rewrite"})
     b.add_edge("post_guard", END)
+
+    # 검색 실패 폴백 분기
+    b.add_conditional_edges("classify_fallback", nodes.fallback_router,
+                            {"blocked": END, "fallback_generate": "fallback_generate",
+                             "referral": "referral_notice", "scope": "scope_notice"})
+    b.add_edge("fallback_generate", "fallback_post_guard")
+    b.add_edge("fallback_post_guard", END)
+    b.add_edge("referral_notice", END)
+    b.add_edge("scope_notice", END)
     return b.compile()
 
 
@@ -73,6 +89,7 @@ def run(question: str, user_context: dict | None = None) -> str:
         "retry_count": 0,
         "gen_retry_count": 0,
         "blocked": None,
+        "domain": "",
         "user_context": user_context or {},
     }
     final = get_graph().invoke(init)

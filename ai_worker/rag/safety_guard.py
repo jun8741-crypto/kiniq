@@ -123,3 +123,56 @@ def find_forbidden(text: str) -> list[str]:
 def with_disclaimer(text: str) -> str:
     """이미 면책 문구가 있으면 중복 부착하지 않는다."""
     return text if "의학적 진단·처방을 대체하지" in text else text + DISCLAIMER
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LLM 폴백 전용 가드 (검색 실패 차등 라우팅 — medical 필수 #3·#4)
+# ─────────────────────────────────────────────────────────────────────────────
+# 폴백 답변은 가이드라인 근거가 없으므로 RAG 답변보다 더 엄격히 검사한다. 매칭 시 답변을 대체.
+_FALLBACK_FORBIDDEN: list[tuple[re.Pattern, str]] = [
+    # 약물·용량 수치 (숫자+단위) — "아세트아미노펜 500mg", "0.8 g", "5 mEq". kg(체중)은 미포함.
+    (re.compile(r"\d[\d,\.]*\s*(mg|mcg|μg|mL|ml|IU|mmol|mEq|g|정|캡슐)\b"), "약물·용량수치"),
+    (re.compile(r"(과용|독성|치사량|치명적|과다\s*복용|중독)"), "독성·과용"),
+    # 식이 제한 수치 (CKD 개인별 처방 사항)
+    (re.compile(r"(칼륨|포타슘|인|나트륨|소금).{0,20}(mg|g|mmol|mEq).{0,12}(이하|미만|이상|초과)"), "식이제한수치"),
+]
+
+
+def fallback_post_guard(text: str) -> list[str]:
+    """폴백 답변의 위험 패턴(약물수치·독성·식이수치) 검출. find_forbidden 과 별도로 더 엄격."""
+    return [cat for rx, cat in _FALLBACK_FORBIDDEN if rx.search(text)]
+
+
+# 위험 패턴 검출 시 답변을 통째로 대체 (medical 필수 #3 — LLM 답변 그대로 전달 금지)
+FALLBACK_REPLACED = (
+    "이 내용은 전문 의료진과 직접 상담이 필요한 사항입니다. 담당 의료진(신장내과 등)과 상의하세요."
+)
+
+# 폴백 in-domain 답변 하단 면책 (medical 필수 #4 — 일반성·가이드라인 미포함·의료인 상담 3요소)
+FALLBACK_DISCLAIMER = (
+    "\n\n─────────────────────────────\n"
+    "ℹ️ 위 내용은 특정 임상 가이드라인에 근거한 정보가 아닌 일반적인 의학 지식입니다. "
+    "개인의 신장 기능·동반 질환·복용 약물에 따라 적용이 달라질 수 있으므로, "
+    "담당 의료진(신장내과 또는 가정의학과)과 반드시 상담하세요. 이 정보를 자의적으로 적용하지 마세요."
+)
+
+# out-of-domain(비의료) scope 안내
+SCOPE_NOTICE = (
+    "저는 만성콩팥병(CKD) 및 신장 건강 관련 정보를 제공하는 도우미입니다. "
+    "문의하신 내용은 제가 안내드릴 수 있는 범위를 벗어납니다. "
+    "신장 건강·CKD 관리·신장 보호 생활습관에 관한 궁금한 점을 질문해 주세요."
+)
+
+# 인접 질환 비신장(DOMAIN_2_GENERAL) 전문진료 유도
+REFERRAL_NOTICE = (
+    "문의하신 내용은 만성콩팥병과 관련될 수 있는 중요한 주제입니다. 다만 해당 질환의 구체적인 "
+    "관리·치료에 대한 조언은 해당 전문과(내분비내과·순환기내과 등) 의료진과 상담하시기를 권장합니다. "
+    "만성콩팥병과의 연관성에 대해 알고 싶으시면 다시 질문해 주세요."
+)
+
+
+def fallback_finalize(text: str) -> str:
+    """폴백 LLM 답변을 안전 검사 후 확정. 위험 패턴 시 대체, 통과 시 폴백 면책 부착."""
+    if find_forbidden(text) or fallback_post_guard(text):
+        return FALLBACK_REPLACED + FALLBACK_DISCLAIMER
+    return text + FALLBACK_DISCLAIMER
