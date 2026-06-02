@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <defs>
+    <radialGradient id="pdAura3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FBBF24" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#FBBF24" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#FBBF24" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="105" fill="url(#pdAura3)"/>
+  <text x="20" y="55" font-size="22" fill="#FBBF24">★</text>
+  <text x="180" y="65" font-size="22" fill="#FBBF24">★</text>
+  <text x="25" y="200" font-size="18" fill="#FCD34D">✦</text>
+  <text x="175" y="205" font-size="18" fill="#FCD34D">✦</text>
+  <ellipse cx="110" cy="200" rx="62" ry="7" fill="#000" opacity="0.18"/>
+  <circle cx="76" cy="40" r="16" fill="#1F2937" stroke="#0F172A" stroke-width="3"/>
+  <circle cx="144" cy="40" r="16" fill="#1F2937" stroke="#0F172A" stroke-width="3"/>
+  <ellipse cx="82" cy="184" rx="16" ry="12" fill="#1F2937" stroke="#0F172A" stroke-width="3"/>
+  <ellipse cx="138" cy="184" rx="16" ry="12" fill="#1F2937" stroke="#0F172A" stroke-width="3"/>
+  <ellipse cx="110" cy="130" rx="58" ry="60" fill="#F9FAFB" stroke="#374151" stroke-width="3.5"/>
+  <!-- 가슴 메달 -->
+  <circle cx="110" cy="135" r="13" fill="#FBBF24" stroke="#92400E" stroke-width="2.5"/>
+  <text x="103" y="142" font-size="14" fill="#92400E" font-weight="bold">★</text>
+  <ellipse cx="60" cy="125" rx="15" ry="26" fill="#1F2937" stroke="#0F172A" stroke-width="2.8" transform="rotate(-12 60 125)"/>
+  <ellipse cx="160" cy="130" rx="15" ry="26" fill="#1F2937" stroke="#0F172A" stroke-width="2.8" transform="rotate(12 160 130)"/>
+  <!-- 황금 댓잎 -->
+  <ellipse cx="162" cy="155" rx="7" ry="16" fill="#FBBF24" stroke="#92400E" stroke-width="1.8" transform="rotate(35 162 155)"/>
+  <ellipse cx="174" cy="142" rx="6" ry="14" fill="#FCD34D" stroke="#92400E" stroke-width="1.5" transform="rotate(45 174 142)"/>
+  <!-- 머리 -->
+  <circle cx="110" cy="72" r="40" fill="#F9FAFB" stroke="#374151" stroke-width="3.5"/>
+  <ellipse cx="94" cy="70" rx="11" ry="13" fill="#1F2937" transform="rotate(-15 94 70)"/>
+  <ellipse cx="126" cy="70" rx="11" ry="13" fill="#1F2937" transform="rotate(15 126 70)"/>
+  <circle cx="95" cy="71" r="5" fill="#FFFFFF"/>
+  <circle cx="125" cy="71" r="5" fill="#FFFFFF"/>
+  <circle cx="95.5" cy="71.5" r="2.8" fill="#1F2937"/>
+  <circle cx="125.5" cy="71.5" r="2.8" fill="#1F2937"/>
+  <circle cx="96" cy="70.5" r="1.1" fill="#FFFFFF"/>
+  <circle cx="126" cy="70.5" r="1.1" fill="#FFFFFF"/>
+  <ellipse cx="110" cy="84" rx="5" ry="3.5" fill="#1F2937"/>
+  <path d="M 110 87 L 110 93 M 110 93 Q 102 99 99 96 M 110 93 Q 118 99 121 96" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <circle cx="74" cy="86" r="5.5" fill="#F472B6" opacity="0.7"/>
+  <circle cx="146" cy="86" r="5.5" fill="#F472B6" opacity="0.7"/>
+  <!-- 왕관 -->
+  <polygon points="82,28 92,14 102,24 110,8 118,24 128,14 138,28 138,38 82,38" fill="#FBBF24" stroke="#92400E" stroke-width="2.5"/>
+  <circle cx="92" cy="14" r="3" fill="#DC2626"/>
+  <circle cx="110" cy="8" r="3.5" fill="#2563EB"/>
+  <circle cx="128" cy="14" r="3" fill="#DC2626"/>
+  <rect x="82" y="32" width="56" height="6" fill="#FCD34D" stroke="#92400E" stroke-width="1.5"/>
+</svg>

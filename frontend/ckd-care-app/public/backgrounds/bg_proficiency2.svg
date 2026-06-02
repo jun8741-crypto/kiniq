@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#DBEAFE"/>
+      <stop offset="50%" stop-color="#A5B4FC"/>
+      <stop offset="100%" stop-color="#86EFAC"/>
+    </linearGradient>
+  </defs>
+  <rect width="220" height="220" fill="url(#bg2)"/>
+  <!-- 산 (뒤) -->
+  <polygon points="0,200 50,80 90,140 130,60 180,130 220,90 220,220 0,220" fill="#6B7280" opacity="0.8"/>
+  <!-- 산 (앞) -->
+  <polygon points="0,220 40,140 100,180 160,110 220,170 220,220" fill="#374151" opacity="0.9"/>
+  <!-- 눈 -->
+  <polygon points="120,75 130,60 140,75" fill="#FFFFFF"/>
+  <polygon points="45,95 50,80 55,95" fill="#FFFFFF"/>
+  <!-- 구름 -->
+  <ellipse cx="50" cy="35" rx="20" ry="8" fill="#FFFFFF" opacity="0.85"/>
+  <ellipse cx="175" cy="50" rx="18" ry="7" fill="#FFFFFF" opacity="0.85"/>
+  <!-- 해 -->
+  <circle cx="110" cy="40" r="14" fill="#FCD34D"/>
+</svg>

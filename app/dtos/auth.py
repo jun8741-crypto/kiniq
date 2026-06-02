@@ -3,8 +3,8 @@ from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, EmailStr, Field
 
-from app.models.users import Gender
 from app.core.validators import validate_birthday, validate_password, validate_phone_number
+from app.models.users import Gender
 
 
 class SignUpRequest(BaseModel):
@@ -29,3 +29,31 @@ class LoginResponse(BaseModel):
 
 
 class TokenRefreshResponse(LoginResponse): ...
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ForgotPasswordResponse(BaseModel):
+    temp_password: str
+
+
+class PasswordResetRequestBody(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetRequestResponse(BaseModel):
+    sent: bool
+    mode: str
+    demo_code: str | None = None
+    expires_in_seconds: int
+
+
+class PasswordResetVerifyBody(BaseModel):
+    email: EmailStr
+    code: Annotated[str, Field(min_length=6, max_length=6, pattern=r"^\d{6}$")]
+
+
+class PasswordResetVerifyResponse(BaseModel):
+    temp_password: str

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <ellipse cx="110" cy="195" rx="60" ry="6" fill="#000" opacity="0.15"/>
+  <!-- 다리 -->
+  <ellipse cx="68" cy="148" rx="12" ry="15" fill="#6EE7B7" stroke="#065F46" stroke-width="2.5"/>
+  <ellipse cx="152" cy="148" rx="12" ry="15" fill="#6EE7B7" stroke="#065F46" stroke-width="2.5"/>
+  <ellipse cx="76" cy="178" rx="11" ry="14" fill="#6EE7B7" stroke="#065F46" stroke-width="2.5"/>
+  <ellipse cx="144" cy="178" rx="11" ry="14" fill="#6EE7B7" stroke="#065F46" stroke-width="2.5"/>
+  <ellipse cx="110" cy="183" rx="7" ry="11" fill="#6EE7B7" stroke="#065F46" stroke-width="2"/>
+  <!-- 등딱지 (더 큼) -->
+  <ellipse cx="110" cy="130" rx="64" ry="46" fill="#16A34A" stroke="#065F46" stroke-width="4"/>
+  <!-- 패턴 -->
+  <polygon points="110,105 130,117 130,139 110,151 90,139 90,117" fill="#22C55E" stroke="#065F46" stroke-width="2"/>
+  <polygon points="76,125 88,132 88,144 76,151 64,144 64,132" fill="#22C55E" stroke="#065F46" stroke-width="2"/>
+  <polygon points="144,125 156,132 156,144 144,151 132,144 132,132" fill="#22C55E" stroke="#065F46" stroke-width="2"/>
+  <!-- 등딱지 윤기 -->
+  <ellipse cx="95" cy="110" rx="15" ry="6" fill="#FFFFFF" opacity="0.35"/>
+  <!-- 머리 (살짝 큼) -->
+  <circle cx="110" cy="72" r="29" fill="#86EFAC" stroke="#065F46" stroke-width="3"/>
+  <!-- 눈 -->
+  <circle cx="99" cy="69" r="6" fill="#FFFFFF" stroke="#065F46" stroke-width="1.5"/>
+  <circle cx="121" cy="69" r="6" fill="#FFFFFF" stroke="#065F46" stroke-width="1.5"/>
+  <circle cx="100" cy="70" r="3.5" fill="#1F2937"/>
+  <circle cx="122" cy="70" r="3.5" fill="#1F2937"/>
+  <circle cx="101.5" cy="68.5" r="1.2" fill="#FFFFFF"/>
+  <circle cx="123.5" cy="68.5" r="1.2" fill="#FFFFFF"/>
+  <!-- 입 (미소) -->
+  <path d="M 100 84 Q 110 92 120 84" stroke="#065F46" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <!-- 볼터치 -->
+  <circle cx="88" cy="80" r="4" fill="#F87171" opacity="0.55"/>
+  <circle cx="132" cy="80" r="4" fill="#F87171" opacity="0.55"/>
+  <!-- 빨간 리본 -->
+  <path d="M 95 55 L 105 50 L 115 55 L 125 50 L 122 60 L 102 60 Z" fill="#DC2626" stroke="#7F1D1D" stroke-width="1.5"/>
+  <circle cx="110" cy="55" r="3" fill="#FBBF24" stroke="#7F1D1D" stroke-width="1.2"/>
+</svg>

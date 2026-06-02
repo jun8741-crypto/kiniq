@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <!-- 그림자 -->
+  <ellipse cx="110" cy="195" rx="55" ry="6" fill="#000" opacity="0.15"/>
+  <!-- 다리 4개 -->
+  <ellipse cx="72" cy="148" rx="11" ry="14" fill="#86EFAC" stroke="#065F46" stroke-width="2.5"/>
+  <ellipse cx="148" cy="148" rx="11" ry="14" fill="#86EFAC" stroke="#065F46" stroke-width="2.5"/>
+  <ellipse cx="80" cy="175" rx="10" ry="13" fill="#86EFAC" stroke="#065F46" stroke-width="2.5"/>
+  <ellipse cx="140" cy="175" rx="10" ry="13" fill="#86EFAC" stroke="#065F46" stroke-width="2.5"/>
+  <!-- 꼬리 -->
+  <ellipse cx="110" cy="180" rx="6" ry="10" fill="#86EFAC" stroke="#065F46" stroke-width="2"/>
+  <!-- 등딱지 -->
+  <ellipse cx="110" cy="135" rx="58" ry="42" fill="#16A34A" stroke="#065F46" stroke-width="3.5"/>
+  <!-- 등딱지 패턴 (육각) -->
+  <polygon points="110,113 128,123 128,143 110,153 92,143 92,123" fill="#22C55E" stroke="#065F46" stroke-width="1.8"/>
+  <polygon points="80,128 90,134 90,145 80,151 70,145 70,134" fill="#22C55E" stroke="#065F46" stroke-width="1.8"/>
+  <polygon points="140,128 150,134 150,145 140,151 130,145 130,134" fill="#22C55E" stroke="#065F46" stroke-width="1.8"/>
+  <!-- 머리 -->
+  <circle cx="110" cy="78" r="26" fill="#86EFAC" stroke="#065F46" stroke-width="3"/>
+  <!-- 눈 흰자 -->
+  <circle cx="100" cy="75" r="5.5" fill="#FFFFFF" stroke="#065F46" stroke-width="1.5"/>
+  <circle cx="120" cy="75" r="5.5" fill="#FFFFFF" stroke="#065F46" stroke-width="1.5"/>
+  <!-- 눈동자 -->
+  <circle cx="101" cy="76" r="3" fill="#1F2937"/>
+  <circle cx="121" cy="76" r="3" fill="#1F2937"/>
+  <circle cx="102" cy="75" r="1" fill="#FFFFFF"/>
+  <circle cx="122" cy="75" r="1" fill="#FFFFFF"/>
+  <!-- 입 -->
+  <path d="M 103 88 Q 110 92 117 88" stroke="#065F46" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- 볼터치 -->
+  <circle cx="92" cy="85" r="3.5" fill="#F87171" opacity="0.5"/>
+  <circle cx="128" cy="85" r="3.5" fill="#F87171" opacity="0.5"/>
+</svg>

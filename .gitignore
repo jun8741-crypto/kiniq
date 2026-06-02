@@ -12,4 +12,21 @@ wheels/
 .coverage
 *.coverage
 .coverage.*
-\n# Mac 시스템 파일\n.DS_Store\n**/.DS_Store
+
+# Mac 시스템 파일
+.DS_Store
+**/.DS_Store
+
+# Claude Code
+.claude
+
+# Frontend
+frontend/ckd-care-app/node_modules/
+frontend/ckd-care-app/dist/
+
+# Excel/Office 임시 파일
+~$*
+
+# 부하 테스트 산출물 (재생성 가능, README.md만 추적)
+docs/load-test/report.html
+docs/load-test/result_*.csv
