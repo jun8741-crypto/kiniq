@@ -7,6 +7,7 @@
 PoC(poc_langgraph_rag)의 노드·라우터 로직을 그대로 옮기되, 검색은 retriever(Parent-Child·age_group),
 가드는 safety_guard(05 명세 전체), 프롬프트는 prompt_builder를 쓴다.
 """
+
 from __future__ import annotations
 
 from langchain_core.messages import HumanMessage
@@ -44,16 +45,16 @@ def grade_node(state: RAGState) -> dict:
     joined = "\n\n".join(d.page_content for d in state["documents"])
     if not joined.strip():
         return {"relevance": "not_relevant"}
-    g = llm_client.doc_grader().invoke(
-        f"질문: {_q(state)}\n문서:\n{joined}\n이 문서에 질문에 답할 정보가 있습니까?"
-    )
+    g = llm_client.doc_grader().invoke(f"질문: {_q(state)}\n문서:\n{joined}\n이 문서에 질문에 답할 정보가 있습니까?")
     return {"relevance": g.relevance}
 
 
 def rewrite_node(state: RAGState) -> dict:
-    nq = llm_client.get_gen_llm().invoke(
-        f"다음 의료 질문을 벡터 검색에 더 잘 맞게 핵심 의학 용어 중심으로 한 줄로 재작성: {_q(state)}"
-    ).content
+    nq = (
+        llm_client.get_gen_llm()
+        .invoke(f"다음 의료 질문을 벡터 검색에 더 잘 맞게 핵심 의학 용어 중심으로 한 줄로 재작성: {_q(state)}")
+        .content
+    )
     return {"messages": [HumanMessage(content=nq)], "retry_count": state.get("retry_count", 0) + 1}
 
 
@@ -74,9 +75,7 @@ def hallucination_node(state: RAGState) -> dict:
 
 
 def answer_node(state: RAGState) -> dict:
-    g = llm_client.answer_grader().invoke(
-        f"질문: {_q(state)}\n답변: {state['generation']}\n답변이 질문을 해결합니까?"
-    )
+    g = llm_client.answer_grader().invoke(f"질문: {_q(state)}\n답변: {state['generation']}\n답변이 질문을 해결합니까?")
     return {"addresses": g.addresses}
 
 
@@ -94,7 +93,7 @@ def relevance_router(s: RAGState) -> str:
         return "generate"
     if s.get("retry_count", 0) < cfg.MAX_REWRITE:
         return "rewrite"
-    return "classify_fallback"   # 검색 실패(rewrite 소진) → LLM 폴백 차등 라우팅
+    return "classify_fallback"  # 검색 실패(rewrite 소진) → LLM 폴백 차등 라우팅
 
 
 def grounded_router(s: RAGState) -> str:
@@ -156,4 +155,4 @@ def fallback_router(s: RAGState) -> str:
         return "fallback_generate"
     if d == "DOMAIN_2_GENERAL":
         return "referral"
-    return "scope"   # DOMAIN_3 또는 분류 실패 시 안전하게 scope 안내
+    return "scope"  # DOMAIN_3 또는 분류 실패 시 안전하게 scope 안내

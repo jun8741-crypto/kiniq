@@ -26,6 +26,7 @@ parent 는 벡터 없이 텍스트만 저장하므로 임베딩 대상이 아니
     python ../src/rag_indexing/embedder.py --dry-run      # 키 없이 deterministic 가짜 벡터로 구조 검증
     python ../src/rag_indexing/embedder.py --prod         # large(3072d)로 임베딩
 """
+
 from __future__ import annotations
 
 import argparse
@@ -44,9 +45,9 @@ except ImportError:
 # ─────────────────────────────────────────────────────────────────────────────
 # 상수
 # ─────────────────────────────────────────────────────────────────────────────
-_MAX_INPUT_TOKENS = 8191        # text-embedding-3 계열 입력당 토큰 상한
-_DEFAULT_BATCH_SIZE = 128       # 요청당 input 개수 (128 × ~250토큰 ≈ 32K ≪ 300K/req 한도)
-_DEFAULT_MAX_RETRIES = 6        # OpenAI SDK 내장 재시도 횟수 (지수 백오프)
+_MAX_INPUT_TOKENS = 8191  # text-embedding-3 계열 입력당 토큰 상한
+_DEFAULT_BATCH_SIZE = 128  # 요청당 input 개수 (128 × ~250토큰 ≈ 32K ≪ 300K/req 한도)
+_DEFAULT_MAX_RETRIES = 6  # OpenAI SDK 내장 재시도 횟수 (지수 백오프)
 # USD / 1M tokens (project_api_model_policy — 비용 추정 출력용, 청구 기준은 OpenAI 대시보드)
 _PRICE_PER_1M = {
     "text-embedding-3-small": 0.02,
@@ -61,6 +62,7 @@ def _get_encoder():
     """text-embedding-3 계열 인코더(cl100k_base). tiktoken 미설치 시 None."""
     try:
         import tiktoken
+
         return tiktoken.get_encoding("cl100k_base")
     except Exception:  # noqa: BLE001 — tiktoken 부재/네트워크는 치명적이지 않음
         return None
@@ -109,6 +111,7 @@ class Embedder:
     def _get_client(self):
         if self._client is None:
             from openai import OpenAI
+
             self._client = OpenAI(api_key=self._api_key, max_retries=self.max_retries)
         return self._client
 
@@ -132,7 +135,7 @@ class Embedder:
             batches = _maybe_tqdm(batches, total_items=len(prepared), batch_size=self.batch_size)
 
         for start in batches:
-            batch = prepared[start:start + self.batch_size]
+            batch = prepared[start : start + self.batch_size]
             resp = client.embeddings.create(model=self.model, input=batch)
             # 응답은 input 순서대로지만 index 로 복원해 순서를 명시적으로 보장
             for item in resp.data:
@@ -202,6 +205,7 @@ def dump_jsonl(rows: list[dict], path: Path) -> None:
 def _maybe_tqdm(iterable, *, total_items: int, batch_size: int):
     try:
         from tqdm import tqdm
+
         total = (total_items + batch_size - 1) // batch_size
         return tqdm(iterable, total=total, desc="embedding", unit="batch")
     except Exception:  # noqa: BLE001
@@ -254,7 +258,9 @@ def estimate_tokens_cost(texts: list[str], model: str) -> tuple[int, float]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="child_chunks.jsonl → 임베딩 → embedded_child_chunks.jsonl")
     parser.add_argument("--in", dest="in_path", default=None, help="입력 JSONL (기본 chunks/child_chunks.jsonl)")
-    parser.add_argument("--out", dest="out_path", default=None, help="출력 JSONL (기본 chunks/embedded_child_chunks.jsonl)")
+    parser.add_argument(
+        "--out", dest="out_path", default=None, help="출력 JSONL (기본 chunks/embedded_child_chunks.jsonl)"
+    )
     parser.add_argument("--limit", type=int, default=None, help="앞 N개만 임베딩 (스모크·비용 절감)")
     parser.add_argument("--batch-size", type=int, default=_DEFAULT_BATCH_SIZE, help="요청당 input 개수")
     parser.add_argument("--prod", action="store_true", help="prod 모델(text-embedding-3-large, 3072d) 사용")
@@ -272,7 +278,7 @@ def main() -> None:
 
     rows = read_jsonl(in_path)
     if args.limit:
-        rows = rows[:args.limit]
+        rows = rows[: args.limit]
     texts = [r["text"] for r in rows]
     print(f"입력: {in_path.name} → {len(rows)}개 child" + (f" (--limit {args.limit})" if args.limit else ""))
     print(f"모델: {model} ({dim}d)" + ("  [dry-run 가짜 벡터]" if args.dry_run else ""))
@@ -295,7 +301,7 @@ def main() -> None:
 
     vectors = embedder.embed_texts(texts, progress=True)
 
-    for r, v in zip(rows, vectors):
+    for r, v in zip(rows, vectors, strict=True):
         r["vector"] = v
 
     dump_jsonl(rows, out_path)

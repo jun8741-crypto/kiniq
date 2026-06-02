@@ -4,6 +4,7 @@
 06_chunking_strategy 학습카드 + project_api_model_policy 기준.
 chunking.py·embedder.py·qdrant_uploader.py 가 이 상수를 공유 import 한다.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,18 +12,18 @@ from pathlib import Path
 # ─────────────────────────────────────────────
 # 경로
 # ─────────────────────────────────────────────
-PKG_ROOT = Path(__file__).resolve().parent          # src/rag_indexing/
-DATA_DIR = PKG_ROOT / "data"                         # 원본 PDF/MD (PDF는 .gitignore)
-CHUNKS_DIR = PKG_ROOT / "chunks"                     # chunking.py JSONL 덤프 출력 (.gitignore 권장)
+PKG_ROOT = Path(__file__).resolve().parent  # src/rag_indexing/
+DATA_DIR = PKG_ROOT / "data"  # 원본 PDF/MD (PDF는 .gitignore)
+CHUNKS_DIR = PKG_ROOT / "chunks"  # chunking.py JSONL 덤프 출력 (.gitignore 권장)
 
 # ─────────────────────────────────────────────
 # doc_type 매핑 (폴더 → 분류) — payload.doc_type 의 단일 정의
 # ─────────────────────────────────────────────
 DOC_TYPE_BY_FOLDER = {
-    "kdigo": "clinical",          # 영문 임상 가이드라인 (KDIGO)
+    "kdigo": "clinical",  # 영문 임상 가이드라인 (KDIGO)
     "ksn_guideline": "clinical",  # 국문 임상 진료지침 (KSN 당뇨병/고혈압 콩팥병)
-    "knsn": "nutrition",          # 국문 영양·환자교육 (KSN 영양 + 질병관리청 바로알기)
-    "lifestyle": "lifestyle",     # 생활습관 (운동·금연·절주·수면·스트레스)
+    "knsn": "nutrition",  # 국문 영양·환자교육 (KSN 영양 + 질병관리청 바로알기)
+    "lifestyle": "lifestyle",  # 생활습관 (운동·금연·절주·수면·스트레스)
 }
 
 # ─────────────────────────────────────────────
@@ -50,8 +51,8 @@ MD_GLOBS = [
 #   → 영문/국문 어느 자료를 새로 넣어도 config 무수정 (EN_PDF_STEMS 하드코딩 폐지).
 #     chunking.detect_language 가 이 두 상수를 공유한다.
 # ─────────────────────────────────────────────
-LANG_SAMPLE_CHARS = 3000        # 언어 판정에 쓸 문서 앞부분 글자 수
-KO_LANG_THRESHOLD = 0.10        # 한글/(한글+라틴) ≥ 이 값이면 ko, 아니면 en
+LANG_SAMPLE_CHARS = 3000  # 언어 판정에 쓸 문서 앞부분 글자 수
+KO_LANG_THRESHOLD = 0.10  # 한글/(한글+라틴) ≥ 이 값이면 ko, 아니면 en
 
 # ─────────────────────────────────────────────
 # 인덱싱 제외 (파일명 부분문자열 매칭)
@@ -82,9 +83,9 @@ STRIP_REFERENCES = True
 # ─────────────────────────────────────────────
 # Qdrant collection (parent 는 벡터X 텍스트 저장만 → dev/prod 분리 불요)
 # ─────────────────────────────────────────────
-COLLECTION_CHILD_DEV = "medical_kb_dev"     # child 벡터, embed-3-small 1536d
-COLLECTION_CHILD_PROD = "medical_kb_prod"   # child 벡터, embed-3-large 3072d
-COLLECTION_PARENT = "medical_kb_parents"    # parent (벡터 없음, parent_id 로 조회)
+COLLECTION_CHILD_DEV = "medical_kb_dev"  # child 벡터, embed-3-small 1536d
+COLLECTION_CHILD_PROD = "medical_kb_prod"  # child 벡터, embed-3-large 3072d
+COLLECTION_PARENT = "medical_kb_parents"  # parent (벡터 없음, parent_id 로 조회)
 
 # ─────────────────────────────────────────────
 # 임베딩 모델 정책 (project_api_model_policy)
@@ -112,8 +113,8 @@ AGE_GROUP_PEDIATRIC = "pediatric"
 # ─────────────────────────────────────────────
 # Qdrant 업로드 (qdrant_uploader.py)
 # ─────────────────────────────────────────────
-QDRANT_DISTANCE = "Cosine"      # child 벡터 검색 거리 (정규화 임베딩 표준)
-UPLOAD_BATCH_SIZE = 256         # upsert 배치 크기
+QDRANT_DISTANCE = "Cosine"  # child 벡터 검색 거리 (정규화 임베딩 표준)
+UPLOAD_BATCH_SIZE = 256  # upsert 배치 크기
 # 로컬 스크립트 실행용 기본 URL (docker-compose 내부 호스트명 'qdrant' 가 아닌 localhost).
 # env QDRANT_URL 이 있으면 그것을 우선한다.
 QDRANT_LOCAL_URL = "http://localhost:6333"
@@ -123,15 +124,16 @@ QDRANT_LOCAL_URL = "http://localhost:6333"
 #   doc_type(폴더 기반)·source·section(헤더)·parent_id·hash·reference_removed
 # ─────────────────────────────────────────────
 PAYLOAD_FIELDS = [
-    "doc_type",          # clinical | nutrition | lifestyle
-    "source",            # 파일 stem (예: KDIGO-2024-CKD-Guideline)
-    "language",          # ko | en
-    "h1", "h2",          # MarkdownHeader 그룹 (MD는 frontmatter title → h1)
-    "page",              # PDF 페이지 (가능 시)
-    "parent_id",         # child → parent 조회 키
+    "doc_type",  # clinical | nutrition | lifestyle
+    "source",  # 파일 stem (예: KDIGO-2024-CKD-Guideline)
+    "language",  # ko | en
+    "h1",
+    "h2",  # MarkdownHeader 그룹 (MD는 frontmatter title → h1)
+    "page",  # PDF 페이지 (가능 시)
+    "parent_id",  # child → parent 조회 키
     "chunk_idx",
-    "age_group",         # adult | pediatric (uploader 가 부착 — P1-4)
-    "text",              # 원문 (uploader 가 부착 — 검색 결과 반환용)
+    "age_group",  # adult | pediatric (uploader 가 부착 — P1-4)
+    "text",  # 원문 (uploader 가 부착 — 검색 결과 반환용)
 ]
 
 # ─────────────────────────────────────────────

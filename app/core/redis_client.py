@@ -1,4 +1,5 @@
 """RAG 챗봇용 Redis 비동기 클라이언트 (단일 커넥션 풀)."""
+
 from __future__ import annotations
 
 import redis.asyncio as aioredis

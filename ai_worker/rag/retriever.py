@@ -7,6 +7,7 @@ child top-k 벡터검색(age_group=adult 필터) → 각 child 의 parent_id 로
 구조를 정확히 다뤄야 하므로, langchain `QdrantVectorStore` 대신 qdrant-client 를 직접 쓴다.
 point id 는 인덱싱 `qdrant_uploader.point_id` 와 동일하게 16-hex → int(hex,16) 로 변환한다.
 """
+
 from __future__ import annotations
 
 from langchain_core.documents import Document
@@ -56,7 +57,7 @@ def retrieve(
     ).points
 
     documents: list[Document] = []
-    parent_ids: list[str] = []          # 순서 보존 + 중복 제거
+    parent_ids: list[str] = []  # 순서 보존 + 중복 제거
     for h in hits:
         p = h.payload or {}
         documents.append(

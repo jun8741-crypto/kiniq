@@ -1,5 +1,7 @@
 """rag_task.handle_chat_job 단위 테스트."""
+
 import pytest
+
 from ai_worker.schemas.chat import ChatJob
 from ai_worker.tasks import rag_task
 

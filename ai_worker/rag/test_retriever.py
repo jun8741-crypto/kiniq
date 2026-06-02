@@ -3,12 +3,13 @@
 age_group 필터 적용·Parent-Child 조회·parent_id 중복제거·빈 결과를 순수 로직으로 검증.
 실행: cd 코드루트 && poc/.venv/bin/python ai_worker/rag/test_retriever.py
 """
+
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # 코드루트 (ai_worker 패키지)
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # 코드루트 (ai_worker 패키지)
 
 from ai_worker.rag import retriever
 
@@ -52,8 +53,15 @@ class _MockClient:
 
 def _hit(text, parent_hex, score, age="adult", source="KDIGO-2024-CKD-Guideline"):
     return _Hit(
-        {"text": text, "parent_id": parent_hex, "source": source, "page": 3,
-         "doc_type": "clinical", "h2": "Diet", "age_group": age},
+        {
+            "text": text,
+            "parent_id": parent_hex,
+            "source": source,
+            "page": 3,
+            "doc_type": "clinical",
+            "h2": "Diet",
+            "age_group": age,
+        },
         score,
     )
 

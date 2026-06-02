@@ -6,6 +6,7 @@ fixture 미사용으로 pytest·직접 실행 양쪽 지원. 실행:
     source .venv/bin/activate
     python ../src/rag_indexing/test_uploader.py
 """
+
 from __future__ import annotations
 
 import sys
@@ -13,8 +14,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import qdrant_uploader as up
 import config as cfg
+import qdrant_uploader as up
 
 
 def _child(id_, text, **payload):
@@ -29,8 +30,8 @@ def _child(id_, text, **payload):
 def test_point_id_is_deterministic_u64():
     pid = up.point_id("797cb062055e70c7")
     assert pid == 8754065710744760519
-    assert 0 <= pid < 2 ** 64
-    assert up.point_id("797cb062055e70c7") == pid     # 결정적
+    assert 0 <= pid < 2**64
+    assert up.point_id("797cb062055e70c7") == pid  # 결정적
 
 
 def test_point_id_distinct_for_distinct_hex():
@@ -47,7 +48,10 @@ def test_age_group_ksn_pediatric_chapter():
 
 def test_age_group_kdigo_pediatric_section():
     assert up.age_group_for({"source": "KDIGO-2024-CKD-Guideline", "h2": "Pediatric considerations."}) == "pediatric"
-    assert up.age_group_for({"source": "KDIGO-2024-CKD-Guideline", "h2": "Considerations in children and adolescents"}) == "pediatric"
+    assert (
+        up.age_group_for({"source": "KDIGO-2024-CKD-Guideline", "h2": "Considerations in children and adolescents"})
+        == "pediatric"
+    )
 
 
 def test_age_group_adult_default():
@@ -68,11 +72,11 @@ def test_dedup_removes_exact_duplicates_keeps_first():
     children = [
         _child("a1", "권고문 동일 텍스트", parent_id="p1"),
         _child("a2", "고유 텍스트", parent_id="p1"),
-        _child("a3", "권고문 동일 텍스트", parent_id="p2"),   # a1 과 정확 일치 → 제거
+        _child("a3", "권고문 동일 텍스트", parent_id="p2"),  # a1 과 정확 일치 → 제거
     ]
     kept, removed = up.dedup_children(children)
     assert removed == 1
-    assert [c["id"] for c in kept] == ["a1", "a2"]      # 첫 등장 유지·순서 보존
+    assert [c["id"] for c in kept] == ["a1", "a2"]  # 첫 등장 유지·순서 보존
 
 
 def test_dedup_no_duplicates():
@@ -85,19 +89,25 @@ def test_dedup_no_duplicates():
 # payload 조립 — age_group·text·원본 chunk_id 부착, 원본 필드 보존
 # ─────────────────────────────────────────────────────────────────────────────
 def test_build_payload_attaches_fields():
-    row = _child("abc123", "본문 텍스트", source="KSN-2025-Hypertension-CKD-Guideline",
-                 h2="제8장 소아청소년 고혈압콩팥병의 진단과 치료", parent_id="pp1", page=12)
+    row = _child(
+        "abc123",
+        "본문 텍스트",
+        source="KSN-2025-Hypertension-CKD-Guideline",
+        h2="제8장 소아청소년 고혈압콩팥병의 진단과 치료",
+        parent_id="pp1",
+        page=12,
+    )
     pl = up.build_payload(row)
     assert pl["age_group"] == "pediatric"
     assert pl["text"] == "본문 텍스트"
     assert pl["chunk_id"] == "abc123"
-    assert pl["parent_id"] == "pp1" and pl["page"] == 12      # 원본 보존
+    assert pl["parent_id"] == "pp1" and pl["page"] == 12  # 원본 보존
 
 
 def test_build_payload_does_not_mutate_source_row():
     row = _child("abc123", "t")
     up.build_payload(row)
-    assert "age_group" not in row["payload"]      # 원본 payload 불변 (dict 복사)
+    assert "age_group" not in row["payload"]  # 원본 payload 불변 (dict 복사)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -129,7 +139,7 @@ def test_ensure_child_collection_creates_when_absent():
     c = _MockClient()
     up.ensure_child_collection(c, "medical_kb_dev", 1536, recreate=False)
     assert len(c.created) == 1 and c.created[0][0] == "medical_kb_dev"
-    assert c.deleted == []      # 부재 시 삭제 없이 생성만
+    assert c.deleted == []  # 부재 시 삭제 없이 생성만
 
 
 def test_ensure_child_collection_recreate_deletes_first():

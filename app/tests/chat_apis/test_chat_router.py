@@ -4,7 +4,8 @@
 인증: signup → login → Bearer 토큰 (기존 health_check / lifestyle_survey 테스트와 동일)
 ChatService.ask: monkeypatch (Redis/worker 없이 라우터만 검증)
 """
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 from httpx import ASGITransport, AsyncClient
 from starlette import status
@@ -51,7 +52,7 @@ class TestChatRouterAnswer(TestCase):
         from app.dtos.chat import ChatMessageResponse
 
         fake_answer = "하루 단백질 0.8 g/kg 권장합니다."
-        fake_created_at = datetime(2026, 6, 2, 12, 0, 0, tzinfo=timezone.utc)
+        fake_created_at = datetime(2026, 6, 2, 12, 0, 0, tzinfo=UTC)
 
         # ChatService.ask를 가짜 응답으로 교체 (Redis/worker 의존 없이)
         original_ask = chat_module.ChatService.ask

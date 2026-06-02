@@ -42,9 +42,9 @@ EMBED_DIM = 1536
 
 # 비교할 청크 크기 (overlap은 chunk_size의 20% 유지)
 CHUNK_CONFIGS = [
-    (500, 100),    # 작은 청크
-    (1000, 200),   # baseline
-    (1500, 300),   # 큰 청크
+    (500, 100),  # 작은 청크
+    (1000, 200),  # baseline
+    (1500, 300),  # 큰 청크
 ]
 
 DEFAULT_QUESTION = "G2 단계 CKD 환자의 단백질 섭취 권장량은?"
@@ -59,18 +59,25 @@ SYSTEM_PROMPT = (
 def load_chunks(chunk_size: int, chunk_overlap: int) -> list:
     reader = PdfReader(str(PDF_PATH))
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=chunk_overlap,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
         separators=["\n\n", "\n", " ", ""],
     )
     chunks = []
     for page_idx, page in enumerate(reader.pages):
         text = page.extract_text() or ""
         for ci, ct in enumerate(splitter.split_text(text)):
-            chunks.append({
-                "text": ct,
-                "metadata": {"source": "KDIGO 2024", "page": page_idx + 1, "chunk_idx": ci,
-                             "chunk_size": chunk_size},
-            })
+            chunks.append(
+                {
+                    "text": ct,
+                    "metadata": {
+                        "source": "KDIGO 2024",
+                        "page": page_idx + 1,
+                        "chunk_idx": ci,
+                        "chunk_size": chunk_size,
+                    },
+                }
+            )
     return chunks
 
 
@@ -86,7 +93,7 @@ def run_one(chunk_size: int, chunk_overlap: int, question: str, reindex: bool) -
         existing = {c.name for c in client.get_collections().collections}
 
         if collection in existing and not reindex:
-            pass   # 캐시 재사용
+            pass  # 캐시 재사용
         else:
             if collection in existing:
                 client.delete_collection(collection)
@@ -96,7 +103,9 @@ def run_one(chunk_size: int, chunk_overlap: int, question: str, reindex: bool) -
                 vectors_config=qmodels.VectorParams(size=EMBED_DIM, distance=qmodels.Distance.COSINE),
             )
             vs_for_add = QdrantVectorStore(
-                client=client, collection_name=collection, embedding=embeddings,
+                client=client,
+                collection_name=collection,
+                embedding=embeddings,
             )
             vs_for_add.add_texts(
                 texts=[c["text"] for c in chunks],
@@ -106,12 +115,14 @@ def run_one(chunk_size: int, chunk_overlap: int, question: str, reindex: bool) -
 
         # 같은 client에서 count + 검색 (lock 유지 상태)
         vs = QdrantVectorStore(
-            client=client, collection_name=collection, embedding=embeddings,
+            client=client,
+            collection_name=collection,
+            embedding=embeddings,
         )
         count = client.count(collection).count
         hits = vs.similarity_search_with_score(question, k=3)
     finally:
-        client.close()   # ⭐ lock 즉시 해제
+        client.close()  # ⭐ lock 즉시 해제
 
     scores = [s for _, s in hits]
     print(f"  청크 수: {count}, Top-3 score: {[round(s, 3) for s in scores]}")
@@ -120,14 +131,14 @@ def run_one(chunk_size: int, chunk_overlap: int, question: str, reindex: bool) -
         print(f"    {i}. [score={s:.3f}] p.{doc.metadata.get('page')} — {snippet}...")
 
     # LLM은 Qdrant 무관 — lock 해제 후 호출 OK
-    context = "\n\n".join(
-        f"[p.{d.metadata['page']}]\n{d.page_content}" for d, _ in hits
-    )
+    context = "\n\n".join(f"[p.{d.metadata['page']}]\n{d.page_content}" for d, _ in hits)
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3, max_tokens=300)
-    resp = llm.invoke([
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"[참고]\n{context}\n\n[질문]\n{question}"},
-    ])
+    resp = llm.invoke(
+        [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"[참고]\n{context}\n\n[질문]\n{question}"},
+        ]
+    )
     print(f"  답변 ({(resp.usage_metadata or {}).get('total_tokens', '?')} tok):")
     print(f"  {resp.content[:300]}")
     return {
@@ -157,8 +168,7 @@ def main():
     print(f"{'chunk_size':>10} {'overlap':>8} {'청크수':>8} {'score Top-1':>12} {'tokens':>8}")
     print("─" * 70)
     for r in results:
-        print(f"{r['chunk_size']:>10} {r['overlap']:>8} {r['count']:>8} "
-              f"{r['scores'][0]:>12.3f} {r['tokens']:>8}")
+        print(f"{r['chunk_size']:>10} {r['overlap']:>8} {r['count']:>8} {r['scores'][0]:>12.3f} {r['tokens']:>8}")
 
 
 if __name__ == "__main__":

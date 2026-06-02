@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -83,9 +82,7 @@ def load_pdf(path: Path) -> list[tuple[str, int]]:
 # ─────────────────────────────────────────────────────────────────────────────
 def chunk_pages(pages: list[tuple[str, int]]) -> list[dict]:
     """페이지별 텍스트를 1000자 청크로 분할 + 메타데이터 보존."""
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000, chunk_overlap=200, separators=["\n\n", "\n", " ", ""]
-    )
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, separators=["\n\n", "\n", " ", ""])
     chunks = []
     for text, page_num in pages:
         for idx, chunk_text in enumerate(splitter.split_text(text)):
@@ -119,9 +116,7 @@ def build_vectorstore(reindex: bool = False) -> QdrantVectorStore:
         count = client.count(COLLECTION).count
         print(f"[3+4] Qdrant 캐시 사용: {count}개 청크 (재인덱싱 스킵)")
         print(f"      └─ 경로: {QDRANT_PATH}/")
-        return QdrantVectorStore(
-            client=client, collection_name=COLLECTION, embedding=embeddings
-        )
+        return QdrantVectorStore(client=client, collection_name=COLLECTION, embedding=embeddings)
 
     # 캐시 미스 또는 강제 재인덱싱 — 신규 생성
     if COLLECTION in existing:
@@ -161,10 +156,7 @@ def retrieve(vs: QdrantVectorStore, question: str, k: int = 3) -> list[tuple]:
 # ─────────────────────────────────────────────────────────────────────────────
 def generate_answer(question: str, hits: list[tuple]) -> str:
     """검색 결과 + 시스템 프롬프트 → 답변 + 책임회피 문구."""
-    context = "\n\n".join(
-        f"[{d.metadata['source']} p.{d.metadata['page']}]\n{d.page_content}"
-        for d, _ in hits
-    )
+    context = "\n\n".join(f"[{d.metadata['source']} p.{d.metadata['page']}]\n{d.page_content}" for d, _ in hits)
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3, max_tokens=800)
     response = llm.invoke(
         [
@@ -208,14 +200,10 @@ def repl(vs: QdrantVectorStore, k: int) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Phase 1 RAG PoC")
-    parser.add_argument("question", nargs="?", default=DEFAULT_QUESTION,
-                        help="단발 모드 질문 (REPL 모드 시 무시)")
-    parser.add_argument("--repl", action="store_true",
-                        help="대화형 모드 (인덱싱 1회 후 여러 질문)")
-    parser.add_argument("--reindex", action="store_true",
-                        help="기존 캐시 무시하고 재인덱싱")
-    parser.add_argument("--k", type=int, default=3,
-                        help="검색 Top-K (기본 3)")
+    parser.add_argument("question", nargs="?", default=DEFAULT_QUESTION, help="단발 모드 질문 (REPL 모드 시 무시)")
+    parser.add_argument("--repl", action="store_true", help="대화형 모드 (인덱싱 1회 후 여러 질문)")
+    parser.add_argument("--reindex", action="store_true", help="기존 캐시 무시하고 재인덱싱")
+    parser.add_argument("--k", type=int, default=3, help="검색 Top-K (기본 3)")
     return parser.parse_args()
 
 
