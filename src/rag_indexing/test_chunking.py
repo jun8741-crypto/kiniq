@@ -1,7 +1,7 @@
 """chunking.py 단위 테스트 (2026-05-29 RAG 심층점검 권고 #4·#7).
 
 PDF 변환·임베딩·네트워크 불요 — 순수 함수만 검증한다. 실행:
-    cd ~/workspaces/oz_coding/20project/AI_HealthCare_Final_Project_Template/poc
+    cd ~/workspaces/oz_coding/20project/AI_HealthCare_Final_Project/poc
     source .venv/bin/activate
     python -m pytest ../src/rag_indexing/test_chunking.py -v
     # 또는 pytest 미설치 시: python ../src/rag_indexing/test_chunking.py
@@ -177,11 +177,28 @@ def test_doc_type_for():
     assert ck._doc_type_for(cfg.DATA_DIR / "lifestyle" / "sleep" / "x.md") == "lifestyle"
 
 
-def test_language_for():
-    assert ck._language_for(cfg.DATA_DIR / "kdigo" / "KDIGO-2024-CKD-Guideline.pdf") == "en"
-    assert ck._language_for(cfg.DATA_DIR / "lifestyle" / "ISN-2024-Exercise-CKD-consensus.pdf") == "en"
-    assert ck._language_for(cfg.DATA_DIR / "knsn" / "1권 투석 전.pdf") == "ko"
-    assert ck._language_for(cfg.DATA_DIR / "lifestyle" / "sleep" / "불면장애.md") == "ko"
+def test_detect_language_english():
+    en = ("We recommend that adults with CKD and diabetes maintain an HbA1c target "
+          "of less than 7.0% to slow progression of kidney disease. " * 5)
+    assert ck.detect_language(en) == "en"
+
+
+def test_detect_language_korean():
+    ko = ("만성콩팥병 환자는 단계에 따라 단백질 섭취를 조절해야 합니다. "
+          "투석 전 단계에서는 체중 1kg당 단백질 제한이 권장됩니다. " * 5)
+    assert ck.detect_language(ko) == "ko"
+
+
+def test_detect_language_mixed_is_korean():
+    # 국문 임상자료에 영문 약어(eGFR·SGLT2i)가 섞여도 한글이 우세하면 ko
+    mixed = ("eGFR 가 60 미만이면 SGLT2i 투여를 고려합니다. 혈압은 130/80 mmHg 미만으로 "
+             "관리하고 나트륨은 하루 2,000mg 미만으로 제한하도록 권고합니다. " * 5)
+    assert ck.detect_language(mixed) == "ko"
+
+
+def test_detect_language_no_letters_defaults_korean():
+    # 글자(한글·라틴) 없음 → 보수적으로 ko
+    assert ck.detect_language("12345 ... !!! ") == "ko"
 
 
 def test_skip_substrings():

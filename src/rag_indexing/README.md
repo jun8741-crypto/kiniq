@@ -64,13 +64,14 @@ flowchart TD
 
 | 파일 | 책임 (SRP) |
 |---|---|
-| `config.py` | 전역 상수 **단일 진실** — 경로·doc_type·청크 크기·모델·age_group 규칙·collection 이름 |
-| `chunking.py` | Parent-Child 2단 청킹 (PDF/MD 분기). 인코딩·인용·page 정리 |
+| `config.py` | 전역 상수 **단일 진실** — 경로·doc_type·청크 크기·모델·age_group 규칙·언어 임계·collection 이름 |
+| `chunking.py` | Parent-Child 2단 청킹 (PDF/MD 분기). 언어 ko/en **자동판정**·PDF **동적 카운트**·인코딩·인용·page 정리 |
 | `embedder.py` | OpenAI 임베딩 (배치·재시도·차원검증·순서보존) + `--dry-run` |
 | `qdrant_uploader.py` | age_group 태깅·text-hash dedup·point_id 변환·Qdrant 업로드 + `--dry-run` |
+| `run_indexing.py` | **통합 진입점** — 위 3단(청킹→임베딩→업로드)을 순차 실행 (`--dry-run`·`--stage`·`--prod`·`--yes`) |
 | `probe_headers.py` | (1회성) PDF/MD 헤더 구조 실측 — 청킹 분기 근거 |
 | `sources/scrape_nosmokeguide.py` | 금연가이드 MD 스크래퍼 |
-| `test_chunking.py` · `test_embedder.py` · `test_uploader.py` | 단위 테스트 **57개** (네트워크·키 불요, mock·dry-run) |
+| `test_chunking.py` · `test_embedder.py` · `test_uploader.py` | 단위 테스트 **60개** (네트워크·키 불요, mock·dry-run) |
 
 > `data/`(원본 PDF)·`chunks/`(생성물 JSONL)는 `.gitignore` — 코드+출처 명세만으로 재생성 가능(재현성).
 
@@ -86,6 +87,29 @@ flowchart TD
 ---
 
 ## 파이프라인 실행
+
+### 자료 추가 → 재인덱싱 (2026-06-02 자동화)
+
+새 가이드라인·교육자료를 추가할 때:
+
+1. **파일을 카테고리 폴더에 넣는다** — `data/{kdigo|ksn_guideline|knsn|lifestyle}/`
+   (또는 MD 하위폴더 `lifestyle/{nosmokeguide|alcohol|sleep|stress}/`)
+2. **통합 실행** — 끝.
+   ```bash
+   python ../src/rag_indexing/run_indexing.py            # 청킹→임베딩→업로드 (전체 재구축)
+   python ../src/rag_indexing/run_indexing.py --dry-run  # 키·Docker 불요, 구조만 검증 (실제 산출물 보존)
+   ```
+
+**config 수정이 필요 없는 이유** (자료가 늘어도 손 안 댐):
+- **언어 ko/en** = `chunking.detect_language` 가 텍스트 한글 비율로 자동 판정 (`EN_PDF_STEMS` 폐지)
+- **PDF 개수** = `collect_pdfs` 가 동적 카운트 + glob별 ≥1 매치만 검증 (`EXPECTED_*` 폐지)
+
+**예외 — 단 1줄만 수동**: 완전히 **새로운 카테고리 폴더**(예: `pubmed/`)를 만들 때만
+`config.DOC_TYPE_BY_FOLDER` 에 `"pubmed": "clinical"` 한 줄 + `PDF_GLOBS`(또는 `MD_GLOBS`)에 glob 을
+추가한다 (폴더명만으론 clinical/nutrition 을 의미적으로 구분할 수 없어 자동화 대상에서 제외).
+
+> ⚠️ 증분이 아니라 **전량 재구축**이다 — `--recreate` 가 collection 을 비우고 다시 적재한다
+> (dev 임베딩 ≈ $0.03 라 단순·안전을 택함). 부분 실행은 `--stage chunk|embed|upload`.
 
 ### 사전 준비 (1회)
 ```bash
@@ -140,6 +164,11 @@ python ../src/rag_indexing/test_uploader.py    # 14
 
 ## 처리 정책
 
+- **언어 자동 판정 (2026-06-02)**: `payload.language`(ko/en)는 `chunking.detect_language` 가 문서 앞부분
+  (`LANG_SAMPLE_CHARS=3000`)의 한글:라틴 글자 비율로 자동 결정한다(`KO_LANG_THRESHOLD=0.10`). 의료 자료는
+  주 언어가 명확히 갈려 robust 하며, 영문/국문 자료 추가 시 config 무수정(`EN_PDF_STEMS` 폐지).
+- **PDF 동적 카운트 (2026-06-02)**: `collect_pdfs` 는 개수를 하드코딩하지 않고 `PDF_GLOBS` 각각이
+  최소 1건 매치하는지만 검증(빈 폴더·glob 오타로 인한 조용한 누락 방지). `EXPECTED_*` 폐지.
 - **모델** (`project_api_model_policy`): dev `text-embedding-3-small`(1536d) / prod `text-embedding-3-large`(3072d). **차원 변경 시 collection 재구축 필수.**
 - **age_group 태깅 (P1-4)**: 타겟은 40세+ 성인 CKD. 소아 콘텐츠(KSN 소아 챕터·KDIGO 소아 섹션, 134개)는 **드롭하지 않고** `age_group='pediatric'`으로 태깅(무손실) → retriever가 `age_group=adult`로 격리. 규칙은 `config.py` 단일 진실.
 - **dedup (P1-5)**: child 정확중복 텍스트 949개 제거(첫 등장 유지). parent는 `parent_id` 참조 무결성 위해 dedup 안 함.

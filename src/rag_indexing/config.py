@@ -44,25 +44,23 @@ MD_GLOBS = [
 ]
 
 # ─────────────────────────────────────────────
-# 언어 판정 (payload.language) — 영문 소스 stem 집합이 단일 정의, 나머지는 ko
-#   kdigo 폴더 4개 + ISN 운동 합의문 1개만 영문. 그 외(국문 진료지침·영양·생활습관) ko.
+# 언어 자동 판정 (payload.language) — 텍스트의 한글 음절 비율로 ko/en 결정 (2026-06-02)
+#   의료 자료는 주 언어가 명확히 갈린다(영문 KDIGO 한글≈0% / 국문 자료 한글 다수)라
+#   문서 앞부분 샘플의 한글:라틴 비율 하나로 robust 하게 판정한다.
+#   → 영문/국문 어느 자료를 새로 넣어도 config 무수정 (EN_PDF_STEMS 하드코딩 폐지).
+#     chunking.detect_language 가 이 두 상수를 공유한다.
 # ─────────────────────────────────────────────
-EN_PDF_STEMS = {
-    "KDIGO-2021-Blood-Pressure-in-CKD-Guideline",
-    "KDIGO-2022-Diabetes-CKD",
-    "KDIGO-2024-CKD-Guideline",
-    "NKF-About-CKD-patient",
-    "ISN-2024-Exercise-CKD-consensus",
-}
+LANG_SAMPLE_CHARS = 3000        # 언어 판정에 쓸 문서 앞부분 글자 수
+KO_LANG_THRESHOLD = 0.10        # 한글/(한글+라틴) ≥ 이 값이면 ko, 아니면 en
 
 # ─────────────────────────────────────────────
 # 인덱싱 제외 (파일명 부분문자열 매칭)
 #   소아청소년편 = 타겟(40세+) 밖 / CKRT = 중환자 지속신대체요법 시술
 # ─────────────────────────────────────────────
 SKIP_FILE_SUBSTRINGS = ["소아청소년", "CKRT"]
-# 검증용: raw PDF 16개 → SKIP 후 14개 (chunking.py 에서 assert)
-EXPECTED_RAW_PDF = 16
-EXPECTED_INDEXED_PDF = 14
+# 자료 개수는 하드코딩하지 않는다 (2026-06-02) — chunking.collect_pdfs 가 PDF_GLOBS 각각이
+# 최소 1건 매치하는지(빈 폴더·glob 오타로 인한 조용한 누락 방지)만 검증하고, 실제 개수는
+# 동적으로 센다. 자료가 늘어나는 운영을 위해 EXPECTED_RAW_PDF/EXPECTED_INDEXED_PDF 폐지.
 
 # ─────────────────────────────────────────────
 # 청킹 (Parent-Child 2단 — 06_chunking_strategy + PoC C단계 + probe)

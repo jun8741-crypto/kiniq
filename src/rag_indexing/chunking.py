@@ -17,7 +17,7 @@ parent_id 를 부착해 검색 후 parent 를 끌어온다.
   • parent_chunks.jsonl — 벡터 없이 parent_id 조회용 (qdrant_uploader.py 입력)
 
 키·Docker·Qdrant 불요. 실행 (의존성은 poc/.venv 에 설치돼 있음):
-    cd ~/workspaces/oz_coding/20project/AI_HealthCare_Final_Project_Template/poc
+    cd ~/workspaces/oz_coding/20project/AI_HealthCare_Final_Project/poc
     source .venv/bin/activate
     python ../src/rag_indexing/chunking.py            # 전체 인덱싱 → JSONL 덤프
     python ../src/rag_indexing/chunking.py --dry-run   # 통계만, 파일 미출력
@@ -155,9 +155,25 @@ def _doc_type_for(path: Path) -> str:
     return cfg.DOC_TYPE_BY_FOLDER[folder]
 
 
-def _language_for(path: Path) -> str:
-    """영문 소스 stem 집합에 있으면 en, 아니면 ko."""
-    return "en" if path.stem in cfg.EN_PDF_STEMS else "ko"
+def detect_language(text: str) -> str:
+    """텍스트 앞부분의 한글:라틴 글자 비율로 ko/en 자동 판정 (config 상수 단일 진실).
+
+    의료 자료는 주 언어가 명확히 갈려(영문 KDIGO 한글≈0% / 국문 자료 한글 다수)
+    문서 선두 샘플의 비율 하나로 robust 하다. 숫자·기호·공백은 분모에서 제외하고
+    한글 음절(가-힣)과 라틴 알파벳만 센다. 글자가 전혀 없으면 보수적으로 ko.
+    → 영문/국문 어느 자료를 새로 넣어도 config 무수정 (EN_PDF_STEMS 하드코딩 폐지, 2026-06-02).
+    """
+    sample = text[:cfg.LANG_SAMPLE_CHARS]
+    hangul = latin = 0
+    for ch in sample:
+        if "가" <= ch <= "힣":
+            hangul += 1
+        elif ch.isascii() and ch.isalpha():
+            latin += 1
+    total = hangul + latin
+    if total == 0:
+        return "ko"
+    return "ko" if hangul / total >= cfg.KO_LANG_THRESHOLD else "en"
 
 
 def _is_skipped(path: Path) -> bool:
@@ -239,12 +255,15 @@ def _emit_parent_children(
 def chunk_pdf(path: Path) -> tuple[list, list]:
     source = path.stem
     doc_type = _doc_type_for(path)
-    language = _language_for(path)
 
     # page_chunks=True → 페이지별 {text, metadata.page_number}. 페이지 경계를 넘는 헤더는
     # carry-over(직전 h1/h2 상속)로 self-contained 맥락을 유지하면서 page 를 부착한다.
     # (KDIGO 영문은 # 헤더가 0개라 h1 은 대부분 공백 — 상속으로 페이지 선두 텍스트 맥락 보강)
     pages = pymupdf4llm.to_markdown(str(path), page_chunks=True, show_progress=False)
+
+    # 언어: 앞 페이지들의 텍스트를 모아 한글 비율로 자동 판정 (stem 하드코딩 폐지)
+    head_text = "".join(pg.get("text", "") for pg in pages[:5])
+    language = detect_language(head_text)
 
     parents: list = []
     children: list = []
@@ -313,11 +332,11 @@ def _strip_leading_title(body: str) -> tuple[str, str]:
 def chunk_md(path: Path) -> tuple[list, list]:
     source = path.stem
     doc_type = _doc_type_for(path)
-    language = _language_for(path)   # lifestyle MD 는 전부 ko
 
     meta, body = parse_frontmatter(path.read_text(encoding="utf-8"))
     body = clean_md_scrape_artifacts(body)            # P0-2: UI 텍스트·nbsp 제거 (제목 분리 전)
     title_from_body, body = _strip_leading_title(body)
+    language = detect_language(body)                  # 본문 한글 비율로 자동 판정 (lifestyle MD 는 사실상 ko)
     # h1 = frontmatter title 우선, 없으면 본문 # 제목. (probe상 MD는 # 1개씩 존재)
     h1 = meta.get("title") or title_from_body
     # h2 = frontmatter category (절주/수면/스트레스/금연방법 등) — 섹션 컨텍스트 보강
@@ -337,18 +356,25 @@ def chunk_md(path: Path) -> tuple[list, list]:
 # ─────────────────────────────────────────────────────────────────────────────
 # 파일 수집
 # ─────────────────────────────────────────────────────────────────────────────
-def collect_pdfs() -> list[Path]:
+def collect_pdfs() -> tuple[list[Path], list[Path]]:
+    """PDF 수집 → (indexed, skipped) 반환.
+
+    개수를 하드코딩하지 않고 PDF_GLOBS 각각이 최소 1건 매치하는지만 검증한다 (빈 폴더·glob
+    오타로 인한 조용한 누락 방지). 실제 개수는 동적으로 센다 — 자료 추가 시 config 무수정.
+    """
     found: list[Path] = []
+    empty_globs: list[str] = []
     for g in cfg.PDF_GLOBS:
-        found.extend(sorted(cfg.DATA_DIR.glob(g)))
-    assert len(found) == cfg.EXPECTED_RAW_PDF, (
-        f"raw PDF {len(found)}개 (기대 {cfg.EXPECTED_RAW_PDF}). PDF_GLOBS·data/ 확인."
+        matches = sorted(cfg.DATA_DIR.glob(g))
+        if not matches:
+            empty_globs.append(g)
+        found.extend(matches)
+    assert not empty_globs, (
+        f"매치 0건인 PDF_GLOB: {empty_globs} — data/ 폴더·경로·glob 오타 확인 (자료 누락 방지)."
     )
+    skipped = [p for p in found if _is_skipped(p)]
     indexed = [p for p in found if not _is_skipped(p)]
-    assert len(indexed) == cfg.EXPECTED_INDEXED_PDF, (
-        f"SKIP 후 PDF {len(indexed)}개 (기대 {cfg.EXPECTED_INDEXED_PDF}). SKIP_FILE_SUBSTRINGS 확인."
-    )
-    return indexed
+    return indexed, skipped
 
 
 def collect_mds() -> list[Path]:
@@ -376,9 +402,11 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="통계만 출력, 파일 미생성")
     args = parser.parse_args()
 
-    pdfs = collect_pdfs()
+    pdfs, skipped = collect_pdfs()
     mds = collect_mds()
-    print(f"입력: PDF {len(pdfs)}개 (SKIP {cfg.EXPECTED_RAW_PDF - cfg.EXPECTED_INDEXED_PDF}) + MD {len(mds)}개")
+    print(f"입력: PDF {len(pdfs)}개 (raw {len(pdfs) + len(skipped)} − SKIP {len(skipped)}) + MD {len(mds)}개")
+    for p in skipped:
+        print(f"  [SKIP] {p.relative_to(cfg.DATA_DIR)}  (SKIP_FILE_SUBSTRINGS)")
 
     all_parents: list = []
     all_children: list = []
@@ -388,7 +416,8 @@ def main() -> None:
         parents, children = chunk_pdf(p)
         all_parents.extend(parents)
         all_children.extend(children)
-        print(f"  {p.stem:52s} parent={len(parents):4d} child={len(children):5d}")
+        lang = parents[0]["payload"]["language"] if parents else "?"
+        print(f"  {p.stem:52s} [{lang}] parent={len(parents):4d} child={len(children):5d}")
 
     print("\n[MD 경로] frontmatter + #제목 주입 → Parent-Child")
     md_parent_n = md_child_n = 0
