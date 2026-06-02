@@ -30,6 +30,14 @@ class Config(BaseSettings):
     DB_CONNECT_TIMEOUT: int = 5
     DB_CONNECTION_POOL_MAXSIZE: int = 10
 
+    # Redis (RAG 챗봇 작업 큐 — docker-compose redis 서비스)
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    RAG_JOBS_STREAM: str = "rag_jobs"          # 백엔드→worker 작업 스트림
+    RAG_JOBS_GROUP: str = "rag_workers"        # consumer group 이름
+    RAG_RESP_PREFIX: str = "rag_resp"          # 응답 채널 prefix → rag_resp:{job_id}
+    RAG_TIMEOUT_SEC: int = 60                  # 백엔드 응답 대기 상한
+
     COOKIE_DOMAIN: str = "localhost"
 
     JWT_ALGORITHM: str = "HS256"
