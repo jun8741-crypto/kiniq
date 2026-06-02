@@ -58,10 +58,14 @@ class ChatService:
         resp_key = f"{config.RAG_RESP_PREFIX}:{job_id}"
         result = await redis.xread({resp_key: "0"}, count=1, block=config.RAG_TIMEOUT_SEC * 1000)
         if not result:
+            # I-2: 타임아웃 시에도 잔여 키 정리 (worker가 늦게 쓴 경우 대비)
+            await redis.delete(resp_key)
             raise HTTPException(
                 status_code=status.HTTP_504_GATEWAY_TIMEOUT,
                 detail="답변 생성이 지연되고 있습니다. 잠시 후 다시 시도해주세요.",
             )
+        # I-2: 응답을 정상적으로 읽은 직후 스트림 삭제 (Redis 메모리 누수 방지)
+        await redis.delete(resp_key)
         payload = json.loads(result[0][1][0][1]["data"])
         if payload.get("error"):
             raise HTTPException(
