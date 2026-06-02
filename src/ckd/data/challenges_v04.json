@@ -1,0 +1,1602 @@
+[
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "아침 첫 물 한 컵",
+    "description": "기상 직후 물 한 컵(200ml) 마시기. 신장 기능 저하 시 아침 수분 보충이 혈압 조절에 도움이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "수분 섭취 기록",
+    "description": "하루 동안 마신 음료(물·국물 포함)를 메모장에 기록하기. 목표: 1.5L 이내 파악."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "카페인 음료 줄이기",
+    "description": "커피·에너지드링크를 하루 1잔 이하로 제한하기. 카페인은 혈압을 일시적으로 높일 수 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "국물 절반 남기기",
+    "description": "찌개·국 먹을 때 국물은 절반만 마시기. 국물 속 나트륨이 수분 저류를 유발할 수 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "탄산음료 대신 물",
+    "description": "탄산음료나 주스 대신 물 선택하기. 당분 함량이 높은 음료는 신장에 부담을 줄 수 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "1.5L 수분 목표 달성",
+    "description": "하루 총 수분 섭취량을 1.5L로 맞추기. CKD 환자는 과도한 수분이 부종·고혈압을 악화시킬 수 있어 정확한 양이 중요합니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "시간대별 수분 계획",
+    "description": "아침·점심·저녁·취침 전으로 나눠 수분 섭취 시간을 정해두기. 규칙적인 섭취가 신장 부담을 줄입니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "카페인 음료 끊기 도전",
+    "description": "카페인 음료(커피·녹차·에너지드링크)를 14일 동안 완전히 줄이거나 디카페인으로 대체하기."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "국물 요리 줄이기",
+    "description": "국·찌개·라면 국물 섭취를 주 3회 이하로 줄이기. 나트륨 과다 섭취는 수분 조절을 어렵게 합니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "부종 자가 체크",
+    "description": "매일 아침 발목을 눌러보며 부종 여부를 확인하고 기록하기. 부종이 심해지면 수분 섭취를 줄이는 신호입니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "의료진 권고량 준수",
+    "description": "주치의가 권고한 하루 수분량을 정확히 지키기. 개인 상태에 따라 다르므로 꼭 의료진과 상의한 목표량을 기준으로 합니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "운동 후 수분 조절",
+    "description": "운동 후 갈증이 있을 때 수분을 조금씩 나눠 마시기. 한 번에 많은 양은 신장에 부담이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "식이나트륨과 수분 연계",
+    "description": "나트륨 섭취가 많은 날은 수분도 늘어날 수 있음을 인식하고 저염식을 유지하기."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "음료 성분 확인 습관",
+    "description": "편의점·카페 음료 구매 전 나트륨·당 함량 확인하기. 고나트륨 음료는 피합니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "수분 섭취 일지 21일 작성",
+    "description": "21일 동안 매일 수분 섭취 총량을 기록하고 목표 달성 여부를 표시하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "개인 맞춤 수분 루틴",
+    "description": "30일 수분 기록을 바탕으로 자신만의 최적 수분 루틴 만들기. 계절·활동량 변화에도 유지할 수 있는 패턴 정착."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "1.5~2L 정밀 유지",
+    "description": "과잉도 부족도 없이 1.5~2L 범위를 30일 연속 유지하기. CKD에서는 정확한 수분 균형이 핵심입니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "카페인·알코올 대체 완성",
+    "description": "카페인과 알코올을 물·허브티·보리차로 완전 대체하는 습관을 30일간 유지하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "혈압·수분 상관관계 파악",
+    "description": "수분 섭취량과 당일 혈압을 함께 기록해 둘의 관계를 파악하기. 패턴을 의료진과 공유합니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "다음 진료 시 수분 일지 공유",
+    "description": "30일 수분 일지를 다음 진료 시 의료진에게 보여주기. 맞춤 관리 방향을 함께 결정합니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "국물 절반 남기기",
+    "description": "국·찌개 먹을 때 국물을 절반만 마시기. 나트륨을 하루 2,000mg 이하로 줄이는 첫 걸음입니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "소금 추가 안 하기",
+    "description": "식탁에서 음식에 소금·간장을 추가로 뿌리지 않기. 조리 시 간이 이미 충분합니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "저염 간장 사용해보기",
+    "description": "일반 간장 대신 저염 간장으로 바꿔보기. 나트륨을 40~50% 줄일 수 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "가공식품 나트륨 확인",
+    "description": "구매 전 포장 뒷면 나트륨 함량 확인하기. 1회 제공량당 나트륨 600mg 이상은 고나트륨 식품입니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "채소 반찬 하나 더",
+    "description": "매 식사마다 채소 반찬을 한 가지 추가하기. 식이섬유가 혈당·콜레스테롤 조절에 도움이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "나트륨 2,000mg 이하 14일",
+    "description": "하루 나트륨 섭취를 2,000mg 이하로 유지하기 14일 도전. 고혈압·신장 보호의 핵심 목표입니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "외식 시 저염 선택",
+    "description": "식당에서 짜지 않은 메뉴 고르기, 소스·양념은 따로 요청하기. 외식 나트륨은 집밥의 2~3배입니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "단백질 과다 섭취 줄이기",
+    "description": "고기·생선을 한 끼 손바닥 크기(약 80g) 이하로 조절하기. 단백질 과다는 신장 여과 부담을 높입니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "가공육 줄이기",
+    "description": "햄·소시지·베이컨을 주 2회 이하로 줄이기. 나트륨과 인 함량이 매우 높습니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "단 음료 끊기",
+    "description": "설탕이 든 음료(주스·이온음료·커피믹스)를 14일간 끊기. 혈당 조절과 체중 관리에 도움이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "식단 일기 21일 작성",
+    "description": "매일 먹은 음식을 간단히 기록하기. 어떤 음식에서 나트륨이 많이 나오는지 파악할 수 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "저염 조리법 실천",
+    "description": "국·찌개 만들 때 육수를 먼저 끓이고 나중에 간을 맞추는 방식으로 나트륨 사용량 줄이기."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "포화지방 줄이기",
+    "description": "삼겹살·버터·치즈 등 포화지방 높은 음식을 주 3회 이하로 줄이기. 심혈관 질환 위험을 낮춥니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "식이섬유 늘리기",
+    "description": "잡곡밥·콩·브로콜리·당근 등 식이섬유 풍부한 음식을 매 식사에 포함하기."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "배달·편의점 식품 줄이기",
+    "description": "배달 음식·편의점 도시락을 주 2회 이하로 줄이기. 나트륨·포화지방이 매우 높습니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "KDIGO 저염식 완전 정착",
+    "description": "나트륨 하루 2g(2,000mg) 이하를 30일 연속 유지하기. 이 목표가 CKD 진행 속도를 늦추는 핵심입니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "영양소 균형 유지",
+    "description": "탄수화물 50~60%, 단백질 15~20%, 지방 25~30% 비율로 균형 잡힌 식사를 30일간 유지하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "외식·배달에서도 저염 유지",
+    "description": "외식·배달을 하더라도 저염 원칙을 지키는 전략을 30일간 실천하기. 주문 시 '싱겁게' 요청하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "영양사 상담 후 실천",
+    "description": "영양사와 상담해 개인 맞춤 식단을 작성하고 30일간 실천하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "혈압·혈당 식이 연계 파악",
+    "description": "식단 기록과 혈압·혈당 측정값을 비교해 어떤 음식이 수치에 영향을 주는지 파악하기."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "식후 5분 걷기",
+    "description": "매 식사 후 5분 천천히 걷기. 혈당 조절과 소화에 도움이 되며 신장 혈류를 개선합니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "자리 스트레칭 1시간마다",
+    "description": "앉아서 일할 때 1시간마다 일어나 5분 스트레칭하기. 장시간 좌식은 혈압과 혈당을 높입니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "계단 1층 이용하기",
+    "description": "엘리베이터 대신 계단 1층을 걸어 오르내리기. 작은 움직임도 심폐 기능 향상에 도움이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "취침 전 스트레칭 5분",
+    "description": "잠들기 전 가벼운 스트레칭으로 근육 이완하기. 혈압 저하와 수면의 질 향상에 도움이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "하루 10분 걷기",
+    "description": "하루에 최소 10분 이상 걷기. 운동 전 혈압이 160/100 이상이면 그날은 쉽니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "하루 20분 빠르게 걷기",
+    "description": "빠른 걸음으로 20분 걷기. 숨이 약간 찬 정도(중등도 강도)를 유지합니다. 운동 전후 혈압 체크."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "주 3회 유산소 운동",
+    "description": "빠르게 걷기·수영·자전거 중 하나를 주 3회, 회당 20분 이상 실시하기."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "운동 전 혈압 확인 습관",
+    "description": "운동 시작 전 혈압을 재고 기록하기. 수축기 180 이상이면 운동을 중단하고 의료진과 상담합니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "저강도 근력 운동 5분",
+    "description": "스쿼트·앉아서 다리 들기 등 저강도 근력 운동 5분 추가하기. 근육량 유지가 대사 건강에 중요합니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "운동 일지 시작",
+    "description": "운동 종류·시간·운동 전후 혈압을 기록하기 시작하기. 2주 기록으로 운동 습관을 확인합니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "하루 30분 중등도 유산소",
+    "description": "빠른 걷기·수영·자전거를 30분씩 주 5회 실시하기. 중등도(대화는 가능하나 노래는 힘든 강도) 유지."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "관절 부담 낮은 운동 선택",
+    "description": "수영·아쿠아로빅·실내 자전거 등 관절에 부담이 적은 운동을 주 3회 이상 하기."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "운동 중 증상 모니터링",
+    "description": "운동 중 두통·흉통·호흡곤란 등이 생기면 즉시 중단하고 기록하기. 의료진에게 알립니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "근력 운동 주 2회 추가",
+    "description": "탄력밴드·맨몸 운동으로 주 2회 근력 운동 병행하기. 근감소는 CKD 예후를 악화시킵니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "운동 후 쿨다운 5분",
+    "description": "운동 후 가벼운 걷기·스트레칭으로 5분 쿨다운하기. 갑작스러운 혈압 변화를 예방합니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "주 150분 유산소 달성",
+    "description": "중등도 유산소 운동을 주 150분(하루 30분×5회) 달성하기. WHO·KDIGO 권고 기준입니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "근력 운동 루틴 정착",
+    "description": "근력 운동을 주 2회 30일간 꾸준히 유지하기. 근육량 유지로 기초대사량과 혈당 조절을 개선합니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "운동 강도 점진적 증가",
+    "description": "매주 운동 시간을 5분씩 늘려보기. 단, 혈압이 안정된 날에만 강도를 높입니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "운동 일지 30일 완성",
+    "description": "30일 운동 일지(종류·시간·혈압)를 완성하기. 다음 진료 시 의료진에게 공유합니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "의료진과 운동 계획 공유",
+    "description": "30일 운동 기록을 의료진과 검토하고 다음 단계 운동 계획을 함께 세우기."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "취침 시간 일정하게",
+    "description": "매일 같은 시간에 잠자리에 들기. 수면 리듬이 혈압 일주기 변동에 영향을 줍니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "취침 1시간 전 스마트폰 끄기",
+    "description": "자기 1시간 전부터 스마트폰·TV 화면을 끄기. 블루라이트가 수면 호르몬을 억제합니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "저녁 카페인 피하기",
+    "description": "오후 3시 이후 커피·녹차·초콜릿 섭취 피하기. 카페인 반감기는 약 5~6시간입니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "7시간 이상 수면 확보",
+    "description": "수면 시간을 최소 7시간 이상 확보하기. 수면 부족은 혈압을 높이고 신장 기능을 악화시킵니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "취침 전 족욕 10분",
+    "description": "잠들기 30분 전 따뜻한 물(38~40도)에 10분 족욕하기. 혈압 이완과 수면 유도에 도움이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "기상 시간 일정하게",
+    "description": "주말에도 같은 시간에 일어나기. 수면-각성 리듬이 안정되면 혈압 야간 강하(Dipping)가 개선됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "낮잠 30분 이내로",
+    "description": "낮잠을 꼭 자야 한다면 오후 2시 전, 30분 이내로 제한하기. 야간 수면에 영향을 줄 수 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "침실 환경 개선",
+    "description": "침실 온도 18~22도, 암막 커튼·귀마개 사용하기. 쾌적한 환경이 수면의 질을 높입니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "저녁 식사 3시간 전 완료",
+    "description": "취침 3시간 전에 저녁 식사를 마치기. 소화 활동이 수면을 방해하고 야간 혈압을 높일 수 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "수면 일지 작성",
+    "description": "매일 취침·기상 시각, 수면의 질(1~5점)을 기록하기. 패턴 파악에 도움이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "야간 혈압 연계 관리",
+    "description": "아침 기상 후 혈압을 재고 수면의 질과 함께 기록하기. 야간 혈압이 낮지 않으면(non-dipper) 의료진에게 알립니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "수면 무호흡 체크",
+    "description": "코골이·숨 멈춤이 있는지 가족에게 확인하거나 수면 앱으로 녹음하기. 수면 무호흡은 혈압을 심하게 높입니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "규칙적 수면 루틴 만들기",
+    "description": "취침 30분 전 스트레칭→족욕→독서 순서로 수면 루틴을 만들고 21일 유지하기."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "낮 활동량 높이기",
+    "description": "낮에 충분히 움직여 야간 수면의 질을 높이기. 낮 운동이 수면 깊이를 개선합니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "알코올 없이 수면하기",
+    "description": "잠을 청하기 위한 음주를 완전히 피하기. 알코올은 수면 구조를 방해하고 혈압을 높입니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "6~8시간 수면 30일 유지",
+    "description": "수면 시간을 6~8시간으로 유지하기 30일 도전. 과다 수면도 심혈관 위험을 높일 수 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "수면-혈압 30일 기록 분석",
+    "description": "수면 일지와 아침 혈압을 30일간 비교해 수면의 질이 혈압에 미치는 영향을 파악하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "수면 장애 없이 유지",
+    "description": "30일 동안 수면 보조제 없이 자연스럽게 잠드는 습관 정착하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "수면 루틴 완전 자동화",
+    "description": "수면 준비 루틴이 의식하지 않아도 자연스럽게 이루어지도록 30일간 반복하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "수면 문제 의료진 공유",
+    "description": "30일 수면 일지를 진료 시 공유해 수면의 질이 혈압·신장 기능에 미치는 영향을 함께 평가하기."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "복식 호흡 5분",
+    "description": "하루 한 번 배로 숨 쉬는 복식 호흡 5분 연습하기. 교감신경을 안정시켜 혈압을 즉시 낮추는 효과가 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "스트레스 상황 기록",
+    "description": "하루 동안 스트레스를 느낀 순간을 적어보기. 기록 자체가 스트레스를 객관화하는 데 도움이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "자연 속 10분 산책",
+    "description": "나무·하늘·바람을 느끼며 10분 천천히 걷기. 자연 환경은 코르티솔(스트레스 호르몬) 수치를 낮춥니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "좋아하는 음악 10분 듣기",
+    "description": "하루에 좋아하는 음악을 10분 이상 감상하기. 음악 감상은 혈압과 심박수를 안정시킵니다."
+  },
+  {
+    "track": "A",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "감사 일기 3가지",
+    "description": "매일 감사한 일 3가지를 적기. 긍정적 사고가 스트레스 호르몬 분비를 줄입니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "하루 10분 명상",
+    "description": "앱(마보·헤드스페이스 등)을 활용해 하루 10분 명상하기. 혈압 강하 효과가 임상적으로 입증되어 있습니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "스트레스 트리거 파악",
+    "description": "반복적으로 스트레스를 주는 상황을 파악하고 대처 방법을 생각해보기."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "취미 활동 주 2회",
+    "description": "그림·독서·요리 등 좋아하는 취미 활동을 주 2회 이상 하기. 몰입 활동이 스트레스를 해소합니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "혈압-스트레스 연계 확인",
+    "description": "스트레스가 심한 날 혈압을 재고 기록하기. 스트레스와 혈압의 관계를 직접 확인합니다."
+  },
+  {
+    "track": "A",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "대화로 스트레스 풀기",
+    "description": "신뢰하는 가족이나 친구와 하루 10분 이상 대화 나누기. 사회적 지지가 혈압을 낮춥니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "마음챙김 명상 주 5회",
+    "description": "마음챙김(Mindfulness) 명상을 주 5회 이상 하기. 만성 스트레스로 인한 혈압 상승을 줄이는 데 효과적입니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "점진적 근육이완법 배우기",
+    "description": "발끝부터 머리까지 근육을 차례로 긴장-이완하는 PMR 기법을 취침 전에 실시하기."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "스트레스와 혈압 상관 분석",
+    "description": "21일 동안 스트레스 점수(1~10)와 혈압을 함께 기록해 패턴 파악하기."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "사회적 지지 네트워크 강화",
+    "description": "정기적으로 가족·친구와 만나거나 연락하기. 사회적 고립은 만성 스트레스의 원인이 됩니다."
+  },
+  {
+    "track": "A",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "스트레스 해소 운동 병행",
+    "description": "스트레스를 느낄 때 10분 이상 빠르게 걷기. 운동이 스트레스 호르몬을 빠르게 해소합니다."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "스트레스 관리 계획 실천",
+    "description": "자신만의 스트레스 관리 루틴(명상·운동·대화)을 정해 30일간 실천하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "일상 마음챙김 적용",
+    "description": "식사·걷기·샤워 중에도 현재 순간에 집중하는 마음챙김을 30일간 꾸준히 연습하기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "스트레스 자가 모니터링",
+    "description": "매일 스트레스 수준을 1~10점으로 평가하고 혈압과 함께 기록하기 30일 완성."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "정기적 취미 루틴 정착",
+    "description": "취미 활동을 주 3회 이상, 회당 30분 이상으로 30일간 정착시키기."
+  },
+  {
+    "track": "A",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "전문가 상담 병행",
+    "description": "만성 스트레스가 지속된다면 정신건강의학과 또는 상담사와 상담을 병행하기. 심리적 건강이 혈압·신장 기능을 지킵니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "아침 물 한 컵 습관",
+    "description": "기상 후 물 한 컵(200ml)을 마시는 습관 만들기. 밤 동안 손실된 수분을 보충하고 신진대사를 활성화합니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "탄산음료 대신 물",
+    "description": "하루 한 번이라도 탄산음료·주스 대신 물을 선택하기. 당분 섭취를 줄이는 첫 걸음입니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "식사 중 물 마시기",
+    "description": "매 식사 때 물 한 컵을 함께 마시기. 소화를 돕고 포만감을 높여 과식을 예방합니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "하루 6잔 물 목표",
+    "description": "하루에 물 6잔(약 1.2L) 이상 마시기 목표 세우기. 물병에 표시해두면 실천이 쉽습니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "HYDRATION",
+    "duration_days": 7,
+    "name": "운동 후 물 마시기",
+    "description": "운동 후 15분 이내에 물 한 컵(200~300ml) 마시기. 수분 보충으로 근육 회복을 돕습니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "하루 2L 물 마시기",
+    "description": "하루 총 수분 섭취 2L 달성하기 14일 도전. 물병 2개 분량이 목표입니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "카페인 음료 줄이기",
+    "description": "커피·에너지드링크를 하루 2잔 이하로 줄이기. 나머지는 물·허브티로 대체합니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "수분 섭취 앱으로 기록",
+    "description": "수분 섭취 앱(워터마인더 등)으로 하루 수분량을 기록하기. 목표 달성 여부를 시각적으로 확인합니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "매 시간 물 한 모금",
+    "description": "1시간마다 알람을 맞추고 물 한 모금씩 마시기. 규칙적인 수분 섭취 습관을 만듭니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "HYDRATION",
+    "duration_days": 14,
+    "name": "과일로 수분 보충",
+    "description": "수박·오이·토마토 등 수분 함량 높은 과일·채소를 매일 섭취하기. 자연스러운 수분 보충 방법입니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "수분 섭취 패턴 최적화",
+    "description": "아침·오전·오후·저녁으로 나눠 균등하게 수분을 섭취하는 패턴을 21일간 만들어가기."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "운동량에 따른 수분 조절",
+    "description": "운동 강도에 따라 수분 섭취를 늘리기. 30분 운동 시 추가로 300~500ml 보충합니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "날씨에 따른 수분 조절",
+    "description": "더운 날, 냉방이 강한 날 등 환경에 따라 수분 섭취를 조절하는 감각 기르기."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "카페인 완전 줄이기",
+    "description": "카페인 음료를 하루 1잔 이하로 줄이고 나머지는 물·무카페인 음료로 대체하기 21일 도전."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "HYDRATION",
+    "duration_days": 21,
+    "name": "피부·에너지 변화 관찰",
+    "description": "충분한 수분 섭취 후 피부 탄력·에너지 수준 변화를 기록하기. 동기부여에 도움이 됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "2L 수분 30일 연속 달성",
+    "description": "하루 2L 수분 섭취를 30일 연속 달성하기. 이제 충분한 수분이 습관이 되는 단계입니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "계절별 수분 전략",
+    "description": "여름·겨울에 각각 수분 섭취 전략을 다르게 적용하기. 계절 변화에도 2L 목표를 유지합니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "건강한 음료 선택 정착",
+    "description": "커피·탄산음료 대신 물·허브티·보리차를 자연스럽게 선택하는 습관을 30일간 완전히 정착하기."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "가족과 함께 수분 습관",
+    "description": "가족과 함께 충분한 수분 섭취 챌린지를 하기. 함께 하면 습관 유지 확률이 높아집니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "HYDRATION",
+    "duration_days": 30,
+    "name": "수분 섭취 완전 자동화",
+    "description": "수분 섭취 알람 없이도 자연스럽게 하루 2L를 채우는 습관이 30일간 완전히 자리 잡기."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "채소 반찬 하나 더",
+    "description": "매 식사마다 채소 반찬을 한 가지 더 먹기. 식이섬유와 항산화 물질이 만성질환 예방에 도움이 됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "싱겁게 먹기 시작",
+    "description": "음식을 먹을 때 소금·간장을 추가로 넣지 않기. 점차 저염 식단에 적응하는 첫 단계입니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "가공식품 나트륨 확인",
+    "description": "과자·라면·가공육 구매 전 나트륨 함량 확인하기. 의식이 생기는 것만으로 섭취가 줄어듭니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "단 음료 한 잔 줄이기",
+    "description": "오늘보다 단 음료(콜라·주스·커피믹스)를 하루 한 잔 줄이기. 혈당과 체중 관리의 시작입니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "DIET",
+    "duration_days": 7,
+    "name": "잡곡 한 숟가락 추가",
+    "description": "흰쌀밥에 잡곡(현미·보리·귀리)을 한 숟가락 섞어보기. 식이섬유와 혈당 지수를 낮춥니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "나트륨 2,500mg 이하",
+    "description": "하루 나트륨 섭취를 2,500mg 이하로 줄이기 14일 도전. 세계보건기구(WHO) 권고량 기준입니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "외식 메뉴 현명하게 고르기",
+    "description": "외식 시 구이·찜 등 덜 짠 조리법을 선택하고 소스는 따로 요청하기."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "과일 하루 1회 섭취",
+    "description": "하루 한 번 신선한 과일을 간식으로 먹기. 비타민·미네랄과 식이섬유를 자연스럽게 보충합니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "가공육 줄이기",
+    "description": "햄·소시지·베이컨을 주 2회 이하로 줄이기. 포화지방과 나트륨 섭취를 함께 줄입니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "DIET",
+    "duration_days": 14,
+    "name": "식사 속도 천천히",
+    "description": "한 입 먹고 젓가락을 내려놓는 식사법 연습하기. 포만감을 빨리 느껴 과식을 예방합니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "식단 일기 21일 작성",
+    "description": "매일 먹은 음식을 간단히 기록하기. 어떤 날 어떤 음식을 먹었는지 패턴을 파악합니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "균형 잡힌 식판 만들기",
+    "description": "한 끼를 채소 반, 단백질 1/4, 탄수화물 1/4로 구성하기. '건강 식판법'을 21일간 실천합니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "식이섬유 하루 25g 목표",
+    "description": "잡곡·콩·채소·과일로 하루 식이섬유 25g 이상 채우기. 장 건강과 혈당 조절에 도움이 됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "야식 끊기",
+    "description": "취침 2시간 전 이후 음식 섭취를 하지 않기 21일 도전. 혈당·체중·수면 질이 함께 개선됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "DIET",
+    "duration_days": 21,
+    "name": "건강 간식으로 대체",
+    "description": "과자·빵 대신 견과류·요거트·과일을 간식으로 선택하기 21일 도전."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "균형 식단 30일 완성",
+    "description": "탄수화물·단백질·지방·채소가 균형 잡힌 식사를 30일간 유지하기."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "나트륨 2,000mg 목표 달성",
+    "description": "하루 나트륨을 2,000mg 이하로 줄이는 데 도전하기. 고혈압 예방의 핵심 목표입니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "배달·외식 비율 줄이기",
+    "description": "배달 음식·외식을 주 3회 이하로 줄이고 집밥 비율을 높이기 30일 도전."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "혈당·체중 변화 기록",
+    "description": "식단 개선 후 혈당(있다면)과 체중 변화를 30일간 기록하기. 노력의 효과를 직접 확인합니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "DIET",
+    "duration_days": 30,
+    "name": "건강 식습관 가족과 공유",
+    "description": "건강한 식습관을 가족과 함께 실천하기. 식환경이 바뀌면 지속력이 높아집니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "하루 10분 걷기",
+    "description": "하루에 최소 10분 이상 걷기. 움직이지 않는 습관에서 벗어나는 첫 걸음입니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "엘리베이터 대신 계단",
+    "description": "1~2층은 항상 계단 이용하기. 일상 속 작은 움직임이 쌓이면 큰 건강 효과가 납니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "식후 산책 5분",
+    "description": "점심·저녁 식사 후 5분씩 가볍게 걷기. 식후 혈당 급등을 막는 간단한 방법입니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "스트레칭 5분",
+    "description": "아침 기상 후 또는 취침 전 전신 스트레칭 5분 하기. 유연성을 높이고 혈액순환을 돕습니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "EXERCISE",
+    "duration_days": 7,
+    "name": "TV 보며 제자리 걷기",
+    "description": "TV 시청 중 광고 시간에 제자리 걷기나 스트레칭하기. 좌식 시간을 줄이는 쉬운 방법입니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "하루 30분 걷기",
+    "description": "하루 30분 이상 빠르게 걷기. 가벼운 유산소 운동으로 심폐 기능과 혈당 조절을 개선합니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "주 3회 운동 루틴",
+    "description": "월·수·금 또는 화·목·토 등 요일을 정해 주 3회 운동하기. 규칙이 습관을 만듭니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "맨몸 운동 10분",
+    "description": "스쿼트·런지·팔굽혀펴기 등 맨몸 운동을 10분씩 하기. 근력과 기초대사량을 높입니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "운동 일지 기록 시작",
+    "description": "운동 종류·시간·강도를 매일 기록하기 시작하기. 2주 기록이 모이면 동기부여가 됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "EXERCISE",
+    "duration_days": 14,
+    "name": "자전거·수영 도전",
+    "description": "자전거 타기·수영 중 하나를 2주 동안 주 2회 해보기. 관절 부담이 적고 전신 운동이 됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "주 5회 운동 루틴",
+    "description": "주 5회 이상 30분 유산소 운동하기. WHO 권고 기준인 주 150분 유산소를 달성합니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "근력 운동 주 2회",
+    "description": "상·하체 근력 운동을 주 2회 회당 20분 이상 하기. 근육량 유지는 대사 건강의 핵심입니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "운동 강도 높이기",
+    "description": "걷기에서 빠르게 걷기 또는 조깅으로 강도를 단계적으로 높이기. 심폐 기능을 더 키울 수 있습니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "그룹 운동 참여",
+    "description": "요가·필라테스·단체 스포츠 등 그룹 운동에 참여하기. 사회적 연결이 운동 지속력을 높입니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "EXERCISE",
+    "duration_days": 21,
+    "name": "체력 변화 측정",
+    "description": "3주 전후 걷기 속도·팔굽혀펴기 횟수 등을 비교하기. 객관적인 향상이 동기를 높입니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "주 150분 유산소 30일",
+    "description": "중등도 유산소 운동 주 150분(하루 30분×5일)을 30일간 유지하기. WHO 권고 기준 완전 달성."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "근력 운동 루틴 정착",
+    "description": "근력 운동을 주 2~3회 30일 연속 유지하기. 이제 근력 운동이 생활의 일부가 됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "좋아하는 스포츠 찾기",
+    "description": "테니스·등산·댄스 등 즐기면서 할 수 있는 스포츠를 찾아 30일간 꾸준히 하기."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "운동 일지 30일 완성",
+    "description": "30일 운동 일지를 완성하고 체력 변화를 분석하기. 다음 30일 목표를 스스로 세웁니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "EXERCISE",
+    "duration_days": 30,
+    "name": "운동 파트너 만들기",
+    "description": "가족·친구·동료와 함께 운동 루틴을 만들어 30일간 유지하기. 함께하면 포기하지 않습니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "취침 시간 정하기",
+    "description": "오늘부터 매일 같은 시간에 잠자리에 들기. 규칙적인 수면이 전반적인 건강에 가장 중요합니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "취침 1시간 전 스마트폰 끄기",
+    "description": "자기 1시간 전 스마트폰을 멀리 두기. 블루라이트와 자극적인 콘텐츠가 수면을 방해합니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "7시간 수면 확보",
+    "description": "하루 7시간 이상 잠자기. 수면 부족은 혈압·혈당·면역력에 직접 영향을 미칩니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "오후 카페인 피하기",
+    "description": "오후 3시 이후 커피·에너지드링크·녹차 마시지 않기. 잠이 오는 것을 방해하지 않습니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "SLEEP",
+    "duration_days": 7,
+    "name": "침실 어둡게 유지하기",
+    "description": "잠들기 전 침실을 어둡게 만들기(암막 커튼·안대 활용). 어두운 환경이 수면 호르몬 분비를 돕습니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "기상 시간 일정하게",
+    "description": "주말에도 평일과 같은 시간에 일어나기. 생체 시계가 안정되면 자연스럽게 잠이 옵니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "수면 루틴 만들기",
+    "description": "취침 30분 전 스트레칭 또는 독서 등 긴장을 푸는 루틴을 만들고 14일간 실천하기."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "낮잠 30분 이내",
+    "description": "낮잠은 오후 2시 이전, 30분을 넘지 않게 자기. 너무 긴 낮잠은 야간 수면을 방해합니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "저녁 식사 2시간 전 완료",
+    "description": "잠들기 2시간 전에 저녁 식사를 마치기. 소화 활동이 수면을 방해하지 않도록 합니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "SLEEP",
+    "duration_days": 14,
+    "name": "수면 일지 작성",
+    "description": "매일 취침·기상 시각과 수면의 질(1~5점)을 기록하기. 2주 패턴을 보면 개선점이 보입니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "수면 환경 최적화",
+    "description": "침실 온도 18~22도, 습도 40~60% 유지하기. 쾌적한 환경이 수면의 질을 크게 높입니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "낮 활동량 높이기",
+    "description": "낮에 충분히 움직여 밤에 자연스럽게 잠이 오게 하기. 운동이 가장 좋은 수면제입니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "알코올 없이 수면",
+    "description": "잠을 위해 술을 마시는 습관 없애기 21일 도전. 알코올은 수면 구조를 방해하고 잠의 질을 낮춥니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "스트레스 해소 후 취침",
+    "description": "잠들기 전 그날의 스트레스를 일기·명상·대화로 해소하기. 걱정이 줄어야 깊이 잘 수 있습니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "SLEEP",
+    "duration_days": 21,
+    "name": "수면 앱 활용",
+    "description": "수면 추적 앱으로 수면 단계·코골이 등을 측정하기. 객관적인 데이터로 수면을 개선합니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "7~8시간 수면 30일 유지",
+    "description": "7~8시간 규칙적인 수면을 30일간 유지하기. 이제 좋은 수면이 완전한 습관이 됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "수면 루틴 완전 자동화",
+    "description": "수면 준비 루틴이 의식하지 않아도 자연스럽게 이루어지도록 30일간 반복하기."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "수면 일지 30일 분석",
+    "description": "30일 수면 일지를 돌아보며 어떤 날 잘 잤는지 패턴을 분석하기. 나만의 최적 수면 공식을 찾습니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "가족과 함께 수면 리듬 맞추기",
+    "description": "가족과 취침·기상 시간을 맞추기. 가정 환경이 함께 바뀌면 지속하기 훨씬 쉽습니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "SLEEP",
+    "duration_days": 30,
+    "name": "수면 장애 지속 시 상담",
+    "description": "30일 후에도 수면 문제가 지속된다면 수면 전문의 상담받기. 조기 발견이 중요합니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "복식 호흡 3분",
+    "description": "하루 한 번 배로 숨 쉬는 복식 호흡 3분 연습하기. 언제 어디서나 할 수 있는 가장 쉬운 스트레스 해소법입니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "감사 일기 3가지",
+    "description": "매일 자기 전 감사한 일 3가지 적기. 긍정적인 시각이 스트레스 반응을 줄여줍니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "자연 속 10분 걷기",
+    "description": "나무·공원 등 자연 공간에서 10분 천천히 걷기. 자연이 스트레스 호르몬(코르티솔)을 낮춥니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "좋아하는 음악 감상",
+    "description": "좋아하는 음악을 10분 이상 감상하기. 음악은 혈압과 심박수를 안정시킵니다."
+  },
+  {
+    "track": "B",
+    "stage": 1,
+    "category": "STRESS",
+    "duration_days": 7,
+    "name": "스트레스 상황 메모",
+    "description": "스트레스를 받은 상황을 짧게 메모하기. 기록이 스트레스 패턴을 인식하게 돕습니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "하루 10분 명상",
+    "description": "앱을 활용해 하루 10분 명상하기. 꾸준한 명상이 스트레스 민감도를 낮춥니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "취미 활동 주 2회",
+    "description": "좋아하는 취미(그림·요리·게임·독서 등)를 주 2회 이상 하기. 즐거움이 스트레스를 해소합니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "대화로 풀기",
+    "description": "신뢰하는 사람과 하루 10분 이상 이야기 나누기. 말하는 것만으로도 스트레스가 줄어듭니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "SNS 사용 시간 줄이기",
+    "description": "SNS·뉴스 앱 사용을 하루 1시간 이하로 줄이기. 과도한 정보가 스트레스를 키웁니다."
+  },
+  {
+    "track": "B",
+    "stage": 2,
+    "category": "STRESS",
+    "duration_days": 14,
+    "name": "스트레스 트리거 파악",
+    "description": "반복되는 스트레스 원인을 파악하고 대처 방법 1가지 생각해두기."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "마음챙김 명상 주 5회",
+    "description": "마음챙김 명상을 주 5회 이상 하기. 현재 순간에 집중하는 연습이 스트레스 내성을 높입니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "이완 기법 배우기",
+    "description": "점진적 근육이완법(PMR)이나 자율훈련법을 배워 취침 전 실시하기."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "운동으로 스트레스 해소",
+    "description": "스트레스를 받을 때 10~20분 유산소 운동하기. 운동이 스트레스 호르몬을 가장 빠르게 해소합니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "사회적 관계 강화",
+    "description": "친구·가족과의 만남을 주 1회 이상 늘리기. 사회적 연결이 스트레스를 완충합니다."
+  },
+  {
+    "track": "B",
+    "stage": 3,
+    "category": "STRESS",
+    "duration_days": 21,
+    "name": "스트레스 점수 기록",
+    "description": "매일 스트레스 수준을 1~10점으로 평가해 기록하기. 패턴을 보면 원인이 보입니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "스트레스 관리 루틴 정착",
+    "description": "나만의 스트레스 관리 루틴(명상·운동·취미·대화)을 30일간 꾸준히 실천하기."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "일상 마음챙김 실천",
+    "description": "밥 먹기·걷기 등 일상 활동에서 현재 순간에 집중하는 마음챙김을 30일간 연습하기."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "정기 취미 루틴 만들기",
+    "description": "주 3회 이상 좋아하는 활동을 30일간 꾸준히 하기. 이제 즐거운 활동이 일상의 일부가 됩니다."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "스트레스 30일 패턴 분석",
+    "description": "30일 스트레스 일지를 분석해 어떤 상황이 가장 큰 스트레스인지 파악하고 장기 대처법 세우기."
+  },
+  {
+    "track": "B",
+    "stage": 4,
+    "category": "STRESS",
+    "duration_days": 30,
+    "name": "전문 상담 필요 여부 판단",
+    "description": "30일 후에도 만성 스트레스가 지속된다면 심리 상담을 고려하기. 도움을 요청하는 것은 용기 있는 선택입니다."
+  }
+]

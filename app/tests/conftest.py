@@ -1,40 +1,46 @@
 import asyncio
+import socket
 from collections.abc import Generator
-from typing import Any
-from unittest.mock import Mock, patch
 
 import pytest
 import pytest_asyncio
 from _pytest.fixtures import FixtureRequest
-from tortoise import generate_config
 from tortoise.contrib.test import finalizer, initializer
 
 from app.core import config
 from app.core.db.databases import TORTOISE_APP_MODELS
+from app.core.rate_limit import limiter
+
+# 테스트 중에는 Rate Limit 비활성화 (단일 IP에서 빠르게 호출하므로 5/min 초과)
+limiter.enabled = False
 
 TEST_BASE_URL = "http://test"
-TEST_DB_LABEL = "models"
-TEST_DB_TZ = "Asia/Seoul"
 
 
-def get_test_db_config() -> dict[str, Any]:
-    tortoise_config = generate_config(
-        db_url=f"mysql://{config.DB_USER}:{config.DB_PASSWORD}@{config.DB_HOST}:{config.DB_PORT}/test",
-        app_modules={TEST_DB_LABEL: TORTOISE_APP_MODELS},
-        connection_label=TEST_DB_LABEL,
-        testing=True,
-    )
-    tortoise_config["timezone"] = TEST_DB_TZ
+def _resolve_db_host(host: str) -> str:
+    """Docker 외부(로컬 머신)에서 실행 시 호스트명이 미해결되면 localhost로 자동 대체.
+    CI(GitHub Actions)와 Docker 컨테이너 내부에서는 'postgres' 그대로 사용."""
+    try:
+        socket.getaddrinfo(host, None)
+        return host
+    except socket.gaierror:
+        return "localhost"
 
-    return tortoise_config
+
+# PostgreSQL에서 DB를 생성/삭제하려면 다른 DB(maintenance DB)에 먼저 접속해야 한다.
+# asyncpg는 DB 미지정 시 username(ckduser)을 DB명으로 사용하므로,
+# CI의 postgres 서비스에 ckduser DB가 존재해야 한다. (checks.yml 참고)
+_db_host = _resolve_db_host(config.DB_HOST)
+TEST_DB_URL = f"postgres://{config.DB_USER}:{config.DB_PASSWORD}@{_db_host}:{config.DB_PORT}/{config.DB_NAME}"
 
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize(request: FixtureRequest) -> Generator[None, None]:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    with patch("tortoise.contrib.test.getDBConfig", Mock(return_value=get_test_db_config())):
-        initializer(modules=TORTOISE_APP_MODELS)
+    # db_url을 직접 전달하면 _TORTOISE_TEST_DB가 설정되어
+    # TestCase도 PostgreSQL을 사용하게 된다.
+    initializer(modules=TORTOISE_APP_MODELS, db_url=TEST_DB_URL)
     yield
     finalizer()
     loop.close()

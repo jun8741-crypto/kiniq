@@ -23,17 +23,33 @@ class Config(BaseSettings):
     TEMPLATE_DIR: str = os.path.join(Path(__file__).resolve().parent.parent, "templates")
 
     DB_HOST: str = "localhost"
-    DB_PORT: int = 3306
-    DB_USER: str = "root"
-    DB_PASSWORD: str = "pw1234"
-    DB_NAME: str = "ai_health"
+    DB_PORT: int = 5432
+    DB_USER: str = "ckduser"
+    DB_PASSWORD: str = "ckdpass1234"
+    DB_NAME: str = "ckd_challenge"
     DB_CONNECT_TIMEOUT: int = 5
     DB_CONNECTION_POOL_MAXSIZE: int = 10
 
     COOKIE_DOMAIN: str = "localhost"
 
     JWT_ALGORITHM: str = "HS256"
-    # v0.7 결정: Access 15분 / Refresh 7일 (Rotate). 단위는 둘 다 '분'으로 통일 — tokens.py에서 timedelta(minutes=...)로 사용
+    # v0.7 / REQ-SEC-003: Access 15분 / Refresh 7일 (Rotate). 단위는 둘 다 '분'으로 통일 — tokens.py에서 timedelta(minutes=...)로 사용
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 7 * 24 * 60  # 10080분 = 7일
     JWT_LEEWAY: int = 5
+
+    # 소셜 로그인 (키 미발급 시 빈 문자열 유지 → 호출 시 HTTPException)
+    FRONTEND_URL: str = "http://localhost:5173"
+    KAKAO_REST_API_KEY: str = ""
+    KAKAO_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/kakao/callback"
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+
+    # 이메일 (REQ-AUTH 비밀번호 재설정)
+    # EMAIL_MODE: demo = 응답에 코드 반환 (시연용, 외부 호출 X) / production = Resend 실제 발송
+    EMAIL_MODE: str = "demo"
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM: str = "CKD Care <onboarding@resend.dev>"
+    PASSWORD_RESET_CODE_TTL_SECONDS: int = 300  # 5분
+    PASSWORD_RESET_MAX_ATTEMPTS: int = 5

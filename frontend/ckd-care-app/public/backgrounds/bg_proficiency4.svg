@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <defs>
+    <radialGradient id="bg4" cx="50%" cy="60%" r="80%">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="50%" stop-color="#DC2626"/>
+      <stop offset="100%" stop-color="#7F1D1D"/>
+    </radialGradient>
+  </defs>
+  <rect width="220" height="220" fill="url(#bg4)"/>
+  <!-- 옥타곤 케이지 격자 -->
+  <g stroke="#1F2937" stroke-width="1.2" opacity="0.55" fill="none">
+    <line x1="20" y1="20" x2="60" y2="60"/>
+    <line x1="60" y1="20" x2="20" y2="60"/>
+    <line x1="80" y1="20" x2="120" y2="60"/>
+    <line x1="120" y1="20" x2="80" y2="60"/>
+    <line x1="140" y1="20" x2="180" y2="60"/>
+    <line x1="180" y1="20" x2="140" y2="60"/>
+    <line x1="20" y1="80" x2="60" y2="120"/>
+    <line x1="60" y1="80" x2="20" y2="120"/>
+    <line x1="160" y1="80" x2="200" y2="120"/>
+    <line x1="200" y1="80" x2="160" y2="120"/>
+  </g>
+  <!-- 옥타곤 윤곽 -->
+  <polygon points="60,30 160,30 200,80 200,160 160,210 60,210 20,160 20,80" fill="none" stroke="#1F2937" stroke-width="3" opacity="0.7"/>
+  <!-- 용암 바닥 -->
+  <ellipse cx="50" cy="200" rx="20" ry="6" fill="#FBBF24" opacity="0.7"/>
+  <ellipse cx="170" cy="200" rx="22" ry="6" fill="#FBBF24" opacity="0.7"/>
+  <!-- 불꽃 -->
+  <path d="M 30 180 Q 35 170 32 165 Q 38 170 36 178" fill="#FBBF24" opacity="0.8"/>
+  <path d="M 188 175 Q 192 165 190 160 Q 196 168 194 175" fill="#FBBF24" opacity="0.8"/>
+  <!-- 별 (위) -->
+  <circle cx="30" cy="40" r="2" fill="#FCD34D" opacity="0.9"/>
+  <circle cx="190" cy="40" r="2" fill="#FCD34D" opacity="0.9"/>
+</svg>

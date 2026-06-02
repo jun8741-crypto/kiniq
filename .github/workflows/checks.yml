@@ -44,13 +44,19 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:16
         env:
-          MYSQL_ROOT_PASSWORD: pw1234
-          MYSQL_DATABASE: ai_health
+          POSTGRES_USER: ckduser
+          POSTGRES_PASSWORD: ckdpass1234
+          POSTGRES_DB: ckd_challenge
         ports:
-          - 3306:3306
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,6 +73,15 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --group app --frozen
+
+      - name: Create ckduser maintenance database
+        # asyncpg가 DB DROP/CREATE 시 maintenance DB로 username(ckduser)을 기본 사용.
+        # ckduser DB가 없으면 "database ckduser does not exist" 에러 발생 → 미리 생성.
+        env:
+          PGPASSWORD: ckdpass1234
+        run: |
+          psql -h localhost -U ckduser -d ckd_challenge \
+            -c "CREATE DATABASE ckduser OWNER ckduser;"
 
       - name: Check if tests exist
         id: check_tests

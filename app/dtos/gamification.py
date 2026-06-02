@@ -1,0 +1,75 @@
+from datetime import datetime
+
+from pydantic import BaseModel, Field
+
+from app.dtos.base import BaseSerializerModel
+from app.models.gamification import CharacterSpecies, ItemCode
+
+
+class EggResponse(BaseSerializerModel):
+    egg_no: int
+    progress_checkins: int
+    current_stage: int
+    progress_percent: int  # progress_checkins / 100 * 100
+    goal_70_alerted: bool
+    goal_90_alerted: bool
+    is_legendary: bool | None
+    species: CharacterSpecies | None
+    character_name: str | None
+    started_at: datetime
+
+
+class EggHistoryItem(BaseSerializerModel):
+    egg_no: int
+    is_legendary: bool | None
+    species: CharacterSpecies | None
+    character_name: str | None
+    started_at: datetime
+    hatched_at: datetime
+
+
+class CharacterRenameRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=30)
+
+
+class SkinEquipRequest(BaseModel):
+    item_code: ItemCode | None = Field(None, description="장착할 스킨 코드. null이면 해제(기본 외형).")
+
+
+class SkinEquipResponse(BaseSerializerModel):
+    active_skin_code: ItemCode | None
+
+
+class EggHistoryResponse(BaseSerializerModel):
+    total: int
+    legendary_count: int
+    items: list[EggHistoryItem]
+
+
+class ChargeModeResponse(BaseSerializerModel):
+    is_active: bool
+    entered_at: datetime | None
+    exited_at: datetime | None
+    days_since_last_checkin: int | None
+    warning_4d_alerted: bool
+    warning_5d_alerted: bool
+    warning_6d_alerted: bool
+
+
+class InventoryItem(BaseSerializerModel):
+    item_code: ItemCode
+    quantity: int
+    acquired_at: datetime
+
+
+class InventoryResponse(BaseSerializerModel):
+    total: int
+    items: list[InventoryItem]
+
+
+class MascotResponse(BaseSerializerModel):
+    current_egg: EggResponse
+    charge_mode: ChargeModeResponse
+    legendary_unlocked: bool  # 부화 이력 중 전설 한 번이라도?
+    skin_active: ItemCode | None  # 보유 스킨 중 가장 비싼 거 (단순화)
+    proficiency: int  # 챌린지 숙련도 1~4 (EggWidget 배경 결정용)
