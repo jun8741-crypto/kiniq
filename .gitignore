@@ -34,6 +34,33 @@ frontend/ckd-care-app/dist/
 # Excel/Office 임시 파일
 ~$*
 
-# 부하 테스트 산출물 (재생성 가능, README.md만 추적)
-docs/load-test/report.html
-docs/load-test/result_*.csv
+# 부하 테스트 산출물 — 평가 5-1 증빙으로 핵심 결과(report.html·stats·failures)는 추적,
+# 대용량 시계열·예외 덤프만 제외
+docs/load-test/result_stats_history.csv
+docs/load-test/result_exceptions.csv
+
+# CKD 학습 전용 venv (AutoGluon 3.11)
+.venv-train/
+
+# CKD 모델 아티팩트·학습셋 (재학습 가능 / 대용량 — git 제외, 외부 스토리지)
+# 루트 models/ 만 제외 — 'models/'(앞 슬래시 없음)는 app/models·db/migrations/models까지
+# 잡아 새 모델·마이그레이션 파일이 무시되는 함정이 있어 '/models/'로 한정
+/models/
+data/ckd/
+
+# 협업 자산 패키징 산출물 (scripts/setup/dump_*.sh 생성 → Google Drive 공유, git 추적 X)
+/models_ckd.tar.gz
+/qdrant_snapshot.tar.gz
+qdrant_backup_*/
+qdrant_backup_*.tar.gz
+*.snapshot
+probe_headers.py
+
+# RAG 테스트 결과물 (재생성 가능 — git 제외)
+results/
+
+# 임시 회귀 스크립트 (로컬 실행 전용 — git 제외)
+run_review.py
+
+# 발표 준비 폴더 (개인 작업물 — git 제외)
+/presentation/

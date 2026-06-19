@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { gamificationApi, PROFICIENCY_LABEL, type MascotResponse } from "../api/gamification";
+import { ANIMAL_SKIN_TO_SPECIES, ANIMAL_SKIN_TO_STAGE, gamificationApi, PROFICIENCY_LABEL, type MascotResponse } from "../api/gamification";
 import { BackgroundImage } from "./BackgroundImage";
 import { CharacterImage } from "./CharacterImage";
 
@@ -24,12 +24,12 @@ function progressColor(progress: number, isCharge: boolean): string {
 
 function nextThreshold(progress: number): { name: string; remaining: number } | null {
   if (progress < HATCH_AT) return { name: "부화", remaining: HATCH_AT - progress };
-  if (progress < EVOLVE_2) return { name: "2단계", remaining: EVOLVE_2 - progress };
-  if (progress < GOAL_CHECKINS) return { name: "완전체", remaining: GOAL_CHECKINS - progress };
+  if (progress < EVOLVE_2) return { name: "다음 진화", remaining: EVOLVE_2 - progress };
+  if (progress < GOAL_CHECKINS) return { name: "다음 진화", remaining: GOAL_CHECKINS - progress };
   return null;
 }
 
-export function EggWidget() {
+export function EggWidget({ aspectBackground = false }: { aspectBackground?: boolean } = {}) {
   // 캐릭터·알 진행률 — 캐릭터 5분 TTL (REQ-DASH-004)
   const { data, isLoading: loading } = useQuery<MascotResponse | null>({
     queryKey: ["gamification", "mascot"],
@@ -39,7 +39,7 @@ export function EggWidget() {
 
   if (loading) {
     return (
-      <div className="flex w-[280px] flex-col items-center justify-center rounded-md border border-border bg-bg p-[16px]">
+      <div className="flex h-full flex-col items-center justify-center rounded-lg border border-border bg-bg p-[16px] shadow-card">
         <p className="text-xs text-text-muted">로딩 중...</p>
       </div>
     );
@@ -47,7 +47,7 @@ export function EggWidget() {
 
   if (!data) {
     return (
-      <div className="flex w-[280px] flex-col items-center justify-center gap-[8px] rounded-md border border-border bg-bg p-[16px]">
+      <div className="flex h-full flex-col items-center justify-center gap-[8px] rounded-lg border border-border bg-bg p-[16px] shadow-card">
         <div className="flex h-[80px] w-[80px] items-center justify-center rounded-full bg-success/20">
           <CharacterImage species={null} stage={0} size={56} emojiClass="text-3xl" />
         </div>
@@ -60,7 +60,13 @@ export function EggWidget() {
   const egg = data.current_egg;
   const charge = data.charge_mode;
   const isCharge = charge.is_active;
+
+  // 동물 스킨 장착 시 표시 species/stage override (실제 진행 데이터는 유지)
+  const skinSpecies = data.skin_active ? ANIMAL_SKIN_TO_SPECIES[data.skin_active] ?? null : null;
+  const skinStage = data.skin_active ? ANIMAL_SKIN_TO_STAGE[data.skin_active] ?? null : null;
+  const displaySpecies = skinSpecies ?? egg.species;
   const stageIdx = Math.max(0, Math.min(egg.current_stage, 3));
+  const displayStage = skinStage ?? stageIdx;
   const label = STAGE_LABEL[stageIdx];
   const progress = egg.progress_checkins;
   const percentToGoal = Math.round((progress / GOAL_CHECKINS) * 100);
@@ -73,20 +79,22 @@ export function EggWidget() {
   const proficiencyLabel = PROFICIENCY_LABEL[proficiency] ?? "입문";
 
   return (
-    <div className="flex w-[420px] flex-col items-center gap-[10px] rounded-md border border-border bg-bg p-[16px]">
+    <div className="flex h-full flex-col items-center justify-center gap-[10px] rounded-lg border border-border bg-bg p-[16px] shadow-card">
       {/* 캐릭터 아이콘 + 숙련도 배경 (와이드 사각형, 시연 임팩트 강화) */}
       <div
-        className="relative flex h-[200px] w-full items-center justify-center overflow-hidden rounded-xl ring-2 ring-border shadow-sm"
+        className={`relative flex w-full items-center justify-center overflow-hidden rounded-xl ring-2 ring-border shadow-sm ${
+          aspectBackground ? "aspect-[1024/572]" : "h-[200px]"
+        }`}
         title={`숙련도: ${proficiencyLabel}`}
       >
         {/* 배경 (PNG → SVG → 그라데이션 fallback) */}
         <BackgroundImage proficiency={proficiency} />
         {/* 캐릭터 (배경 위) */}
         <div className="relative z-10">
-          <CharacterImage species={egg.species} stage={stageIdx} size={140} emojiClass="text-6xl" />
+          <CharacterImage species={displaySpecies} stage={displayStage} size={140} emojiClass="text-6xl" />
         </div>
         {isComplete && (
-          <span className="absolute top-2 right-2 z-20 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-bold text-yellow-700 shadow">
+          <span className="absolute top-2 right-2 z-20 rounded-md bg-yellow-100 px-2 py-0.5 text-xs font-bold text-yellow-700 shadow">
             ✨ 완전체
           </span>
         )}

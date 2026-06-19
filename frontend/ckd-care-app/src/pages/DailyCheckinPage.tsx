@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Droplets, UtensilsCrossed, Footprints, Moon, Brain, Check } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Droplets, UtensilsCrossed, Footprints, Moon, Brain, Check, BookOpen, ClipboardList, Activity, HeartPulse } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ScreenLabel } from "../components/ScreenLabel";
@@ -19,6 +20,10 @@ const CATEGORY_ICON: Record<ChallengeCategory, LucideIcon> = {
   DIET: UtensilsCrossed,
   SLEEP: Moon,
   STRESS: Brain,
+  EDUCATION: BookOpen,
+  RECORD: ClipboardList,
+  MONITORING: Activity,
+  EMOTION: HeartPulse,
 };
 
 const CATEGORY_LABEL: Record<ChallengeCategory, string> = {
@@ -27,6 +32,10 @@ const CATEGORY_LABEL: Record<ChallengeCategory, string> = {
   DIET: "식단",
   SLEEP: "수면",
   STRESS: "스트레스",
+  EDUCATION: "교육·이해",
+  RECORD: "기록 습관",
+  MONITORING: "검사·수치 관리",
+  EMOTION: "정서",
 };
 
 function todayStr() {
@@ -38,16 +47,23 @@ function isCheckedToday(uc: UserChallenge): boolean {
 }
 
 export function DailyCheckinPage() {
+  const queryClient = useQueryClient();
   const [myList, setMyList] = useState<UserChallenge[]>([]);
   const [challengeMap, setChallengeMap] = useState<Record<number, Challenge>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [checkingIn, setCheckingIn] = useState<number | "all" | null>(null);
+  const [cancelingIn, setCancelingIn] = useState<number | null>(null);
   const [resultModal, setResultModal] = useState<CheckInResponse | null>(null);
 
   async function load() {
     try {
-      const [listRes, myRes] = await Promise.all([challengeApi.list(), challengeApi.myList()]);
+      // 내 트랙·스테이지 기준 챌린지 목록 조회 (구버전 list() 제거)
+      const mt = await challengeApi.myTrack();
+      const [listRes, myRes] = await Promise.all([
+        challengeApi.listByTrackStage(mt.track, mt.stage),
+        challengeApi.myList(),
+      ]);
       const map: Record<number, Challenge> = {};
       listRes.items.forEach((c) => (map[c.id] = c));
       setChallengeMap(map);
@@ -69,11 +85,32 @@ export function DailyCheckinPage() {
     try {
       const res = await challengeApi.checkin(uc.id);
       setResultModal(res);
+      // 개별 체크인 완료 후 대시보드 챌린지 통계 즉시 갱신
+      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"], refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: ["challenges"], refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "체크인 실패");
     } finally {
       setCheckingIn(null);
+    }
+  }
+
+  async function handleCancelCheckin(uc: UserChallenge) {
+    if (!window.confirm("오늘 체크인을 취소할까요?")) return;
+    setCancelingIn(uc.id);
+    setError("");
+    try {
+      await challengeApi.cancelCheckin(uc.id);
+      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"], refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: ["challenges"], refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "체크인 취소 실패");
+    } finally {
+      setCancelingIn(null);
     }
   }
 
@@ -88,6 +125,10 @@ export function DailyCheckinPage() {
         lastResult = await challengeApi.checkin(uc.id);
       }
       if (lastResult) setResultModal(lastResult);
+      // 전체 체크인 완료 후 대시보드 챌린지 통계 즉시 갱신
+      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"], refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: ["challenges"], refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "체크인 실패");
@@ -150,7 +191,7 @@ export function DailyCheckinPage() {
 
           {/* 미완료 일괄 체크인 헤더 */}
           {pending.length > 0 && (
-            <div className="mt-[24px] flex items-center justify-between rounded-md border border-border bg-bg p-[16px]">
+            <div className="mt-[24px] flex items-center justify-between rounded-lg border border-border bg-bg p-[16px] shadow-card">
               <div>
                 <p className="text-sm font-bold text-text-primary">미완료 {pending.length}개</p>
                 <p className="text-xs text-text-muted">한 번에 모두 체크인하면 풀 참여 보너스 +40pt를 받을 수 있어요.</p>
@@ -158,7 +199,7 @@ export function DailyCheckinPage() {
               <button
                 onClick={handleCheckinAll}
                 disabled={checkingIn !== null}
-                className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-bg hover:bg-accent/90 disabled:opacity-50"
+                className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-bg shadow-sm transition-colors hover:bg-accent-hover disabled:opacity-50"
               >
                 {checkingIn === "all" ? "체크인 중..." : "전부 체크인"}
               </button>
@@ -173,9 +214,9 @@ export function DailyCheckinPage() {
                 if (!c) return null;
                 const Icon = CATEGORY_ICON[c.category];
                 return (
-                  <div key={uc.id} className="flex items-center gap-[16px] rounded-md border border-border bg-bg p-[16px]">
-                    <div className="flex h-[48px] w-[48px] items-center justify-center rounded-full bg-bg-alt">
-                      <Icon size={22} className="text-text-secondary" />
+                  <div key={uc.id} className="flex items-center gap-[16px] rounded-lg border border-border bg-bg p-[16px] shadow-card">
+                    <div className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                      <Icon size={22} />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-bold text-text-primary">{c.name}</p>
@@ -196,7 +237,7 @@ export function DailyCheckinPage() {
             </div>
           )}
 
-          {/* 완료 챌린지 (작게) */}
+          {/* 완료 챌린지 — 클릭 시 체크인 취소 가능 */}
           {done.length > 0 && (
             <div className="mt-[24px]">
               <p className="mb-[8px] text-xs font-bold text-text-secondary">오늘 완료 {done.length}개</p>
@@ -204,10 +245,23 @@ export function DailyCheckinPage() {
                 {done.map((uc) => {
                   const c = challengeMap[uc.challenge_id];
                   if (!c) return null;
+                  const isCanceling = cancelingIn === uc.id;
                   return (
-                    <div key={uc.id} className="flex items-center gap-[12px] rounded-sm bg-bg px-[12px] py-[8px] opacity-70">
-                      <Check size={16} className="text-success" />
-                      <span className="text-sm text-text-secondary line-through">{c.name}</span>
+                    <div
+                      key={uc.id}
+                      className="group flex items-center gap-[12px] rounded-sm bg-bg px-[12px] py-[8px] opacity-70 hover:opacity-100 transition-opacity"
+                    >
+                      <Check size={16} className="shrink-0 text-success group-hover:hidden" />
+                      <span className="text-sm text-text-secondary line-through flex-1 group-hover:no-underline group-hover:text-text-primary">
+                        {c.name}
+                      </span>
+                      <button
+                        onClick={() => handleCancelCheckin(uc)}
+                        disabled={cancelingIn !== null || checkingIn !== null}
+                        className="hidden group-hover:inline-flex items-center rounded px-2 py-0.5 text-xs text-danger border border-danger/40 hover:bg-danger/10 disabled:opacity-50 shrink-0"
+                      >
+                        {isCanceling ? "취소 중..." : "완료 취소"}
+                      </button>
                     </div>
                   );
                 })}

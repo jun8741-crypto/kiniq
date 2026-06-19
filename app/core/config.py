@@ -5,6 +5,7 @@ from dataclasses import field
 from enum import StrEnum
 from pathlib import Path
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,7 +16,7 @@ class Env(StrEnum):
 
 
 class Config(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     ENV: Env = Env.LOCAL
     SECRET_KEY: str = f"default-secret-key{uuid.uuid4().hex}"
@@ -37,6 +38,7 @@ class Config(BaseSettings):
     RAG_JOBS_GROUP: str = "rag_workers"  # consumer group 이름
     RAG_RESP_PREFIX: str = "rag_resp"  # 응답 채널 prefix → rag_resp:{job_id}
     RAG_TIMEOUT_SEC: int = 60  # 백엔드 응답 대기 상한
+    CKD_JOBS_STREAM: str = "ckd_jobs"  # 백엔드→worker CKD 예측 작업 스트림
 
     COOKIE_DOMAIN: str = "localhost"
 
@@ -46,18 +48,40 @@ class Config(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 7 * 24 * 60  # 10080분 = 7일
     JWT_LEEWAY: int = 5
 
-    # 소셜 로그인 (키 미발급 시 빈 문자열 유지 → 호출 시 HTTPException)
+    # 프론트엔드 URL (이메일 인증·비번 재설정 링크 발송에 사용)
     FRONTEND_URL: str = "http://localhost:5173"
-    KAKAO_REST_API_KEY: str = ""
-    KAKAO_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/kakao/callback"
-    GOOGLE_CLIENT_ID: str = ""
-    GOOGLE_CLIENT_SECRET: str = ""
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
 
-    # 이메일 (REQ-AUTH 비밀번호 재설정)
-    # EMAIL_MODE: demo = 응답에 코드 반환 (시연용, 외부 호출 X) / production = Resend 실제 발송
+    # 이메일 (REQ-AUTH 비밀번호 재설정 + REQ-AUTH-003 회원가입 인증)
+    # EMAIL_MODE:
+    #   demo       = 응답에 코드 노출, 외부 호출 X (시연 안전, 발표 기본값)
+    #   gmail      = Gmail SMTP 실제 발송 + 응답에도 코드 노출(시연 fallback 유지)
+    #                — SMTP_USERNAME/SMTP_PASSWORD 미설정 시 demo로 강등
+    #   production = Resend API 실제 발송, 응답 코드 null
+    #                — RESEND_API_KEY 미설정 시 demo로 강등
     EMAIL_MODE: str = "demo"
     RESEND_API_KEY: str = ""
     EMAIL_FROM: str = "CKD Care <onboarding@resend.dev>"
+    # Gmail SMTP (EMAIL_MODE=gmail 일 때 사용)
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""  # 본인 Gmail 주소
+    SMTP_PASSWORD: str = ""  # Gmail 앱 비밀번호 (16자, 2FA 활성화 후 발급)
     PASSWORD_RESET_CODE_TTL_SECONDS: int = 300  # 5분
     PASSWORD_RESET_MAX_ATTEMPTS: int = 5
+
+    # Rate limiting (REQ-NF-008). 기본 켜짐 — 단일 IP 부하테스트 등에서만 false 로 비활성화
+    RATE_LIMIT_ENABLED: bool = True
+
+    @model_validator(mode="after")
+    def _enforce_real_secret_key(self) -> "Config":
+        # REQ-SEC: dev/prod에서 SECRET_KEY가 기본값/placeholder면 부팅 실패(fail-fast).
+        # 미설정 시 매 프로세스 랜덤 키로 조용히 동작 → 멀티워커 토큰 검증 붕괴·재시작 시 세션 전멸하는 footgun 방지.
+        # 로컬(LOCAL)은 개발 편의상 허용.
+        if self.ENV in (Env.DEV, Env.PROD) and (
+            self.SECRET_KEY.startswith("default-secret-key") or self.SECRET_KEY.startswith("CHANGE_ME")
+        ):
+            raise ValueError("SECRET_KEY must be set to a real secret in dev/prod (no default/placeholder value)")
+        # REQ-AUTH-003: prod에서 EMAIL_MODE=demo면 인증/재설정 코드가 API 응답(demo_code)에 노출 → 부팅 실패
+        if self.ENV == Env.PROD and self.EMAIL_MODE == "demo":
+            raise ValueError("EMAIL_MODE must not be 'demo' in prod (인증/재설정 코드가 응답에 노출됨)")
+        return self

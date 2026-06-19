@@ -2,7 +2,8 @@
 
 guard → retrieve → grade ─(부족)→ rewrite → retrieve(≤2)
        → generate → hallucination ─(환각)→ generate(≤1) / answer_grade
-                   → answer_grade ─(미해결)→ rewrite → post_guard → END
+                   → answer_grade ─(미해결)→ rewrite
+                   → analogy → post_guard → END
 
 컴파일된 그래프는 모듈 lazy 싱글턴으로 1회만 만든다(노드 함수의 LLM은 호출 시점 lazy라 컴파일에
 키 불요). Phase 5에서 ai_worker task가 get_graph().invoke(...) 로 호출한다.
@@ -10,12 +11,33 @@ guard → retrieve → grade ─(부족)→ rewrite → retrieve(≤2)
 
 from __future__ import annotations
 
+import logging
+import time
+
 from langgraph.graph import END, START, StateGraph
 
 from . import nodes
 from .state import RAGState
 
+logger = logging.getLogger("ai_worker.rag")
+
 _graph = None
+
+
+def _timed(name: str, fn):
+    """노드 실행 시간을 [RAG-TIMING] 로그로 남기는 래퍼 (병목 계측용).
+
+    반환값을 그대로 통과시켜 그래프 동작은 불변. 같은 노드가 여러 번 호출되면
+    (rewrite/generate 루프) 호출마다 1줄씩 찍혀 호출 횟수도 함께 드러난다.
+    """
+
+    def wrapper(state):
+        t0 = time.perf_counter()
+        result = fn(state)
+        logger.info("[RAG-TIMING] node=%-18s elapsed=%.3fs", name, time.perf_counter() - t0)
+        return result
+
+    return wrapper
 
 
 def build_graph():
@@ -28,6 +50,7 @@ def build_graph():
         ("generate", nodes.generate_node),
         ("hallucination", nodes.hallucination_node),
         ("answer_grade", nodes.answer_node),
+        ("analogy", nodes.analogy_node),
         ("post_guard", nodes.post_guard_node),
         # 검색 실패 폴백 차등 라우팅
         ("classify_fallback", nodes.classify_fallback_node),
@@ -36,7 +59,7 @@ def build_graph():
         ("referral_notice", nodes.referral_notice_node),
         ("scope_notice", nodes.scope_notice_node),
     ]:
-        b.add_node(name, fn)
+        b.add_node(name, _timed(name, fn))
 
     b.add_edge(START, "guard")
     # guard: 차단 메시지가 있으면 즉시 END (검색 건너뜀)
@@ -56,9 +79,10 @@ def build_graph():
     b.add_conditional_edges(
         "hallucination",
         nodes.grounded_router,
-        {"generate": "generate", "answer_grade": "answer_grade", "post_guard": "post_guard"},
+        {"generate": "generate", "answer_grade": "answer_grade", "post_guard": "analogy"},
     )
-    b.add_conditional_edges("answer_grade", nodes.answer_router, {"post_guard": "post_guard", "rewrite": "rewrite"})
+    b.add_conditional_edges("answer_grade", nodes.answer_router, {"post_guard": "analogy", "rewrite": "rewrite"})
+    b.add_edge("analogy", "post_guard")
     b.add_edge("post_guard", END)
 
     # 검색 실패 폴백 분기
@@ -87,9 +111,9 @@ def get_graph():
     return _graph
 
 
-def run(question: str, user_context: dict | None = None) -> str:
-    """단일 질문 실행 → 최종 답변 문자열 (차단 시 가드 응답)."""
-    init = {
+def _init_state(question: str, user_context: dict | None, token_sink=None) -> dict:  # noqa: ANN001
+    """그래프 초기 상태 딕셔너리 생성 헬퍼 (run·run_stream 공통)."""
+    return {
         "messages": [{"role": "user", "content": question}],
         "documents": [],
         "parent_context": "",
@@ -103,8 +127,23 @@ def run(question: str, user_context: dict | None = None) -> str:
         "blocked": None,
         "domain": "",
         "user_context": user_context or {},
+        "token_sink": token_sink,
     }
-    final = get_graph().invoke(init)
+
+
+def run(question: str, user_context: dict | None = None) -> str:
+    """단일 질문 실행 → 최종 답변 문자열 (차단 시 가드 응답)."""
+    t0 = time.perf_counter()
+    final = get_graph().invoke(_init_state(question, user_context))
+    logger.info("[RAG-TIMING] TOTAL graph.invoke elapsed=%.3fs", time.perf_counter() - t0)
+    return final.get("blocked") or final.get("generation", "")
+
+
+def run_stream(question: str, user_context: dict | None, sink) -> str:  # noqa: ANN001
+    """스트리밍용 실행 — generate가 sink로 토큰 방출. 최종 답변 문자열 반환(차단 시 가드 응답)."""
+    t0 = time.perf_counter()
+    final = get_graph().invoke(_init_state(question, user_context, sink))
+    logger.info("[RAG-TIMING] TOTAL graph.invoke(stream) elapsed=%.3fs", time.perf_counter() - t0)
     return final.get("blocked") or final.get("generation", "")
 
 
@@ -120,7 +159,7 @@ if __name__ == "__main__":
     ]
     if len(sys.argv) > 1:
         cases = [(" ".join(sys.argv[1:]), None)]
-    print("[그래프 컴파일] 노드 8 + 조건부 엣지 4")
+    print("[그래프 컴파일] 정상경로 노드 9(analogy 포함) + 조건부 엣지 5")
     for q, uc in cases:
         print(f"\n{'=' * 72}\n질문: {q}" + (f"  (user_context={uc})" if uc else ""))
         print(f"{'─' * 72}")

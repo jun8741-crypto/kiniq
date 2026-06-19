@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Droplets, Footprints, UtensilsCrossed, Moon, Brain } from "lucide-react";
+import { Droplets, Footprints, UtensilsCrossed, Moon, Brain, BookOpen, ClipboardList, Activity, HeartPulse } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { challengeApi, type CategoryProgress, type ChallengeCategory } from "../api/challenge";
 
@@ -9,6 +9,10 @@ const CATEGORY_ICON: Record<ChallengeCategory, LucideIcon> = {
   DIET: UtensilsCrossed,
   SLEEP: Moon,
   STRESS: Brain,
+  EDUCATION: BookOpen,
+  RECORD: ClipboardList,
+  MONITORING: Activity,
+  EMOTION: HeartPulse,
 };
 
 const CATEGORY_LABEL: Record<ChallengeCategory, string> = {
@@ -17,6 +21,10 @@ const CATEGORY_LABEL: Record<ChallengeCategory, string> = {
   DIET: "식단",
   SLEEP: "수면",
   STRESS: "스트레스",
+  EDUCATION: "교육·이해",
+  RECORD: "기록 습관",
+  MONITORING: "검사·수치 관리",
+  EMOTION: "정서",
 };
 
 const CATEGORY_COLOR: Record<ChallengeCategory, string> = {
@@ -25,6 +33,10 @@ const CATEGORY_COLOR: Record<ChallengeCategory, string> = {
   DIET: "#16A34A",
   SLEEP: "#7C3AED",
   STRESS: "#DC2626",
+  EDUCATION: "#0F6E56",
+  RECORD: "#534AB7",
+  MONITORING: "#BA7517",
+  EMOTION: "#D85A30",
 };
 
 function RadialMini({ data }: { data: CategoryProgress }) {
@@ -37,7 +49,7 @@ function RadialMini({ data }: { data: CategoryProgress }) {
   const isInactive = data.active_count === 0;
 
   return (
-    <div className="flex flex-col items-center gap-1 rounded-md border border-border bg-bg p-3">
+    <div className="flex h-full flex-col items-center justify-center gap-1 rounded-lg border border-border bg-bg p-3 shadow-card">
       <div className="relative">
         <svg width="68" height="68" viewBox="0 0 68 68">
           {/* 배경 원 */}
@@ -89,7 +101,7 @@ export function RadialMiniWidget() {
 
   if (loading) {
     return (
-      <div className="rounded-md border border-border bg-bg p-4">
+      <div className="rounded-lg border border-border bg-bg p-4 shadow-card">
         <p className="text-sm text-text-muted">로딩 중...</p>
       </div>
     );
@@ -100,9 +112,9 @@ export function RadialMiniWidget() {
   }
 
   return (
-    <div className="rounded-md border border-border bg-bg p-4">
+    <div className="flex h-full flex-col rounded-lg border border-border bg-bg p-4 shadow-card">
       <p className="mb-3 text-sm font-bold text-text-primary">카테고리별 진행률</p>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid flex-1 grid-cols-3 gap-2 sm:grid-cols-5">
         {items.map((it) => (
           <RadialMini key={it.category} data={it} />
         ))}

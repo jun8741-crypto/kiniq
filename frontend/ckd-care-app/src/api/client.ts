@@ -1,6 +1,6 @@
-const BASE = "/api/v1";
+export const BASE = "/api/v1";
 
-function getToken(): string | null {
+export function getToken(): string | null {
   return localStorage.getItem("access_token") ?? sessionStorage.getItem("access_token");
 }
 
@@ -87,9 +87,12 @@ async function tryRefresh(): Promise<string | null> {
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
+  // FormData면 Content-Type을 브라우저가 자동 설정(multipart boundary 포함)하도록 비움
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   // 네트워크 자체 에러(서버 다운·인터넷 끊김 등) 한국어 처리
@@ -101,6 +104,17 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (res.status === 401) {
+    // 임퍼소네이션(view 토큰) 만료: refresh 쿠키는 관리자 것이므로 refresh하지 않고
+    // 백업한 관리자 토큰으로 복원한 뒤 관리자 화면으로 보낸다.
+    const adminBackup = sessionStorage.getItem("admin_token_backup");
+    if (adminBackup) {
+      sessionStorage.removeItem("admin_token_backup");
+      sessionStorage.removeItem("impersonation_target");
+      localStorage.setItem("access_token", adminBackup);
+      sessionStorage.removeItem("access_token");
+      window.location.href = "/admin/users";
+      throw new Error("임퍼소네이션 세션이 만료돼 관리자로 돌아갑니다.");
+    }
     const newToken = await tryRefresh();
     if (!newToken) {
       clearToken();
@@ -140,6 +154,10 @@ export const api = {
   get: <T>(path: string) => request<T>(path, { method: "GET" }),
   post: <T>(path: string, body: unknown) =>
     request<T>(path, { method: "POST", body: JSON.stringify(body) }),
+  postForm: <T>(path: string, formData: FormData) =>
+    request<T>(path, { method: "POST", body: formData }),
+  put: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: "PUT", body: JSON.stringify(body) }),
   patch: <T>(path: string, body: unknown) =>
     request<T>(path, { method: "PATCH", body: JSON.stringify(body) }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),

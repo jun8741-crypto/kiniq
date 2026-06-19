@@ -9,6 +9,7 @@ export interface LatestHealthMetrics {
   egfr_estimated: number | null;
   ckd_stage: string | null;
   ckd_risk_score: number | null;
+  app_group: string | null;
 }
 
 export interface ChallengeStats {
@@ -24,6 +25,8 @@ export interface LatestLifestyleSummary {
   drinking_frequency: string;
   exercise_days_per_week: number;
   stress_level: string | null;
+  is_pregnant: boolean;
+  ckd_diagnosed: boolean;
 }
 
 export interface DashboardSummary {

@@ -49,6 +49,7 @@ class DashboardService:
                 egfr_estimated=health.egfr_estimated,
                 ckd_stage=health.ckd_stage,
                 ckd_risk_score=health.ckd_risk_score,
+                app_group=health.app_group,
             )
 
         latest_lifestyle = None
@@ -59,6 +60,8 @@ class DashboardService:
                 drinking_frequency=lifestyle.drinking_frequency,
                 exercise_days_per_week=lifestyle.exercise_days_per_week,
                 stress_level=lifestyle.stress_level,
+                is_pregnant=lifestyle.is_pregnant,
+                ckd_diagnosed=lifestyle.ckd_diagnosed,
             )
 
         return DashboardSummaryResponse(

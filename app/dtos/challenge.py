@@ -18,6 +18,7 @@ class ChallengeResponse(BaseSerializerModel):
     description: str
     duration_days: int
     track: ChallengeTrack
+    stage: int  # 난이도 단계 (1=입문 2=초보 3=중급 4=숙련)
 
 
 class ChallengeListResponse(BaseSerializerModel):
@@ -118,3 +119,96 @@ class CheckInResponse(BaseSerializerModel):
     message: str
     award: CheckinAwardResponse | None = None
     egg: EggUpdateResponse | None = None
+
+
+class CancelCheckinResponse(BaseSerializerModel):
+    id: int
+    streak_count: int
+    total_checkins: int
+    last_checkin_date: date | None
+    status: UserChallengeStatus
+    points_revoked: int
+    message: str
+
+
+class AbandonChallengeResponse(BaseSerializerModel):
+    id: int
+    status: UserChallengeStatus
+    points_revoked: int
+    message: str
+
+
+# ─── 챌린지 재설계: 트랙/스테이지/필수체크 응답 DTO ───────────────────────────
+
+
+class TrackCategoryInfo(BaseSerializerModel):
+    """트랙에 속한 카테고리 정보 (UI 탭 목록용)"""
+
+    category: ChallengeCategory
+    label: str  # 한글 라벨
+
+
+class MyTrackResponse(BaseSerializerModel):
+    """내 트랙 정보 조회 응답"""
+
+    track: ChallengeTrack
+    track_label: str
+    stage: int
+    stage_label: str
+    auto_assigned: bool
+    categories: list[TrackCategoryInfo]  # 트랙의 카테고리 목록 (UI 탭)
+
+
+class UpdateMyTrackRequest(BaseModel):
+    """배지 단계(stage) 변경 요청.
+
+    트랙은 PDF 명세상 자동배정되며 사용자가 변경할 수 없으므로 stage만 받는다.
+    """
+
+    stage: int  # 1~4
+
+
+class DailyChecklistItemResponse(BaseSerializerModel):
+    """일일 필수체크 항목 개별 응답"""
+
+    item_key: str
+    text: str
+    checked: bool
+
+
+class DailyChecklistResponse(BaseSerializerModel):
+    """일일 필수체크 전체 응답"""
+
+    date: date  # YYYY-MM-DD
+    track: ChallengeTrack
+    items: list[DailyChecklistItemResponse]
+
+
+class ChecklistToggleResponse(BaseSerializerModel):
+    """필수체크 항목 토글 응답 — 포인트·알 적립 결과 포함."""
+
+    item_key: str
+    text: str
+    checked: bool
+    points_awarded: int  # 이번 토글 순변동 (+5 / +35 / -5 / -35 / 0)
+    all_completed: bool  # 토글 후 트랙 필수항목 전체완료 여부
+    full_bonus_awarded: int  # 이번에 새로 지급된 전체완료 보너스 (0 또는 30)
+    egg: EggUpdateResponse | None = None  # 전체완료로 알이 진행됐을 때만
+
+
+# ─── 월별 달성 달력 DTO ───────────────────────────────────────────────────────
+
+
+class CalendarDay(BaseSerializerModel):
+    date: date
+    required: bool
+    selected_count: int  # 그날 체크인한 선택 챌린지 카테고리 종 수
+    level: str  # none | basic | silver | gold
+
+
+class MonthlyCalendarResponse(BaseSerializerModel):
+    year_month: str  # YYYY-MM
+    days: list[CalendarDay]  # 해당 월 1일~말일
+    achieved_days: int  # level != none 일수
+    gold_days: int  # level == gold 일수
+    max_streak: int  # level != none 연속 최장 (월 내)

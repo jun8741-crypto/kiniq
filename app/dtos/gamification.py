@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.dtos.base import BaseSerializerModel
 from app.models.gamification import CharacterSpecies, ItemCode
@@ -30,6 +30,15 @@ class EggHistoryItem(BaseSerializerModel):
 
 class CharacterRenameRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=30)
+
+    @field_validator("name")
+    @classmethod
+    def _strip_not_empty(cls, v: str) -> str:
+        # min_length=1은 공백만("   ")도 통과시키므로 strip 후 비어있지 않음을 강제
+        stripped = v.strip()
+        if not stripped:
+            raise ValueError("이름은 공백일 수 없습니다.")
+        return stripped
 
 
 class SkinEquipRequest(BaseModel):
@@ -73,3 +82,4 @@ class MascotResponse(BaseSerializerModel):
     legendary_unlocked: bool  # 부화 이력 중 전설 한 번이라도?
     skin_active: ItemCode | None  # 보유 스킨 중 가장 비싼 거 (단순화)
     proficiency: int  # 챌린지 숙련도 1~4 (EggWidget 배경 결정용)
+    max_stage_ever: int = 0  # 모든 알 중 누적 최고 진화 단계 (0~3) — 동물 스킨 잠금 판단

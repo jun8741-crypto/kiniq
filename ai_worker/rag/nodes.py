@@ -1,9 +1,9 @@
-"""StateGraph 노드 (ai_worker/rag/nodes.py) — PoC 8노드 이관 + 실제 모듈 연결.
+"""StateGraph 노드 (ai_worker/rag/nodes.py) — PoC 9노드 이관 + 실제 모듈 연결.
 
 흐름: guard → retrieve → grade ─(부족)→ rewrite → retrieve(재검색 ≤2)
             → generate → hallucination ─(환각)→ 재생성(≤1)
                         → answer_grade ─(미해결)→ rewrite
-                        → post_guard → END
+                        → analogy → post_guard → END
 PoC(poc_langgraph_rag)의 노드·라우터 로직을 그대로 옮기되, 검색은 retriever(Parent-Child·age_group),
 가드는 safety_guard(05 명세 전체), 프롬프트는 prompt_builder를 쓴다.
 """
@@ -13,7 +13,7 @@ from __future__ import annotations
 from langchain_core.messages import HumanMessage
 
 from . import config as cfg
-from . import llm_client, prompt_builder, retriever, safety_guard
+from . import food_analogy, llm_client, prompt_builder, retriever, safety_guard
 from .state import RAGState
 
 
@@ -34,17 +34,19 @@ def guard_node(state: RAGState) -> dict:
 
 
 def retrieve_node(state: RAGState) -> dict:
-    docs, parent_context, top = retriever.retrieve(_q(state))
+    user_ctx = state.get("user_context") or {}
+    track = user_ctx.get("track")  # None 이면 track 필터 미적용 (하위 호환)
+    ckd_diagnosed = bool(user_ctx.get("ckd_diagnosed"))
+    docs, parent_context, top = retriever.retrieve(_q(state), track=track, ckd_diagnosed=ckd_diagnosed)
     return {"documents": docs, "parent_context": parent_context, "top_score": top}
 
 
 def grade_node(state: RAGState) -> dict:
-    # PoC 보완: top_score≥0.5 면 grade LLM 건너뛰고 relevant (정답 청크 과필터 방지)
-    if state.get("top_score", 0.0) >= cfg.SCORE_PREPASS:
-        return {"relevance": "relevant"}
     joined = "\n\n".join(d.page_content for d in state["documents"])
     if not joined.strip():
         return {"relevance": "not_relevant"}
+    if state.get("top_score", 0.0) >= cfg.SCORE_PREPASS:
+        return {"relevance": "relevant"}
     g = llm_client.doc_grader().invoke(f"질문: {_q(state)}\n문서:\n{joined}\n이 문서에 질문에 답할 정보가 있습니까?")
     return {"relevance": g.relevance}
 
@@ -62,8 +64,17 @@ def generate_node(state: RAGState) -> dict:
     msgs = prompt_builder.build_generation_messages(
         _q(state), state.get("parent_context", ""), state["documents"], state.get("user_context")
     )
-    r = llm_client.get_gen_llm().invoke(msgs)
-    return {"generation": r.content}
+    sink = state.get("token_sink")
+    if sink is None:
+        r = llm_client.get_gen_llm().invoke(msgs)
+        return {"generation": r.content}
+    sink.begin_generation()
+    parts: list[str] = []
+    for chunk in llm_client.get_gen_llm().stream(msgs):
+        text = chunk.content or ""
+        parts.append(text)
+        sink.token(text)
+    return {"generation": "".join(parts)}
 
 
 def hallucination_node(state: RAGState) -> dict:
@@ -79,10 +90,19 @@ def answer_node(state: RAGState) -> dict:
     return {"addresses": g.addresses}
 
 
+def analogy_node(state: RAGState) -> dict:
+    """generate 답변의 영양 수치 마커를 음식 비유로 후처리(결정론적). hallucination 통과 후 실행."""
+    gen = state.get("generation") or ""
+    return {"generation": food_analogy.apply_analogies(gen)}
+
+
 def post_guard_node(state: RAGState) -> dict:
     ans = state.get("generation") or "확실한 근거를 찾지 못했습니다. 신장내과 전문의와 상담하세요."
-    if safety_guard.find_forbidden(ans):
-        # 금지표현 검출 → 면책 강화 (Phase 4: 면책, 재생성 루프는 Phase 6)
+    forbidden = safety_guard.find_forbidden(ans)
+    if "단백질처방수치" in forbidden:
+        ans = safety_guard.add_protein_caveat_if_missing(ans, state.get("user_context", {}).get("app_group"))
+        forbidden = [f for f in forbidden if f != "단백질처방수치"]
+    if forbidden:
         ans += "\n\n※ 위 내용은 참고용 안내이며 단정적 의미가 아닙니다."
     return {"generation": safety_guard.with_disclaimer(ans)}
 
@@ -118,8 +138,9 @@ def classify_fallback_node(state: RAGState) -> dict:
     blocked = safety_guard.pre_retrieval_guard(q, state.get("user_context"))
     if blocked:
         return {"blocked": blocked, "generation": blocked}
+    ctx_hint = prompt_builder.build_classification_context_hint(state.get("user_context"))
     g = llm_client.domain_grader().invoke(
-        f"{prompt_builder.CLASSIFICATION_SYSTEM_PROMPT}\n\n질문: {q}\n위 기준으로 분류하세요."
+        f"{prompt_builder.CLASSIFICATION_SYSTEM_PROMPT}{ctx_hint}\n\n질문: {q}\n위 기준으로 분류하세요."
     )
     return {"domain": g.domain}
 
@@ -128,8 +149,17 @@ def fallback_generate_node(state: RAGState) -> dict:
     """가이드라인 근거 없이 LLM 일반지식 답변 (FALLBACK_SYSTEM_PROMPT 제약·max_tokens 제한)."""
     msgs = prompt_builder.build_fallback_messages(_q(state))
     llm = llm_client.get_gen_llm().bind(max_tokens=cfg.FALLBACK_MAX_TOKENS)
-    r = llm.invoke(msgs)
-    return {"generation": r.content}
+    sink = state.get("token_sink")
+    if sink is None:
+        r = llm.invoke(msgs)
+        return {"generation": r.content}
+    sink.begin_generation()
+    parts: list[str] = []
+    for chunk in llm.stream(msgs):
+        text = chunk.content or ""
+        parts.append(text)
+        sink.token(text)
+    return {"generation": "".join(parts)}
 
 
 def fallback_post_guard_node(state: RAGState) -> dict:

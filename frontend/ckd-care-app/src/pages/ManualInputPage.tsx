@@ -1,16 +1,74 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import type { HealthCheckResponse } from "../api/healthCheck";
+import { AlertTriangle, ChevronLeft } from "lucide-react";
+import type { HealthCheckResponse, UrineResult } from "../api/healthCheck";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import { TextInput } from "../components/TextInput";
 import { BtnPrimary } from "../components/BtnPrimary";
 import { BtnSecondary } from "../components/BtnSecondary";
 import { healthCheckApi } from "../api/healthCheck";
+import { useAuth } from "../contexts/AuthContext";
+import { bloodPressureStatus, glucoseStatus, anemiaStatus } from "../utils/healthClassify";
 
 function toNum(v: string): number | null {
   const n = parseFloat(v);
   return isNaN(n) ? null : n;
+}
+
+// 분류 상태 → 배지 색상 (정상=success, 주의/경계=warning, 위험/높음/낮음/저혈당=danger)
+function statusTone(status: string): string {
+  if (status === "정상") return "border-success text-success";
+  if (status === "위험" || status === "높음" || status === "낮음" || status === "저혈당") return "border-danger text-danger";
+  return "border-warning text-warning"; // 주의, 경계
+}
+
+function StatusBadge({ status }: { status: string | null }) {
+  if (!status) return null;
+  return (
+    <span
+      className={`mt-[6px] inline-flex w-fit items-center rounded-sm border px-[8px] py-[2px] text-xs font-bold ${statusTone(status)}`}
+    >
+      {status}
+    </span>
+  );
+}
+
+// 요검사 양성/음성 토글
+function UrineToggle({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: UrineResult | "";
+  onChange: (v: UrineResult) => void;
+}) {
+  const opts: { value: UrineResult; label: string }[] = [
+    { value: "NEGATIVE", label: "음성(정상)" },
+    { value: "POSITIVE", label: "양성(의심)" },
+  ];
+  return (
+    <div className="flex flex-col gap-[4px]">
+      <label className="text-sm font-normal text-text-secondary">{label}</label>
+      <div className="flex gap-[8px]">
+        {opts.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            className={`flex-1 rounded-sm border px-[12px] py-[8px] text-sm ${
+              value === o.value
+                ? "border-accent bg-accent font-bold text-bg"
+                : "border-border-strong bg-bg font-normal text-text-primary"
+            }`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function calcBmi(height: string, weight: string): string {
@@ -23,7 +81,11 @@ function calcBmi(height: string, weight: string): string {
 export function ManualInputPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const prefill = (location.state as { prefill?: HealthCheckResponse } | null)?.prefill;
+  const { user } = useAuth();
+  // prefill에 isEdit=true 플래그가 있으면 update 모드 (CheckupHistoryPage 수정 진입)
+  const navState = location.state as { prefill?: HealthCheckResponse; isEdit?: boolean } | null;
+  const prefill = navState?.prefill;
+  const isEditMode = Boolean(navState?.isEdit && prefill?.id);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +103,15 @@ export function ManualInputPage() {
     triglycerides: prefill?.triglycerides != null ? String(prefill.triglycerides) : "",
     hdl: prefill?.hdl_cholesterol != null ? String(prefill.hdl_cholesterol) : "",
     total_cholesterol: prefill?.total_cholesterol != null ? String(prefill.total_cholesterol) : "",
+    // 신규 검진 수치 항목
+    ldl: prefill?.ldl_cholesterol != null ? String(prefill.ldl_cholesterol) : "",
+    hemoglobin: prefill?.hemoglobin != null ? String(prefill.hemoglobin) : "",
+    ast: prefill?.ast != null ? String(prefill.ast) : "",
+    alt: prefill?.alt != null ? String(prefill.alt) : "",
   });
+  // 요검사(양성/음성)는 별도 state
+  const [urineProtein, setUrineProtein] = useState<UrineResult | "">(prefill?.urine_protein ?? "");
+  const [urineGlucose, setUrineGlucose] = useState<UrineResult | "">(prefill?.urine_glucose ?? "");
 
   function set(field: string) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -49,6 +119,11 @@ export function ManualInputPage() {
   }
 
   const bmi = calcBmi(form.height, form.weight);
+
+  // 실시간 분류 (저장 안 함 — 입력값으로 즉시 계산)
+  const bpStatus = bloodPressureStatus(toNum(form.systolic_bp), toNum(form.diastolic_bp));
+  const fgStatus = glucoseStatus(toNum(form.fasting_glucose));
+  const hbStatus = anemiaStatus(toNum(form.hemoglobin), user?.gender ?? null);
 
   async function handleSave() {
     const required = ["checked_date", "height", "weight", "systolic_bp", "diastolic_bp", "fasting_glucose"];
@@ -73,10 +148,38 @@ export function ManualInputPage() {
       const cr = parseFloat(form.creatinine);
       if (isNaN(cr) || cr < 0.1 || cr > 30) { setError("크레아티닌은 0.1~30 mg/dL 범위로 입력해주세요."); return; }
     }
+    if (form.triglycerides) {
+      const tg = parseFloat(form.triglycerides);
+      if (isNaN(tg) || tg < 10 || tg > 5000) { setError("중성지방은 10~5000 mg/dL 범위로 입력해주세요."); return; }
+    }
+    if (form.hdl) {
+      const hdl = parseFloat(form.hdl);
+      if (isNaN(hdl) || hdl < 5 || hdl > 150) { setError("HDL은 5~150 mg/dL 범위로 입력해주세요."); return; }
+    }
+    if (form.ldl) {
+      const ldl = parseFloat(form.ldl);
+      if (isNaN(ldl) || ldl < 10 || ldl > 500) { setError("LDL은 10~500 mg/dL 범위로 입력해주세요."); return; }
+    }
+    if (form.total_cholesterol) {
+      const tc = parseFloat(form.total_cholesterol);
+      if (isNaN(tc) || tc < 50 || tc > 800) { setError("총 콜레스테롤은 50~800 mg/dL 범위로 입력해주세요."); return; }
+    }
+    if (form.hemoglobin) {
+      const hb = parseFloat(form.hemoglobin);
+      if (isNaN(hb) || hb < 3 || hb > 25) { setError("헤모글로빈은 3~25 g/dL 범위로 입력해주세요."); return; }
+    }
+    if (form.ast) {
+      const ast = parseFloat(form.ast);
+      if (isNaN(ast) || ast < 1 || ast > 5000) { setError("AST는 1~5000 U/L 범위로 입력해주세요."); return; }
+    }
+    if (form.alt) {
+      const alt = parseFloat(form.alt);
+      if (isNaN(alt) || alt < 1 || alt > 5000) { setError("ALT는 1~5000 U/L 범위로 입력해주세요."); return; }
+    }
     setError(""); setWarning("");
     setLoading(true);
     try {
-      const res = await healthCheckApi.create({
+      const payload = {
         checked_date: form.checked_date,
         height: parseFloat(form.height),
         weight: parseFloat(form.weight),
@@ -88,7 +191,16 @@ export function ManualInputPage() {
         triglycerides: toNum(form.triglycerides),
         hdl_cholesterol: toNum(form.hdl),
         total_cholesterol: toNum(form.total_cholesterol),
-      });
+        ldl_cholesterol: toNum(form.ldl),
+        hemoglobin: toNum(form.hemoglobin),
+        ast: toNum(form.ast),
+        alt: toNum(form.alt),
+        urine_protein: urineProtein || null,
+        urine_glucose: urineGlucose || null,
+      };
+      const res = isEditMode && prefill?.id
+        ? await healthCheckApi.update(prefill.id, payload)
+        : await healthCheckApi.create(payload);
       if (res.safety_warning) {
         setWarning(res.safety_warning);
       } else {
@@ -109,8 +221,11 @@ export function ManualInputPage() {
 
         {/* 안전 경고 (Safety Guard) */}
         {warning && (
-          <div className="mb-4 rounded-md border-2 border-danger bg-danger/10 p-[16px]">
-            <p className="text-sm font-bold text-danger">⚠ 주의</p>
+          <div className="mb-4 rounded-lg border-2 border-danger bg-danger/10 p-[16px] shadow-card">
+            <p className="flex items-center gap-[6px] text-sm font-bold text-danger">
+              <AlertTriangle size={16} />
+              주의
+            </p>
             <p className="mt-1 text-sm text-danger">{warning}</p>
             <button
               onClick={() => navigate("/dashboard")}
@@ -125,23 +240,32 @@ export function ManualInputPage() {
           <div className="mb-4 rounded-sm bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>
         )}
 
-        <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="mb-[12px] flex w-fit items-center gap-[4px] rounded-md px-[10px] py-[6px] text-sm font-bold text-text-secondary hover:bg-bg"
+        >
+          <ChevronLeft size={18} />
+          뒤로
+        </button>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-text-primary">
-            {prefill ? "건강검진 수치 재입력" : "건강검진 수치 입력"}
+            {isEditMode ? "건강검진 수치 수정" : prefill ? "건강검진 수치 재입력" : "건강검진 수치 입력"}
           </h1>
           <TextInput
             label="검진일"
             placeholder="YYYY-MM-DD"
-            className="w-[200px]"
+            className="w-full sm:w-[200px]"
             value={form.checked_date}
             onChange={set("checked_date")}
           />
         </div>
 
-        <div className="mt-[24px] grid grid-cols-2 gap-[32px]">
+        <div className="mt-[24px] grid grid-cols-1 md:grid-cols-2 gap-[32px]">
           {/* 좌측 */}
           <div className="flex flex-col gap-[24px]">
-            <div className="rounded-md border border-border bg-bg p-[16px]">
+            <div className="rounded-lg border border-border bg-bg p-[16px] shadow-card">
               <p className="mb-[12px] text-md font-bold text-text-primary">신체계측 <span className="text-danger text-xs">* 필수</span></p>
               <div className="flex flex-col gap-[12px]">
                 <TextInput label="신장 (cm)" placeholder="170.0" value={form.height} onChange={set("height")} />
@@ -156,32 +280,79 @@ export function ManualInputPage() {
               </div>
             </div>
 
-            <div className="rounded-md border border-border bg-bg p-[16px]">
+            <div className="rounded-lg border border-border bg-bg p-[16px] shadow-card">
               <p className="mb-[12px] text-md font-bold text-text-primary">혈압 <span className="text-danger text-xs">* 필수</span></p>
               <div className="flex flex-col gap-[12px]">
                 <TextInput label="수축기 혈압 SBP (mmHg)" placeholder="120" value={form.systolic_bp} onChange={set("systolic_bp")} />
                 <TextInput label="이완기 혈압 DBP (mmHg)" placeholder="80" value={form.diastolic_bp} onChange={set("diastolic_bp")} />
+                {bpStatus && (
+                  <div className="flex flex-col">
+                    <span className="text-xs text-text-muted">혈압 상태</span>
+                    <StatusBadge status={bpStatus} />
+                    {bpStatus === "위험" && (
+                      <p className="mt-[4px] text-xs text-text-muted">고혈압 범위 · 확진 아님 · 의료기관 상담</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="rounded-md border border-danger bg-bg p-[16px]">
+            <div className="rounded-lg border border-danger bg-bg p-[16px] shadow-card">
               <p className="mb-[12px] text-md font-bold text-danger">CKD 마커</p>
               <div className="flex flex-col gap-[12px]">
                 <TextInput label="크레아티닌 (mg/dL)" placeholder="1.0" value={form.creatinine} onChange={set("creatinine")} />
                 <p className="text-xs text-text-muted">입력 시 CKD-EPI 공식으로 eGFR 자동 계산</p>
               </div>
             </div>
+
           </div>
 
           {/* 우측 */}
           <div className="flex flex-col gap-[24px]">
-            <div className="rounded-md border border-border bg-bg p-[16px]">
+            <div className="rounded-lg border border-border bg-bg p-[16px] shadow-card">
               <p className="mb-[12px] text-md font-bold text-text-primary">혈액검사 <span className="text-danger text-xs">* 공복혈당 필수</span></p>
               <div className="flex flex-col gap-[12px]">
                 <TextInput label="공복혈당 (mg/dL)" placeholder="100" value={form.fasting_glucose} onChange={set("fasting_glucose")} />
+                {fgStatus && (
+                  <div className="flex flex-col">
+                    <span className="text-xs text-text-muted">혈당 상태</span>
+                    <StatusBadge status={fgStatus} />
+                    {fgStatus === "높음" && (
+                      <p className="mt-[4px] text-xs text-text-muted">당뇨 범위 · 확진 아님 · 의료기관 상담 권장</p>
+                    )}
+                    {fgStatus === "저혈당" && (
+                      <p className="mt-[4px] text-xs text-text-muted">저혈당 의심 · 즉시 의료기관 상담 권장</p>
+                    )}
+                  </div>
+                )}
                 <TextInput label="중성지방 (mg/dL)" placeholder="150" value={form.triglycerides} onChange={set("triglycerides")} />
                 <TextInput label="HDL 콜레스테롤 (mg/dL)" placeholder="60" value={form.hdl} onChange={set("hdl")} />
+                <TextInput label="LDL 콜레스테롤 (mg/dL)" placeholder="100" value={form.ldl} onChange={set("ldl")} />
                 <TextInput label="총 콜레스테롤 (mg/dL)" placeholder="180" value={form.total_cholesterol} onChange={set("total_cholesterol")} />
+                <TextInput label="헤모글로빈 (g/dL)" placeholder="14" value={form.hemoglobin} onChange={set("hemoglobin")} />
+                {hbStatus && (
+                  <div className="flex flex-col">
+                    <span className="text-xs text-text-muted">헤모글로빈 상태</span>
+                    <StatusBadge status={hbStatus} />
+                    {hbStatus === "낮음" && (
+                      <p className="mt-[4px] text-xs text-text-muted">빈혈 의심 · 의료기관 상담</p>
+                    )}
+                    {hbStatus === "높음" && (
+                      <p className="mt-[4px] text-xs text-text-muted">헤모글로빈 높음 · 의료기관 상담</p>
+                    )}
+                  </div>
+                )}
+                <TextInput label="AST (U/L)" placeholder="25" value={form.ast} onChange={set("ast")} />
+                <TextInput label="ALT (U/L)" placeholder="22" value={form.alt} onChange={set("alt")} />
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-bg p-[16px] shadow-card">
+              <p className="mb-[12px] text-md font-bold text-text-primary">요검사</p>
+              <p className="mb-[8px] text-xs text-text-muted">요단백·요당은 양성/음성으로 입력하세요.</p>
+              <div className="flex flex-col gap-[16px]">
+                <UrineToggle label="요단백" value={urineProtein} onChange={setUrineProtein} />
+                <UrineToggle label="요당" value={urineGlucose} onChange={setUrineGlucose} />
               </div>
             </div>
 

@@ -3,6 +3,8 @@ import { Sparkles, Palette, Edit2, Check, X } from "lucide-react";
 import { ScreenLabel } from "../components/ScreenLabel";
 import { TopNav } from "../components/TopNav";
 import {
+  ANIMAL_SKIN_TO_SPECIES,
+  ANIMAL_SKIN_TO_STAGE,
   gamificationApi,
   SKIN_LABEL,
   SPECIES_LABEL,
@@ -19,6 +21,9 @@ const SKIN_ITEM_CODES: ItemCode[] = [
   "SKIN_M_RED",
   "SKIN_M_PURPLE",
   "SKIN_L_GOLD",
+  "SKIN_TURTLE_1", "SKIN_PENGUIN_1", "SKIN_SQUIRREL_1", "SKIN_RABBIT_1", "SKIN_PANDA_1",
+  "SKIN_TURTLE_2", "SKIN_PENGUIN_2", "SKIN_SQUIRREL_2", "SKIN_RABBIT_2", "SKIN_PANDA_2",
+  "SKIN_TURTLE_3", "SKIN_PENGUIN_3", "SKIN_SQUIRREL_3", "SKIN_RABBIT_3", "SKIN_PANDA_3",
 ];
 
 export function CollectionPage() {
@@ -129,20 +134,20 @@ export function CollectionPage() {
             🎉 부화한 캐릭터 ({characters.length})
           </h2>
           {characters.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border bg-bg px-[16px] py-[24px] text-center">
+            <div className="rounded-lg border border-dashed border-border bg-bg px-[16px] py-[24px] text-center">
               <p className="text-sm text-text-muted">
                 아직 부화한 캐릭터가 없어요. 체크인을 꾸준히 해서 알을 부화시켜보세요!
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-[16px]">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-[16px]">
               {characters.map((c) => {
                 const speciesName = c.species ? SPECIES_LABEL[c.species] : "알";
                 const isEditing = editingId === c.egg_no;
                 return (
                   <div
                     key={c.egg_no}
-                    className="flex flex-col items-center gap-[8px] rounded-md border border-border bg-bg p-[16px]"
+                    className="flex flex-col items-center gap-[8px] rounded-lg border border-border bg-bg shadow-card p-[16px]"
                   >
                     <div className="flex h-[100px] w-[100px] items-center justify-center rounded-full bg-amber-50">
                       <CharacterImage species={c.species} stage={1} size={88} emojiClass="text-5xl" />
@@ -203,13 +208,11 @@ export function CollectionPage() {
             보유 스킨 ({ownedSkins.length})
           </h2>
           {ownedSkins.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border bg-bg px-[16px] py-[24px] text-center">
-              <p className="text-sm text-text-muted">
-                보유한 스킨이 없어요. <a href="/shop" className="text-accent underline">상점</a>에서 구매할 수 있어요.
-              </p>
+            <div className="rounded-lg border border-dashed border-border bg-bg px-[16px] py-[24px] text-center">
+              <p className="text-sm text-text-muted">아직 보유한 스킨이 없어요.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-[12px]">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-[12px]">
               {/* 기본 외형 (스킨 해제) 옵션 */}
               <SkinCard
                 code={null}
@@ -235,6 +238,20 @@ export function CollectionPage() {
             </div>
           )}
         </section>
+
+        {/* 상점 배너 — 항상 하단 고정 */}
+        <section className="mt-[32px] mb-[16px]">
+          <a
+            href="/shop"
+            className="flex items-center justify-between rounded-2xl bg-accent px-[24px] py-[28px] shadow-card active:opacity-90"
+          >
+            <div className="flex flex-col gap-[6px]">
+              <span className="text-2xl font-bold text-white">🏬 상점 바로가기</span>
+              <span className="text-base text-white/80">다양한 스킨을 구경해보세요!</span>
+            </div>
+            <span className="text-4xl text-white">›</span>
+          </a>
+        </section>
       </main>
     </div>
   );
@@ -253,18 +270,24 @@ function SkinCard({
   active: boolean;
   onEquip: () => void;
 }) {
+  const animalSpecies = code ? ANIMAL_SKIN_TO_SPECIES[code] : null;
+  const animalStage = code ? ANIMAL_SKIN_TO_STAGE[code] ?? 1 : 1;
   return (
     <div
-      className={`flex flex-col items-center gap-[8px] rounded-md border-2 p-[12px] ${
-        active ? "border-accent bg-accent/5" : "border-border bg-bg"
+      className={`flex flex-col items-center gap-[8px] rounded-lg border-2 p-[12px] ${
+        active ? "border-accent bg-accent/5 shadow-card" : "border-border bg-bg shadow-card"
       }`}
     >
-      <div className={`flex h-[60px] w-[60px] items-center justify-center rounded-full ${color}`}>
-        <Sparkles size={24} className="text-text-secondary" />
+      <div className={`flex h-[60px] w-[60px] items-center justify-center overflow-hidden rounded-full ${color}`}>
+        {animalSpecies ? (
+          <CharacterImage species={animalSpecies} stage={animalStage} size={52} emojiClass="text-3xl" />
+        ) : (
+          <Sparkles size={24} className="text-text-secondary" />
+        )}
       </div>
       <p className="text-xs font-bold text-text-primary text-center">{label}</p>
       {active ? (
-        <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-bg">장착 중</span>
+        <span className="rounded-md bg-accent px-2 py-0.5 text-xs font-bold text-bg">장착 중</span>
       ) : (
         <button
           onClick={onEquip}
